@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&family=Space+Grotesk:wght@700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Refined Dark Theme */
+    --background: 240 33% 4%;          /* #0A0A0F */
+    --foreground: 0 0% 98%;            /* #FAFAFA */
+
+    --card: 240 20% 8%;                /* #12121A */
+    --card-foreground: 0 0% 98%;       /* #FAFAFA */
+
+    --popover: 240 20% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary: Pumpkin Orange */
+    --primary: 36 100% 50%;            /* #ff9900 */
+    --primary-foreground: 240 33% 4%;
+
+    /* Secondary accent (lighter amber for gradients) */
+    --secondary: 240 17% 12%;          /* #1A1A24 */
+    --secondary-foreground: 0 0% 66%;  /* #A1A1AA */
+
+    /* Muted */
+    --muted: 240 20% 8%;
+    --muted-foreground: 240 4% 46%;    /* #71717A */
+
+    /* Accent: Elevated surfaces */
+    --accent: 240 17% 12%;             /* #1A1A24 */
+    --accent-foreground: 0 0% 98%;
+
+    /* Destructive / Error */
+    --destructive: 0 84% 60%;          /* #EF4444 */
+    --destructive-foreground: 0 0% 98%;
+
+    /* Success */
+    --success: 142 71% 45%;            /* #22C55E */
+    --success-foreground: 0 0% 98%;
+
+    /* Warning */
+    --warning: 25 95% 53%;             /* #F97316 */
+    --warning-foreground: 0 0% 98%;
+
+    /* Disabled */
+    --disabled: 240 17% 10%;
+    --disabled-foreground: 240 4% 46%;
+
+    --border: 0 0% 100% / 0.08;
+    --input: 240 20% 8%;
+    --ring: 36 100% 50%;
+
+    --radius: 1rem;
+    --radius-button: 0.75rem;
+    --radius-input: 0.5rem;
+    --shadow-active: 0 0 40px rgba(255, 153, 0, 0.1);
+
+    /* Accent glow for special effects */
+    --accent-glow: 36 100% 50% / 0.15;
+    /* Lighter pumpkin for gradients / hover */
+    --accent-secondary: 36 100% 65%;   /* #ffb74d */
+
+    --sidebar-background: 240 33% 4%;
+    --sidebar-foreground: 0 0% 66%;
+    --sidebar-primary: 36 100% 50%;
+    --sidebar-primary-foreground: 240 33% 4%;
+    --sidebar-accent: 240 17% 12%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 100% / 0.08;
+    --sidebar-ring: 36 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
