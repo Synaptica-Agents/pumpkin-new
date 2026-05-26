@@ -837,7 +837,9 @@ const breakevenTemplates: TemplateGen[] = [
         ],
       };
     }
-    const monthlyRev = diff === 2 ? choice([20_000, 50_000]) : choice([30_000, 60_000, 100_000]);
+    const monthlyRevRaw = diff === 2 ? choice([20_000, 50_000]) : choice([30_000, 60_000, 100_000]);
+    // Garantieren dass Rev > Net, sonst werden die abgeleiteten Kosten negativ
+    const monthlyRev = Math.max(monthlyRevRaw, monthlyNet + 5_000);
     const monthlyCost = monthlyRev - monthlyNet;
     const runningInvest = diff === 3 ? choice([50_000, 100_000]) : 0;
     const totalInvest = invest + runningInvest;
