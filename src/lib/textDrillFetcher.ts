@@ -9,7 +9,7 @@ export const fetchTextDrillCases = async (
   tableName: string,
   difficulty: "easy" | "medium" | "hard",
   categoryField?: string,
-  categoryValue?: string
+  categoryValues?: string[]
 ): Promise<void> => {
   let query = supabase
     .from(tableName as any)
@@ -17,8 +17,8 @@ export const fetchTextDrillCases = async (
     .eq("active", true)
     .eq("difficulty", difficulty);
 
-  if (categoryField && categoryValue && categoryValue !== "all") {
-    query = query.eq(categoryField, categoryValue);
+  if (categoryField && categoryValues && categoryValues.length > 0 && !categoryValues.includes("all")) {
+    query = query.in(categoryField, categoryValues);
   }
 
   const { data, error } = await query;
@@ -34,9 +34,6 @@ export const fetchTextDrillCases = async (
     category: d[categoryField || "category"] || "",
     context_info: d.context_info || d.interpretation_hints || null,
     reference_solution: d.reference_solution || d.reference_answer || d.reference_ideas || null,
-    reference_tree: d.reference_tree || null,
-    chart_data: d.chart_data || null,
-    chart_title: d.chart_title || null,
   }));
 };
 

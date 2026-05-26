@@ -144,20 +144,11 @@ const CaseMathDrill = () => {
       ) : null}
 
       {phase === "config" && (
-        <main className="mx-auto w-full max-w-[760px] px-4 pb-6">
-          {/* Hero */}
-          <div className="flex items-center gap-4 pt-4 pb-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] border border-white/[0.08] bg-[#101013]">
-              <IconCaseMath size={36} />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-semibold leading-tight tracking-tight text-foreground">
-                Case Math Drill
-              </h1>
-              <div className="text-xs text-muted-foreground">
-                Business-Textaufgaben unter Zeitdruck lösen.
-              </div>
-            </div>
+        <main className="mx-auto w-full max-w-[640px] px-4 pb-6">
+          {/* Slim drill label */}
+          <div className="flex items-center gap-2 pt-3 pb-3">
+            <IconCaseMath size={22} />
+            <span className="text-sm font-semibold tracking-tight text-foreground">Case Math</span>
           </div>
 
           <CaseMathConfig

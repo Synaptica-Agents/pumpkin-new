@@ -1,11 +1,10 @@
 import React from "react";
 import { SprintDuration } from "@/types/drill";
 import { DrillConfig } from "@/types/textDrill";
-import { ArrowRight, Info } from "lucide-react";
-import ConfigRow from "@/components/drillConfig/ConfigRow";
+import { Info } from "lucide-react";
 import OptionTile from "@/components/drillConfig/OptionTile";
 import Chip from "@/components/drillConfig/Chip";
-import Divider from "@/components/drillConfig/Divider";
+import DrillWizard, { WizardStep } from "@/components/drillConfig/DrillWizard";
 
 interface TextDrillConfigProps {
   config: DrillConfig;
@@ -13,8 +12,8 @@ interface TextDrillConfigProps {
   onDurationChange: (d: SprintDuration) => void;
   difficulty: "easy" | "medium" | "hard";
   onDifficultyChange: (d: "easy" | "medium" | "hard") => void;
-  category: string;
-  onCategoryChange: (c: string) => void;
+  categories: string[];
+  onCategoriesChange: (c: string[]) => void;
   onStart: () => void;
 }
 
@@ -30,99 +29,104 @@ const TextDrillConfig: React.FC<TextDrillConfigProps> = ({
   onDurationChange,
   difficulty,
   onDifficultyChange,
-  category,
-  onCategoryChange,
+  categories,
+  onCategoriesChange,
   onStart,
 }) => {
   const isSprint = config.sprintMode !== false;
+  const allValues = config.categories.map((c) => c.value);
+  const allSelected = categories.includes("all") || categories.length === allValues.length;
 
-  const durationLabel = durationOptions.find((o) => o.value === duration)?.label ?? "";
-  const difficultyLabel = config.difficultyOptions.find((d) => d.value === difficulty)?.label ?? "";
-  const categoryLabel =
-    category === "all"
-      ? "ALLE"
-      : (config.categories.find((c) => c.value === category)?.label ?? "").toUpperCase();
+  const handleAllToggle = () => {
+    onCategoriesChange(["all"]);
+  };
 
-  const summary = isSprint
-    ? `${durationLabel.toUpperCase()} · ${difficultyLabel.toUpperCase()} · ${categoryLabel}`
-    : `${difficultyLabel.toUpperCase()} · ${categoryLabel}`;
+  const handleCategoryToggle = (value: string) => {
+    // If "all" was active, switch to explicit list with just this value
+    if (categories.includes("all")) {
+      onCategoriesChange([value]);
+      return;
+    }
+    if (categories.includes(value)) {
+      if (categories.length > 1) {
+        onCategoriesChange(categories.filter((c) => c !== value));
+      }
+    } else {
+      onCategoriesChange([...categories, value]);
+    }
+  };
 
-  return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0d0d10] p-8">
-      {isSprint && (
-        <>
-          <ConfigRow label="Sprint-Dauer" caption="Wie lange möchtest du trainieren?">
-            <div className="flex flex-wrap gap-2.5">
-              {durationOptions.map(({ value, label, desc }) => (
-                <OptionTile
-                  key={value}
-                  selected={duration === value}
-                  onClick={() => onDurationChange(value)}
-                  big={label}
-                  small={desc}
-                  width={150}
-                />
-              ))}
-            </div>
-          </ConfigRow>
-          <Divider />
-        </>
-      )}
+  const steps: WizardStep[] = [];
 
-      <ConfigRow label="Schwierigkeit" caption="Welches Niveau fordert dich heute?">
-        <div className="flex flex-wrap gap-2.5">
-          {config.difficultyOptions.map(({ value, label, desc }) => (
+  if (isSprint) {
+    steps.push({
+      label: "Sprint-Dauer",
+      caption: "Wie lange möchtest du trainieren?",
+      content: (
+        <div className="flex flex-col gap-3">
+          {durationOptions.map(({ value, label, desc }) => (
             <OptionTile
               key={value}
-              selected={difficulty === value}
-              onClick={() => onDifficultyChange(value)}
+              variant="wizard"
+              selected={duration === value}
+              onClick={() => onDurationChange(value)}
               big={label}
               small={desc}
-              width={190}
             />
           ))}
         </div>
-      </ConfigRow>
-      <Divider />
+      ),
+    });
+  }
 
-      <ConfigRow label={config.categoryLabel} caption="Ein Thema wählen oder alle Kategorien.">
+  steps.push({
+    label: "Schwierigkeit",
+    caption: "Welches Niveau fordert dich heute?",
+    content: (
+      <div className="flex flex-col gap-3">
+        {config.difficultyOptions.map(({ value, label, desc }) => (
+          <OptionTile
+            key={value}
+            variant="wizard"
+            selected={difficulty === value}
+            onClick={() => onDifficultyChange(value)}
+            big={label}
+            small={desc}
+          />
+        ))}
+      </div>
+    ),
+  });
+
+  steps.push({
+    label: config.categoryLabel,
+    caption: "Mehrfachauswahl möglich.",
+    canAdvance: categories.length > 0,
+    content: (
+      <div className="flex flex-col gap-4">
         <div className="flex flex-wrap gap-2">
-          <Chip selected={category === "all"} onClick={() => onCategoryChange("all")}>
+          <Chip selected={allSelected} onClick={handleAllToggle}>
             Alle
           </Chip>
           {config.categories.map(({ value, label }) => (
             <Chip
               key={value}
-              selected={category === value}
-              onClick={() => onCategoryChange(value)}
+              selected={!allSelected && categories.includes(value)}
+              onClick={() => handleCategoryToggle(value)}
             >
               {label}
             </Chip>
           ))}
         </div>
-      </ConfigRow>
-      <Divider />
-
-      {/* Hint */}
-      <div className="mt-4 flex items-start gap-3 rounded-[10px] border border-white/[0.06] bg-[#101013] px-4 py-3.5">
-        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-        <div className="text-[13px] leading-[1.5] text-foreground/70">{config.hintText}</div>
-      </div>
-
-      {/* Footer */}
-      <div className="mt-7 flex items-center justify-between">
-        <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground/60">
-          {summary}
+        <div className="flex items-start gap-3 rounded-[10px] border border-white/[0.06] bg-[#101013] px-4 py-3.5">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+          <div className="text-[13px] leading-[1.5] text-foreground/70">{config.hintText}</div>
         </div>
-        <button
-          onClick={onStart}
-          className="flex items-center gap-2 rounded-[10px] bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          {config.startButtonText} <ArrowRight className="h-3.5 w-3.5" />
-        </button>
       </div>
-    </div>
-  );
+    ),
+  });
+
+  return <DrillWizard steps={steps} onComplete={onStart} startLabel={config.startButtonText} />;
 };
 
 export default TextDrillConfig;

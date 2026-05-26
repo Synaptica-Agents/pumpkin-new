@@ -60,9 +60,9 @@ const ClientDrillsCarousel: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* Slim brand bar */}
-      <header className="flex items-center justify-center px-4 pt-4 pb-2">
-        <span className="font-logo text-2xl text-foreground">pumpkin.</span>
+      {/* Brand bar */}
+      <header className="flex h-[52px] items-center justify-center border-b border-border px-4">
+        <span className="font-logo text-[28px] leading-none text-foreground">pumpkin.</span>
       </header>
 
       {/* Carousel */}

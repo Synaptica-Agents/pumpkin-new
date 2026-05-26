@@ -2,11 +2,10 @@ import React from "react";
 import { CaseMathCategory } from "@/types/caseMath";
 import { SprintDuration } from "@/types/drill";
 import { DifficultyLevel } from "@/components/DifficultySelector";
-import { ArrowRight, Pencil } from "lucide-react";
-import ConfigRow from "@/components/drillConfig/ConfigRow";
+import { Pencil } from "lucide-react";
 import OptionTile from "@/components/drillConfig/OptionTile";
 import Chip from "@/components/drillConfig/Chip";
-import Divider from "@/components/drillConfig/Divider";
+import DrillWizard, { WizardStep } from "@/components/drillConfig/DrillWizard";
 
 interface CaseMathConfigProps {
   duration: SprintDuration;
@@ -61,86 +60,76 @@ const CaseMathConfig: React.FC<CaseMathConfigProps> = ({
 
   const allSelected = selectedCategories.length === categoryOptions.length;
 
-  const durationLabel = durationOptions.find((o) => o.value === duration)?.label ?? "";
-  const difficultyLabel = difficultyLevels.find((d) => d.level === difficulty)?.label ?? "";
-  const catCount = selectedCategories.length;
-  const summary = `${durationLabel.toUpperCase()} · ${difficultyLabel.toUpperCase()} · ${catCount} ${catCount === 1 ? "KATEGORIE" : "KATEGORIEN"}`;
-
-  return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0d0d10] p-8">
-      <ConfigRow label="Sprint-Dauer" caption="Wie lange möchtest du trainieren?">
-        <div className="flex flex-wrap gap-2.5">
+  const steps: WizardStep[] = [
+    {
+      label: "Sprint-Dauer",
+      caption: "Wie lange möchtest du trainieren?",
+      content: (
+        <div className="flex flex-col gap-3">
           {durationOptions.map(({ value, label, description }) => (
             <OptionTile
               key={value}
+              variant="wizard"
               selected={duration === value}
               onClick={() => onDurationChange(value)}
               big={label}
               small={description}
-              width={150}
             />
           ))}
         </div>
-      </ConfigRow>
-      <Divider />
-
-      <ConfigRow label="Schwierigkeit" caption="Welches Niveau fordert dich heute?">
-        <div className="flex flex-wrap gap-2.5">
+      ),
+    },
+    {
+      label: "Schwierigkeit",
+      caption: "Welches Niveau fordert dich heute?",
+      content: (
+        <div className="flex flex-col gap-3">
           {difficultyLevels.map(({ level, label, description }) => (
             <OptionTile
               key={level}
+              variant="wizard"
               selected={difficulty === level}
               onClick={() => onDifficultyChange(level)}
               big={label}
               small={description}
-              width={190}
             />
           ))}
         </div>
-      </ConfigRow>
-      <Divider />
-
-      <ConfigRow label="Kategorien" caption="Mehrfachauswahl möglich.">
-        <div className="flex flex-wrap gap-2">
-          <Chip selected={allSelected} onClick={selectAllCategories}>
-            Alle
-          </Chip>
-          {categoryOptions.map(({ category, label }) => (
-            <Chip
-              key={category}
-              selected={!allSelected && selectedCategories.includes(category)}
-              onClick={() => handleCategoryToggle(category)}
-            >
-              {label}
+      ),
+    },
+    {
+      label: "Kategorien",
+      caption: "Mehrfachauswahl möglich.",
+      canAdvance: selectedCategories.length > 0,
+      content: (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2">
+            <Chip selected={allSelected} onClick={selectAllCategories}>
+              Alle
             </Chip>
-          ))}
+            {categoryOptions.map(({ category, label }) => (
+              <Chip
+                key={category}
+                selected={!allSelected && selectedCategories.includes(category)}
+                onClick={() => handleCategoryToggle(category)}
+              >
+                {label}
+              </Chip>
+            ))}
+          </div>
+          <div className="flex items-start gap-3 rounded-[10px] border border-white/[0.06] bg-[#101013] px-4 py-3.5">
+            <Pencil className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+            <div className="text-[13px] leading-[1.5]">
+              <span className="text-foreground/70">Nutze Stift &amp; Papier — kein Taschenrechner.</span>{" "}
+              <span className="text-foreground/45">So übst du unter realen Interview-Bedingungen.</span>
+            </div>
+          </div>
         </div>
-      </ConfigRow>
-      <Divider />
+      ),
+    },
+  ];
 
-      {/* Hint */}
-      <div className="mt-4 flex items-start gap-3 rounded-[10px] border border-white/[0.06] bg-[#101013] px-4 py-3.5">
-        <Pencil className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-        <div className="text-[13px] leading-[1.5]">
-          <span className="text-foreground/70">Nutze Stift &amp; Papier — kein Taschenrechner.</span>{" "}
-          <span className="text-foreground/45">So übst du unter realen Interview-Bedingungen.</span>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="mt-7 flex items-center justify-between">
-        <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground/60">
-          {summary}
-        </div>
-        <button
-          onClick={onStart}
-          className="flex items-center gap-2 rounded-[10px] bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          Drill starten <ArrowRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
-    </div>
-  );
+  return <DrillWizard steps={steps} onComplete={onStart} startLabel="Drill starten" />;
 };
 
 export default CaseMathConfig;

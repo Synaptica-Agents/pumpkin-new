@@ -61,7 +61,7 @@ const CreativityDrill: React.FC = () => {
   const userEmail = useUserEmail();
   const [duration, setDuration] = useState<SprintDuration>(300);
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
-  const [category, setCategory] = useState("all");
+  const [categories, setCategories] = useState<string[]>(["all"]);
   const [phase, setPhase] = useState<TextDrillPhase>("config");
   const [currentCase, setCurrentCase] = useState<TextDrillCase | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -78,6 +78,11 @@ const CreativityDrill: React.FC = () => {
   const buildLink = (path: string) =>
     userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
 
+  const pickIndustry = useCallback((): string | undefined => {
+    if (categories.length === 0 || categories.includes("all")) return undefined;
+    return categories[Math.floor(Math.random() * categories.length)];
+  }, [categories]);
+
   const loadNextCase = useCallback(async () => {
     setIsGenerating(true);
     // Try AI-generated case first
@@ -85,7 +90,7 @@ const CreativityDrill: React.FC = () => {
       const { data, error } = await supabase.functions.invoke("generate-creativity-case", {
         body: {
           difficulty,
-          industry: category !== "all" ? category : undefined,
+          industry: pickIndustry(),
           avoid_topics: usedPrompts.current.slice(-5),
         },
       });
@@ -106,10 +111,10 @@ const CreativityDrill: React.FC = () => {
     taskStartTime.current = Date.now();
     setIsGenerating(false);
     setPhase("answering");
-  }, [difficulty, category]);
+  }, [difficulty, pickIndustry]);
 
   const handleStart = useCallback(async () => {
-    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, category);
+    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories);
     resetTextDrillSession(drillConfig.tableName);
     sessionIdRef.current = crypto.randomUUID();
     usedPrompts.current = [];
@@ -128,7 +133,7 @@ const CreativityDrill: React.FC = () => {
         return prev - 1;
       });
     }, 1000);
-  }, [duration, difficulty, category, loadNextCase]);
+  }, [duration, difficulty, categories, loadNextCase]);
 
   const handleEnd = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -279,24 +284,18 @@ const CreativityDrill: React.FC = () => {
       )}
 
       {phase === "config" && (
-        <main className="mx-auto w-full max-w-[760px] px-4 pb-6">
-          <div className="flex items-center gap-4 pt-4 pb-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] border border-white/[0.08] bg-[#101013]">
-              <IconCreativity size={36} />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-semibold leading-tight tracking-tight text-foreground">
-                {drillConfig.title} Drill
-              </h1>
-              <div className="text-xs text-muted-foreground">{drillConfig.subtitle}</div>
-            </div>
+        <main className="mx-auto w-full max-w-[640px] px-4 pb-6">
+          {/* Slim drill label */}
+          <div className="flex items-center gap-2 pt-3 pb-3">
+            <IconCreativity size={22} />
+            <span className="text-sm font-semibold tracking-tight text-foreground">{drillConfig.title}</span>
           </div>
 
           <TextDrillConfig
             config={drillConfig}
             duration={duration} onDurationChange={setDuration}
             difficulty={difficulty} onDifficultyChange={setDifficulty}
-            category={category} onCategoryChange={setCategory}
+            categories={categories} onCategoriesChange={setCategories}
             onStart={handleStart}
           />
         </main>
