@@ -199,7 +199,7 @@ const CreativityDrill: React.FC = () => {
 
       saveDrillSession({
         userEmail,
-        drillType: "creativity" as any,
+        drillType: "creativity",
         correctCount: results.filter(r => (r.evaluation?.total_score ?? 0) >= 60).length,
         totalCount: results.length,
         accuracyPercent: avgScore,
@@ -207,7 +207,7 @@ const CreativityDrill: React.FC = () => {
       }).then((sessionId) => {
         saveDrillAttempts({
           userEmail,
-          drillType: "creativity" as any,
+          drillType: "creativity",
           sessionId,
           attempts: results.map((r) => ({
             taskType: "creativity",

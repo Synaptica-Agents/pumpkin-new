@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { BarChart3 } from "lucide-react";
 import ModuleCard, { ModuleCardProps } from "@/components/ModuleCard";
 import {
   Carousel,
@@ -61,8 +63,21 @@ const ClientDrillsCarousel: React.FC = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Brand bar */}
-      <header className="flex h-[52px] items-center justify-center border-b border-border px-4">
+      <header className="flex h-[52px] items-center justify-between border-b border-border px-4">
+        <span className="w-24" />
         <span className="font-logo text-[28px] leading-none text-foreground">pumpkin.</span>
+        <div className="flex w-24 justify-end">
+          {userEmail && (
+            <Link
+              to={`/fortschritt?email=${encodeURIComponent(userEmail)}`}
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="Fortschritt"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Fortschritt</span>
+            </Link>
+          )}
+        </div>
       </header>
 
       {/* Carousel */}

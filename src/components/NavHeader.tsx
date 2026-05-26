@@ -1,6 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { ArrowLeft, BarChart3 } from "lucide-react";
 import { useUserEmail } from "@/hooks/useUserEmail";
 
 interface NavHeaderProps {
@@ -9,18 +9,33 @@ interface NavHeaderProps {
 
 const NavHeader: React.FC<NavHeaderProps> = () => {
   const userEmail = useUserEmail();
-  const backLink = userEmail ? `/?email=${encodeURIComponent(userEmail)}` : "/";
+  const location = useLocation();
+  const onProgressPage = location.pathname === "/fortschritt";
+
+  const withEmail = (path: string) =>
+    userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
 
   return (
     <header className="flex h-[52px] w-full items-center justify-between border-b border-border px-4">
       <Link
-        to={backLink}
+        to={withEmail("/")}
         className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> Zurück
       </Link>
       <span className="font-logo text-[28px] leading-none text-foreground">pumpkin.</span>
-      <span className="w-16" />
+      <div className="flex w-16 justify-end">
+        {userEmail && !onProgressPage && (
+          <Link
+            to={withEmail("/fortschritt")}
+            className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Fortschritt"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">Fortschritt</span>
+          </Link>
+        )}
+      </div>
     </header>
   );
 };

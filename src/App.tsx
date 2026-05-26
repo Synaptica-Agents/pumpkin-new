@@ -7,6 +7,7 @@ import ClientDrillsCarousel from "./pages/ClientDrillsCarousel";
 import MentalMathDrill from "./pages/MentalMathDrill";
 import CaseMathDrill from "./pages/CaseMathDrill";
 import CreativityDrill from "./pages/CreativityDrill";
+import FortschrittPage from "./pages/FortschrittPage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/mental-math-drill" element={<MentalMathDrill />} />
           <Route path="/case-math-drill" element={<CaseMathDrill />} />
           <Route path="/creativity-drill" element={<CreativityDrill />} />
+          <Route path="/fortschritt" element={<FortschrittPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
