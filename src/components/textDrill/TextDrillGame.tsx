@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { TextDrillCase, DrillConfig } from "@/types/textDrill";
 import SprintTimer from "@/components/sprint/SprintTimer";
 import { DrillButton } from "@/components/ui/drill-button";
+import { AudioRecorder } from "@/components/ui/AudioRecorder";
 import { X, Send, Info, ChevronDown, ChevronUp, Award } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -376,6 +377,12 @@ const TextDrillGame: React.FC<TextDrillGameProps> = ({
           <label className="text-sm font-medium text-foreground">
             Deine Antwort
           </label>
+          <AudioRecorder
+            onTranscript={(text) =>
+              setAnswerText((prev) => (prev ? prev.trimEnd() + "\n" + text : text))
+            }
+            disabled={isEvaluating}
+          />
         </div>
         <textarea
           ref={textareaRef}
