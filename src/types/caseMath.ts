@@ -1,13 +1,7 @@
-export type CaseMathCategory = 
-  | "profitability" 
-  | "investment" 
+export type CaseMathCategory =
+  | "profitability"
+  | "investment"
   | "breakeven";
-
-export interface CaseMathShortcut {
-  name: string;
-  formula: string;
-  tip: string;
-}
 
 export interface CaseMathTask {
   id: number;
@@ -16,7 +10,6 @@ export interface CaseMathTask {
   highlightedQuestion: React.ReactNode;
   answer: number;
   tolerance: number;
-  shortcut: CaseMathShortcut;
   difficulty: number;
   dbTaskType?: string;
   dbDifficulty?: string;

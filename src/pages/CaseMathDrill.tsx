@@ -67,8 +67,7 @@ const CaseMathDrill = () => {
     if (!currentTask || phase !== "sprint") return;
     const timeSpent = Date.now() - taskStartTime.current;
     const isCorrect = checkCaseMathAnswer(userAnswer, currentTask.answer, currentTask.tolerance || 0);
-    const explanation = currentTask.shortcut?.tip || undefined;
-    const result: CaseMathResult = { task: currentTask, userAnswer, isCorrect, timeSpent, explanation };
+    const result: CaseMathResult = { task: currentTask, userAnswer, isCorrect, timeSpent };
     setResults(prev => [...prev, result]);
     if (isCorrect) setCorrectCount(prev => prev + 1);
     setFlashState(isCorrect ? "correct" : "incorrect");

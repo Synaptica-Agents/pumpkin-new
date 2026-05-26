@@ -5,6 +5,7 @@ import { CaseMathTask } from "@/types/caseMath";
 import { DifficultyLevel } from "@/components/DifficultySelector";
 import { DrillButton } from "@/components/ui/drill-button";
 import { X, Calculator } from "lucide-react";
+import { FORMULAS_BY_CATEGORY, CATEGORY_LABELS } from "@/lib/caseMathFormulas";
 
 interface CaseMathGameProps {
   task: CaseMathTask | null;
@@ -99,24 +100,27 @@ const CaseMathGame: React.FC<CaseMathGameProps> = ({
             {parseHighlights(task.question)}
           </p>
 
-          {/* Formula Toggle */}
-          {task.shortcut?.tip && (
-            <div className="mt-4 flex flex-col items-center gap-2">
-              {!showFormula ? (
-                <button
-                  onClick={() => setShowFormula(true)}
-                  className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
-                >
-                  <Calculator className="h-3.5 w-3.5" />
-                  Formel anzeigen
-                </button>
-              ) : (
-                <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary">
-                  {task.shortcut.tip}
+          {/* Formula Toggle — generic per-category formula sheet */}
+          <div className="mt-4 flex flex-col items-center gap-2">
+            {!showFormula ? (
+              <button
+                onClick={() => setShowFormula(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+              >
+                <Calculator className="h-3.5 w-3.5" />
+                Formeln anzeigen
+              </button>
+            ) : (
+              <div className="flex flex-col gap-1.5 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+                <div className="text-[11px] font-mono uppercase tracking-wider text-primary/70">
+                  Formeln · {CATEGORY_LABELS[task.category]}
                 </div>
-              )}
-            </div>
-          )}
+                {FORMULAS_BY_CATEGORY[task.category].map((f, i) => (
+                  <div key={i} className="font-mono text-[13px]">{f}</div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

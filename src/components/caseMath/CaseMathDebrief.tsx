@@ -2,6 +2,7 @@ import React from "react";
 import { DrillButton } from "@/components/ui/drill-button";
 import { CaseMathResult, CaseMathStats } from "@/types/caseMath";
 import { Trophy, Target, Zap, Check, X, Lightbulb, RotateCcw } from "lucide-react";
+import { FORMULAS_BY_CATEGORY, CATEGORY_LABELS } from "@/lib/caseMathFormulas";
 
 interface CaseMathDebriefProps {
   stats: CaseMathStats;
@@ -148,36 +149,20 @@ const CaseMathDebrief: React.FC<CaseMathDebriefProps> = ({ stats, results, onRes
                 </span>
               </div>
 
-              {/* Explanation from template or shortcut */}
-              {(result.explanation || result.task.shortcut.name || result.task.shortcut.formula || result.task.shortcut.tip) && (
-                <div className="bg-card/50 px-4 py-3 border-t border-border/30">
-                  <div className="flex items-start gap-2">
-                    <Lightbulb className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <div>
-                      {result.explanation && (
-                        <p className="text-xs text-muted-foreground">
-                          <span className="font-medium text-primary">Lösung:</span> {result.explanation}
-                        </p>
-                      )}
-                      {result.task.shortcut.name && (
-                        <p className="text-xs font-semibold text-primary mb-1">
-                          {result.task.shortcut.name}
-                        </p>
-                      )}
-                      {result.task.shortcut.formula && (
-                        <p className="text-xs text-muted-foreground mb-1">
-                          <span className="font-medium">Formel:</span> {result.task.shortcut.formula}
-                        </p>
-                      )}
-                      {result.task.shortcut.tip && (
-                        <p className="text-xs text-muted-foreground">
-                          <span className="font-medium">Tip:</span> {result.task.shortcut.tip}
-                        </p>
-                      )}
-                    </div>
+              {/* Generic formula sheet for this category */}
+              <div className="bg-card/50 px-4 py-3 border-t border-border/30">
+                <div className="flex items-start gap-2">
+                  <Lightbulb className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-[11px] font-mono uppercase tracking-wider text-primary/70">
+                      Formeln · {CATEGORY_LABELS[result.task.category]}
+                    </p>
+                    {FORMULAS_BY_CATEGORY[result.task.category].map((f, i) => (
+                      <p key={i} className="font-mono text-xs text-muted-foreground">{f}</p>
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </div>
