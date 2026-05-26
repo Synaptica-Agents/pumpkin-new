@@ -28,8 +28,8 @@ const RUBRICS: Record<string, RubricItem[]> = {
     { key: "communication", label: "Kommunikation", max: 10, description: "Klar und strukturiert kommuniziert?" },
   ],
   creativity: [
-    { key: "structure", label: "Struktur", max: 40, description: "MECE-Aufteilung in Kategorien. Saubere Hierarchie. Locker bewerten — kleine Überschneidungen sind OK." },
-    { key: "content", label: "Inhalt", max: 50, description: "Relevante, korrekte, realistisch umsetzbare Punkte je Kategorie. Stichpunkte reichen. Nichts absolut Wichtiges fehlt." },
+    { key: "structure", label: "Struktur", max: 40, description: "Erkennbare Gruppierung der Antwort — Kategorie-Header ODER thematisch geclusterte Bullet-Bloecke zählen beide voll. Strikt MECE ist NICHT nötig, Überschneidungen sind OK. Sehr großzügig bewerten." },
+    { key: "content", label: "Inhalt", max: 50, description: "Relevante, zur Frage passende Punkte. Stichpunkte ohne Erklärung reichen voll aus. Oberflächlichkeit ist OK. Sehr großzügig bewerten — kein Anspruch auf Vollständigkeit." },
     { key: "creativity", label: "Kreativität", max: 10, description: "Mindestens 1-2 nicht-offensichtliche Ideen. Reines Standard-Set verdient 4-6, frische Ideen 8-10." },
   ],
 };
@@ -93,25 +93,27 @@ SCORING-ANKER (für Konsistenz – wende diese IMMER gleich an):
 - Business-Implikationen: Konkrete Handlungsempfehlungen = 20-25. Allgemeine Schlussfolgerungen = 12-19. Keine Implikationen = 0-11.
 - Analysetiefe: Vergleiche, Ursachen, Zusammenhänge = 12-15. Grundlegende Analyse = 6-11. Nur Beschreibung = 0-5.
 - Kommunikation: Klar und prägnant = 8-10. Verständlich = 4-7. Unstrukturiert = 0-3.` : `
-SCORING-ANKER (großzügig anwenden — Stichpunkte und kurze Erklärungen reichen aus):
+SCORING-ANKER — SEHR GROSSZÜGIG ANWENDEN. Stichpunkte ohne Erklärungen sind voll OK, oberflächliche Antworten verdienen trotzdem hohe Punkte solange sie zur Frage passen. Du bewertest KEINE Consulting-Master-Lösung, sondern eine spontane Stichpunkt-Antwort im Interview-Format.
 
-Struktur (max 40):
-- 35-40: Klare Kategorien, MECE oder fast (kleine Überschneidung OK), 2-4 Kategorien.
-- 25-34: 2-3 Kategorien, leichte Überschneidung oder schiefe Tiefe.
-- 15-24: Liste ohne klare Kategorisierung.
-- 0-14:  Keine erkennbare Struktur.
+Struktur (max 40) — Default ist HOCH:
+- 32-40: Erkennbare Gruppierung. Reicht: 2+ Kategorie-Header ODER thematisch geclusterte Bullet-Blöcke ODER nummerierte Listen mit klarer Themen-Trennung.
+- 22-31: Lockere Liste mit leicht erkennbarer thematischer Sortierung.
+- 10-21: Reine ungeordnete Stichpunkt-Aufzählung.
+- 0-9:   Nur 1 Punkt oder gar keine Struktur.
 
-Inhalt (max 50):
-- 42-50: Jede Kategorie 2-3 relevante, korrekte, umsetzbare Punkte. Nichts absolut Wichtiges fehlt.
-- 32-41: Solide Inhalte, 1-2 kleine Lücken oder teilweise weniger umsetzbar.
-- 20-31: Oberflächlich oder teilweise unpräzise.
-- 0-19:  Beantwortet die Frage kaum.
+Inhalt (max 50) — Default ist HOCH:
+- 42-50: 3+ relevante Punkte, die die Frage adressieren. Stichpunkte OHNE Erklärung reichen voll. Tiefe NICHT erforderlich.
+- 30-41: 2-3 relevante Punkte (manche generisch ist OK).
+- 15-29: 1 klar relevanter Punkt, Rest unklar oder off-topic.
+- 0-14:  Antwort beantwortet die Frage nicht.
 
 Kreativität (max 10):
 - 8-10: Mindestens 1-2 nicht-offensichtliche, frische Ideen.
 - 5-7:  Solide aber durchgehend erwartbar.
 - 2-4:  Sehr generisch.
-- 0-1:  Nichtssagend.`;
+- 0-1:  Nichtssagend.
+
+WICHTIG: Bei einer Antwort mit 3-4 thematisch gruppierten Bullet-Points zur Frage solltest du standardmäßig 80-90 Punkte vergeben. Ziehe nur dann ab, wenn die Antwort die Frage offensichtlich nicht beantwortet, völlig wirr ist, oder absolut zentrale Hebel komplett fehlen.`;
 
   const difficultyGuidance =
     drillType === "frameworks" ? (
@@ -119,8 +121,8 @@ Kreativität (max 10):
       difficulty === "medium" ? "Schwierigkeit: MITTEL (ca. 5-7 Min). Ziel: 3-4 MECE-Äste mit Unterästen, klare Priorisierung. Ein solider Ansatz verdient 70-80 Punkte. 85+ wenn alle Kern-Dimensionen sauber ausgebaut sind." :
       "Schwierigkeit: SCHWER (ca. 7-10 Min). Ziel: 4+ MECE-Äste, tiefe Unterebenen, klare Priorisierung mit Begründungs-Logik. Ein guter Ansatz verdient 65-75 Punkte. 85+ wenn auch Trade-offs und sekundäre Hebel erkennbar sind."
     ) : drillType === "creativity" ? (
-      difficulty === "medium" ? "Schwierigkeit: NORMAL. Sei großzügig. Kurze Frage, kurze Antwort erwartet. Stichpunkte völlig ausreichend, Erklärungen optional. 70+ Punkte schon mit solidem, strukturiertem Ansatz." :
-      "Schwierigkeit: SCHWER. Etwas mehr Substanz erwartet, aber Stichpunkte und kurze Sätze weiter ausreichend. 60+ Punkte mit solidem Ansatz."
+      difficulty === "medium" ? "Schwierigkeit: NORMAL. SEHR großzügig. Stichpunkte alleine sind voll ausreichend, Erklärungen NICHT erforderlich. 80-90 Punkte ist der Default für eine Antwort mit 3-4 relevanten, thematisch gruppierten Bullets. Nur drunter ziehen wenn Antwort offensichtlich off-topic ist oder zentrale Punkte komplett fehlen." :
+      "Schwierigkeit: SCHWER. Großzügig. Stichpunkte und kurze Sätze sind weiter ausreichend, aber 3-5 relevante Punkte gehören rein. 70-85 Punkte für eine strukturierte Stichpunkt-Antwort ist normal."
     ) : (
       difficulty === "easy" ? "Schwierigkeit: EINFACH. Sei großzügig – ein grundlegend richtiger Ansatz verdient 60+ Punkte. Erwarte keine Tiefe." :
       difficulty === "medium" ? "Schwierigkeit: MITTEL. Erwarte solide Struktur und mehrere Aspekte. 50+ Punkte bei erkennbar gutem Ansatz." :
