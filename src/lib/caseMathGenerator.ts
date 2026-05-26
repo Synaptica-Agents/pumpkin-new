@@ -39,6 +39,22 @@ const fmt = (n: number): string => {
 const fmtEur = (n: number): string => `${fmt(n)} €`;
 const fmtPct = (n: number): string => `${n}%`;
 
+/**
+ * Pre-rounds a number to the precision fmt() will display it at:
+ * - >= 1 Mio: 100k granularity (since fmt prints 1 decimal in Mio range)
+ * - >= 10k:    100  granularity
+ * - else:      integer
+ * Use this BEFORE fmtEur() when the answer is derived from the displayed value,
+ * so users computing from the visible numbers get the same result the drill expects.
+ */
+const displayRound = (n: number): number => {
+  const sign = n < 0 ? -1 : 1;
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return sign * Math.round(abs / 100_000) * 100_000;
+  if (abs >= 10_000) return sign * Math.round(abs / 100) * 100;
+  return Math.round(n);
+};
+
 // ============================================
 // INDUSTRIES & CONTEXTS
 // ============================================
@@ -372,20 +388,22 @@ const profitabilityTemplates: TemplateGen[] = [
     if (diff === 1) {
       const rev = choice([1, 2, 5, 10]) * 1_000_000;
       const margin = choice([10, 15, 20, 25, 30, 40, 50]);
-      const profit = rev * margin / 100;
+      const profit = displayRound(rev * margin / 100);
+      const actualMargin = (profit / rev) * 100;
       return {
         question: `Ein ${ind}: Umsatz **${fmtEur(rev)}**, Gewinn **${fmtEur(profit)}**. Wie hoch ist die Gewinnmarge in %?`,
-        answer: margin, tolerance: 0,
+        answer: Math.round(actualMargin * 10) / 10, tolerance: 0.5,
         tip: `Formel: Marge = Gewinn ÷ Umsatz × 100\n\nTypischer Fehler: Division in falscher Richtung (Umsatz ÷ Gewinn).`,
       };
     }
     if (diff === 2) {
       const rev = choice([2, 4, 5, 8, 10]) * 1_000_000;
       const margin = choice([10, 15, 20, 25, 30]);
-      const costs = rev * (1 - margin / 100);
+      const costs = displayRound(rev * (1 - margin / 100));
+      const actualMargin = ((rev - costs) / rev) * 100;
       return {
         question: `Ein ${ind}: Umsatz **${fmtEur(rev)}**, Gesamtkosten **${fmtEur(costs)}**. Wie hoch ist die Gewinnmarge in %?`,
-        answer: margin, tolerance: 0.5,
+        answer: Math.round(actualMargin * 10) / 10, tolerance: 0.5,
         tip: `Formel: Marge = (Umsatz − Kosten) ÷ Umsatz × 100\n\nTypischer Fehler: Kosten ÷ Umsatz rechnen (das ist die Kostenquote, nicht die Marge).`,
       };
     }
@@ -418,13 +436,15 @@ const profitabilityTemplates: TemplateGen[] = [
     if (diff === 2) {
       const rev = choice([5, 8, 10]) * 1_000_000;
       const margin = choice([10, 15, 20, 25]);
-      const totalCosts = rev * (1 - margin / 100);
-      const material = Math.round(totalCosts * 0.5);
-      const personal = Math.round(totalCosts * 0.35);
+      const totalCosts = displayRound(rev * (1 - margin / 100));
+      const material = displayRound(totalCosts * 0.5);
+      const personal = displayRound(totalCosts * 0.35);
       const other = totalCosts - material - personal;
+      const actualTotal = material + personal + other;
+      const actualMargin = ((rev - actualTotal) / rev) * 100;
       return {
         question: `Ein ${ind}: Umsatz **${fmtEur(rev)}**. Kosten: Material **${fmtEur(material)}**, Personal **${fmtEur(personal)}**, Sonstiges **${fmtEur(other)}**. Gewinnmarge in %?`,
-        answer: margin, tolerance: 0.5,
+        answer: Math.round(actualMargin * 10) / 10, tolerance: 0.5,
         tip: `Formel: Marge = (Umsatz − Σ Kosten) ÷ Umsatz × 100\n\nTypischer Fehler: Einen Kostenblock vergessen.`,
       };
     }
