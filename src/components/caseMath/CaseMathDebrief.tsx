@@ -2,7 +2,6 @@ import React from "react";
 import { DrillButton } from "@/components/ui/drill-button";
 import { CaseMathResult, CaseMathStats } from "@/types/caseMath";
 import { Trophy, Target, Zap, Check, X, Lightbulb, RotateCcw } from "lucide-react";
-import { FORMULAS_BY_CATEGORY, CATEGORY_LABELS } from "@/lib/caseMathFormulas";
 
 interface CaseMathDebriefProps {
   stats: CaseMathStats;
@@ -149,20 +148,21 @@ const CaseMathDebrief: React.FC<CaseMathDebriefProps> = ({ stats, results, onRes
                 </span>
               </div>
 
-              {/* Generic formula sheet for this category */}
-              <div className="bg-card/50 px-4 py-3 border-t border-border/30">
-                <div className="flex items-start gap-2">
-                  <Lightbulb className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <div className="flex flex-col gap-1">
-                    <p className="text-[11px] font-mono uppercase tracking-wider text-primary/70">
-                      Formeln · {CATEGORY_LABELS[result.task.category]}
-                    </p>
-                    {FORMULAS_BY_CATEGORY[result.task.category].map((f, i) => (
-                      <p key={i} className="font-mono text-xs text-muted-foreground">{f}</p>
-                    ))}
+              {/* Concrete step-by-step walkthrough for this task */}
+              {result.task.solutionSteps && result.task.solutionSteps.length > 0 && (
+                <div className="bg-card/50 px-4 py-3 border-t border-border/30">
+                  <div className="flex items-start gap-2">
+                    <Lightbulb className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <div className="flex flex-col gap-0.5">
+                      {result.task.solutionSteps.map((step, i) => (
+                        <p key={i} className="font-mono text-xs text-muted-foreground">
+                          {parseHighlights(step)}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>

@@ -11,6 +11,8 @@ export interface CaseMathTask {
   answer: number;
   tolerance: number;
   difficulty: number;
+  /** Concrete step-by-step walkthrough using the actual numbers from the question. Shown in the debrief view. */
+  solutionSteps?: string[];
   dbTaskType?: string;
   dbDifficulty?: string;
 }
