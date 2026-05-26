@@ -1,9 +1,33 @@
 import { supabase } from "@/integrations/supabase/client";
 import { TextDrillCase } from "@/types/textDrill";
 
-// Each drill type gets its own pool
+// Pools live in memory per module instance.
 const pools: Record<string, TextDrillCase[]> = {};
-const seenIds: Record<string, string[]> = {};
+
+// seenIds persist across sprints in the SAME browser session (sessionStorage).
+// Goal: a user playing multiple Creativity sprints in one sitting never sees the
+// same case twice — until they have actually seen every case in the active pool,
+// at which point we drop only the pool-specific ids and let them cycle.
+const SEEN_KEY = (tableName: string) => `pumpkin_seenIds_${tableName}`;
+
+const getSeenIds = (tableName: string): string[] => {
+  if (typeof window === "undefined" || !window.sessionStorage) return [];
+  try {
+    const raw = sessionStorage.getItem(SEEN_KEY(tableName));
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+const setSeenIds = (tableName: string, ids: string[]): void => {
+  if (typeof window === "undefined" || !window.sessionStorage) return;
+  try {
+    sessionStorage.setItem(SEEN_KEY(tableName), JSON.stringify(ids));
+  } catch {
+    /* sessionStorage full or unavailable — silently ignore */
+  }
+};
 
 export const fetchTextDrillCases = async (
   tableName: string,
@@ -37,29 +61,32 @@ export const fetchTextDrillCases = async (
   }));
 };
 
+/**
+ * Optional explicit reset (e.g. for a "starte komplett neu" button).
+ * Not called between sprints anymore — sessionStorage carries dedup across sprints.
+ */
 export const resetTextDrillSession = (tableName: string) => {
-  seenIds[tableName] = [];
+  setSeenIds(tableName, []);
 };
 
 export const getNextTextDrillCase = (tableName: string): TextDrillCase | null => {
   const pool = pools[tableName] || [];
   if (pool.length === 0) return null;
 
-  const seen = seenIds[tableName] || [];
-  let excludeCount = Math.min(20, pool.length - 1);
-  let lastSeen = seen.slice(-excludeCount);
-  let available = pool.filter((c) => !lastSeen.includes(c.id));
+  let seen = getSeenIds(tableName);
+  let available = pool.filter((c) => !seen.includes(c.id));
 
   if (available.length === 0) {
-    excludeCount = Math.min(5, pool.length - 1);
-    lastSeen = seen.slice(-excludeCount);
-    available = pool.filter((c) => !lastSeen.includes(c.id));
+    // Active pool fully seen this session — drop only the pool-specific ids
+    // so other category combos keep their dedup memory.
+    const poolIds = new Set(pool.map((c) => c.id));
+    seen = seen.filter((id) => !poolIds.has(id));
+    setSeenIds(tableName, seen);
+    available = pool;
   }
-  if (available.length === 0) available = pool;
 
   const picked = available[Math.floor(Math.random() * available.length)];
-  if (!seenIds[tableName]) seenIds[tableName] = [];
-  seenIds[tableName].push(picked.id);
+  setSeenIds(tableName, [...seen, picked.id]);
   return picked;
 };
 

@@ -28,11 +28,9 @@ const RUBRICS: Record<string, RubricItem[]> = {
     { key: "communication", label: "Kommunikation", max: 10, description: "Klar und strukturiert kommuniziert?" },
   ],
   creativity: [
-    { key: "originality", label: "Originalität", max: 25, description: "Originalität und Kreativität der Lösung?" },
-    { key: "feasibility", label: "Machbarkeit", max: 25, description: "Machbarkeit und Realisierbarkeit?" },
-    { key: "business_impact", label: "Business Impact", max: 25, description: "Business-Relevanz und Impact?" },
-    { key: "structure", label: "Struktur", max: 15, description: "Strukturierte Darstellung der Idee?" },
-    { key: "communication", label: "Kommunikation", max: 10, description: "Klar und überzeugend kommuniziert?" },
+    { key: "structure", label: "Struktur", max: 40, description: "MECE-Aufteilung in Kategorien. Saubere Hierarchie. Locker bewerten — kleine Überschneidungen sind OK." },
+    { key: "content", label: "Inhalt", max: 50, description: "Relevante, korrekte, realistisch umsetzbare Punkte je Kategorie. Stichpunkte reichen. Nichts absolut Wichtiges fehlt." },
+    { key: "creativity", label: "Kreativität", max: 10, description: "Mindestens 1-2 nicht-offensichtliche Ideen. Reines Standard-Set verdient 4-6, frische Ideen 8-10." },
   ],
 };
 
@@ -95,18 +93,34 @@ SCORING-ANKER (für Konsistenz – wende diese IMMER gleich an):
 - Business-Implikationen: Konkrete Handlungsempfehlungen = 20-25. Allgemeine Schlussfolgerungen = 12-19. Keine Implikationen = 0-11.
 - Analysetiefe: Vergleiche, Ursachen, Zusammenhänge = 12-15. Grundlegende Analyse = 6-11. Nur Beschreibung = 0-5.
 - Kommunikation: Klar und prägnant = 8-10. Verständlich = 4-7. Unstrukturiert = 0-3.` : `
-SCORING-ANKER (für Konsistenz – wende diese IMMER gleich an):
-- Originalität: Unerwarteter, kreativer Ansatz = 20-25. Solide Idee mit eigenem Dreh = 12-19. Naheliegend/generisch = 0-11.
-- Machbarkeit: Konkret umsetzbar mit klaren Schritten = 20-25. Grundsätzlich machbar = 12-19. Unrealistisch = 0-11.
-- Business Impact: Quantifizierter Impact = 20-25. Qualitativer Impact erklärt = 12-19. Kein Impact genannt = 0-11.
-- Struktur: Logisch aufgebaut mit allen Aspekten = 12-15. Grundstruktur erkennbar = 6-11. Unstrukturiert = 0-5.
-- Kommunikation: Überzeugend und klar = 8-10. Verständlich = 4-7. Unklar = 0-3.`;
+SCORING-ANKER (großzügig anwenden — Stichpunkte und kurze Erklärungen reichen aus):
+
+Struktur (max 40):
+- 35-40: Klare Kategorien, MECE oder fast (kleine Überschneidung OK), 2-4 Kategorien.
+- 25-34: 2-3 Kategorien, leichte Überschneidung oder schiefe Tiefe.
+- 15-24: Liste ohne klare Kategorisierung.
+- 0-14:  Keine erkennbare Struktur.
+
+Inhalt (max 50):
+- 42-50: Jede Kategorie 2-3 relevante, korrekte, umsetzbare Punkte. Nichts absolut Wichtiges fehlt.
+- 32-41: Solide Inhalte, 1-2 kleine Lücken oder teilweise weniger umsetzbar.
+- 20-31: Oberflächlich oder teilweise unpräzise.
+- 0-19:  Beantwortet die Frage kaum.
+
+Kreativität (max 10):
+- 8-10: Mindestens 1-2 nicht-offensichtliche, frische Ideen.
+- 5-7:  Solide aber durchgehend erwartbar.
+- 2-4:  Sehr generisch.
+- 0-1:  Nichtssagend.`;
 
   const difficultyGuidance =
     drillType === "frameworks" ? (
       difficulty === "easy" ? "Schwierigkeit: EINFACH (ca. 5 Min Bearbeitung). Ziel: 2-3 MECE-Äste mit je 2-3 Bullets. Ein solider, strukturierter Ansatz verdient 75-85 Punkte. 90+ nur wenn Framework-Wahl UND Priorisierung klar erkennbar UND Tiefe stimmt." :
       difficulty === "medium" ? "Schwierigkeit: MITTEL (ca. 5-7 Min). Ziel: 3-4 MECE-Äste mit Unterästen, klare Priorisierung. Ein solider Ansatz verdient 70-80 Punkte. 85+ wenn alle Kern-Dimensionen sauber ausgebaut sind." :
       "Schwierigkeit: SCHWER (ca. 7-10 Min). Ziel: 4+ MECE-Äste, tiefe Unterebenen, klare Priorisierung mit Begründungs-Logik. Ein guter Ansatz verdient 65-75 Punkte. 85+ wenn auch Trade-offs und sekundäre Hebel erkennbar sind."
+    ) : drillType === "creativity" ? (
+      difficulty === "medium" ? "Schwierigkeit: NORMAL. Sei großzügig. Kurze Frage, kurze Antwort erwartet. Stichpunkte völlig ausreichend, Erklärungen optional. 70+ Punkte schon mit solidem, strukturiertem Ansatz." :
+      "Schwierigkeit: SCHWER. Etwas mehr Substanz erwartet, aber Stichpunkte und kurze Sätze weiter ausreichend. 60+ Punkte mit solidem Ansatz."
     ) : (
       difficulty === "easy" ? "Schwierigkeit: EINFACH. Sei großzügig – ein grundlegend richtiger Ansatz verdient 60+ Punkte. Erwarte keine Tiefe." :
       difficulty === "medium" ? "Schwierigkeit: MITTEL. Erwarte solide Struktur und mehrere Aspekte. 50+ Punkte bei erkennbar gutem Ansatz." :

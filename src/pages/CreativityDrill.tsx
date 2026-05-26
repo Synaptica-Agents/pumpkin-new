@@ -12,7 +12,7 @@ import TextDrillDebrief from "@/components/textDrill/TextDrillDebrief";
 import { SprintDuration } from "@/types/drill";
 import { TextDrillCase, TextDrillResult, TextDrillPhase, TextDrillEvaluation, DrillConfig } from "@/types/textDrill";
 import {
-  fetchTextDrillCases, getNextTextDrillCase, resetTextDrillSession,
+  fetchTextDrillCases, getNextTextDrillCase,
   submitTextDrillAnswer, saveTextDrillEvaluation,
 } from "@/lib/textDrillFetcher";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,40 +21,28 @@ import { toast } from "sonner";
 const drillConfig: DrillConfig = {
   drillType: "creativity",
   title: "Creativity",
-  subtitle: "Entwickle kreative, aber machbare Lösungen für Business-Probleme. KI-gestützte Bewertung.",
+  subtitle: "Strukturiere kreative Antworten auf typische Consulting-Fragen.",
   icon: "Lightbulb",
   tableName: "creativity_cases",
-  categoryField: "industry",
-  categoryLabel: "Industrie",
+  categoryField: "category",
+  categoryLabel: "Kategorie",
   categories: [
-    { value: "tech", label: "Tech" },
-    { value: "retail", label: "Retail" },
-    { value: "healthcare", label: "Healthcare" },
-    { value: "mobility", label: "Mobility" },
-    { value: "finance", label: "Finance" },
-    { value: "sustainability", label: "Sustainability" },
+    { value: "market_entry", label: "Market Entry" },
+    { value: "risks_opportunities", label: "Risiken & Opportunities" },
+    { value: "financial", label: "Financial" },
   ],
   difficultyOptions: [
-    { value: "medium", label: "Normal", desc: "Kurze Situation, kreative Lösung" },
-    { value: "hard", label: "Schwer", desc: "Detailliertes Szenario mit Zahlen" },
+    { value: "medium", label: "Normal", desc: "Kurze Frage, knappe Antwort" },
+    { value: "hard", label: "Schwer", desc: "Mehr Kontext, mehr Substanz" },
   ],
-  hintText: "Entwickle eine kreative, aber machbare Lösung für das Business-Problem. Die KI bewertet deine Antwort nach fester Rubrik.",
+  hintText: "Teile deine Antwort in MECE-Kategorien auf und liste Stichpunkte je Kategorie. Korrektheit > Vollständigkeit, eine kreative Idee zählt mehr als Generisches.",
   startButtonText: "Start Creativity \u2192",
   rubricLabels: [
-    { key: "originality", label: "Originalität", max: 25 },
-    { key: "feasibility", label: "Machbarkeit", max: 25 },
-    { key: "business_impact", label: "Business Impact", max: 25 },
-    { key: "structure", label: "Struktur", max: 15 },
-    { key: "communication", label: "Kommunikation", max: 10 },
+    { key: "structure", label: "Struktur", max: 40 },
+    { key: "content", label: "Inhalt", max: 50 },
+    { key: "creativity", label: "Kreativität", max: 10 },
   ],
-  placeholder: "Kernidee: ...\n\nZielgruppe: ...\n\nUmsetzung:\n  1. ...\n  2. ...\n\nBusiness Impact: ...\n\nRisiken & Mitigation: ...",
-  structureGuide: [
-    "Kernidee klar formulieren — Was ist die Lösung in einem Satz?",
-    "Zielgruppe definieren — Wer profitiert? Warum gerade diese Gruppe?",
-    "Umsetzung skizzieren — Erste Schritte, Pilotansatz, Ressourcen",
-    "Business Impact — Umsatz, Kosten, Wettbewerbsvorteil quantifizieren",
-    "Risiken & Mitigation — Was kann schiefgehen und wie absichern?",
-  ],
+  placeholder: "Kategorie A:\n- Punkt 1\n- Punkt 2\n\nKategorie B:\n- Punkt 1\n- Punkt 2",
 };
 
 const CreativityDrill: React.FC = () => {
@@ -73,51 +61,24 @@ const CreativityDrill: React.FC = () => {
   const taskStartTime = useRef<number>(0);
   const sessionIdRef = useRef<string>(crypto.randomUUID());
   const sprintStartTime = useRef<number>(0);
-  const usedPrompts = useRef<string[]>([]);
 
   const buildLink = (path: string) =>
     userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
 
-  const pickIndustry = useCallback((): string | undefined => {
-    if (categories.length === 0 || categories.includes("all")) return undefined;
-    return categories[Math.floor(Math.random() * categories.length)];
-  }, [categories]);
-
   const loadNextCase = useCallback(async () => {
     setIsGenerating(true);
-    // Try AI-generated case first
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-creativity-case", {
-        body: {
-          difficulty,
-          industry: pickIndustry(),
-          avoid_topics: usedPrompts.current.slice(-5),
-        },
-      });
-      if (!error && data?.prompt) {
-        usedPrompts.current.push(data.prompt);
-        setCurrentCase(data as TextDrillCase);
-        taskStartTime.current = Date.now();
-        setIsGenerating(false);
-        setPhase("answering");
-        return;
-      }
-    } catch {
-      // Fallback to DB
-    }
-    // DB fallback
     const next = getNextTextDrillCase(drillConfig.tableName);
     setCurrentCase(next);
     taskStartTime.current = Date.now();
     setIsGenerating(false);
     setPhase("answering");
-  }, [difficulty, pickIndustry]);
+  }, []);
 
   const handleStart = useCallback(async () => {
     await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories);
-    resetTextDrillSession(drillConfig.tableName);
+    // NOTE: seenIds are NOT reset between sprints — sessionStorage carries
+    // dedup across the whole tab session.
     sessionIdRef.current = crypto.randomUUID();
-    usedPrompts.current = [];
     setResults([]);
     setCurrentResult(null);
     setTimeRemaining(duration);
