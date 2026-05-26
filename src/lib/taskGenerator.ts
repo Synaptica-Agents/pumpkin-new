@@ -264,7 +264,9 @@ const generatePercentageL2 = (): GenResult => {
   const template = choice(["zusammengesetzt", "drittel", "business"]);
 
   if (template === "zusammengesetzt") {
-    const pct = choice([5, 15, 20, 30, 50, 75]);
+    // Nur Prozente die wirklich eine Zerlegung verdienen.
+    // 10/20/25/50 sind in L1 (einfache ÷-Operationen).
+    const pct = choice([5, 15, 30, 75]);
     const base = choice([100, 200, 400, 500, 600, 800, 1000]);
     const unit = choice(["k", "Mio"]);
     const mult = unit === "k" ? 1000 : 1_000_000;
@@ -274,10 +276,7 @@ const generatePercentageL2 = (): GenResult => {
     if (pct === 5) steps = [`10% = ${bold(fmtAbbrev(ten))}`, `÷ 2 = ${bold(fmtAbbrev(answer))}`];
     else if (pct === 15) steps = [`10% = ${bold(fmtAbbrev(ten))}`, `5% = ${bold(fmtAbbrev(ten / 2))}`, `Summe: ${bold(fmtAbbrev(answer))}`];
     else if (pct === 30) steps = [`10% = ${bold(fmtAbbrev(ten))}`, `× 3 = ${bold(fmtAbbrev(answer))}`];
-    else if (pct === 35) steps = [`30% = ${bold(fmtAbbrev(ten * 3))}`, `5% = ${bold(fmtAbbrev(ten / 2))}`, `Summe: ${bold(fmtAbbrev(answer))}`];
-    else if (pct === 40) steps = [`10% = ${bold(fmtAbbrev(ten))}`, `× 4 = ${bold(fmtAbbrev(answer))}`];
-    else if (pct === 60) steps = [`10% = ${bold(fmtAbbrev(ten))}`, `× 6 = ${bold(fmtAbbrev(answer))}`];
-    else steps = [`50% = ${bold(fmtAbbrev(base * mult / 2))}`, `25% = ${bold(fmtAbbrev(base * mult / 4))}`, `Summe: ${bold(fmtAbbrev(answer))}`]; // 75%
+    else steps = [`50% = ${bold(fmtAbbrev(base * mult / 2))}`, `25% = ${bold(fmtAbbrev(base * mult / 4))}`, `Summe: ${bold(fmtAbbrev(answer))}`]; // 75% = 50% + 25%
     return {
       question: `${pct}% von ${fmtRand(base * mult)}`,
       answer,
