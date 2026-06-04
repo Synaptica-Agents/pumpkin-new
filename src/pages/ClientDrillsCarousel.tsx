@@ -15,6 +15,7 @@ import {
   IconMentalMath,
   IconCaseMath,
   IconCreativity,
+  IconMarketSizing,
 } from "@/components/drillIcons";
 
 const modules: Omit<ModuleCardProps, "emailParam">[] = [
@@ -35,10 +36,18 @@ const modules: Omit<ModuleCardProps, "emailParam">[] = [
     drillType: "case_math",
   },
   {
+    title: "Market Sizing",
+    description: "Schätze Marktgrößen mit Struktur, Annahmen & KI-Bewertung.",
+    icon: <IconMarketSizing size={80} />,
+    status: "active",
+    href: "/market-sizing-drill",
+    drillType: "market_sizing",
+  },
+  {
     title: "Creativity",
     description: "Entwickle kreative Lösungen und schärfe deinen Geschäftssinn.",
     icon: <IconCreativity size={80} />,
-    status: "active",
+    status: "coming_soon",
     href: "/creativity-drill",
     drillType: "creativity",
   },

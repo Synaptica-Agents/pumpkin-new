@@ -9,18 +9,20 @@ import {
   IconMentalMath,
   IconCaseMath,
   IconCreativity,
+  IconMarketSizing,
 } from "@/components/drillIcons";
 import { TrendingUp, Hash, Award } from "lucide-react";
 
-type DrillKey = "mental_math" | "case_math" | "creativity";
+type DrillKey = "mental_math" | "case_math" | "creativity" | "market_sizing";
 
 const DRILL_META: Record<DrillKey, { label: string; icon: React.FC<{ size?: number }>; scoreSuffix: string }> = {
   mental_math: { label: "Mental Math", icon: IconMentalMath, scoreSuffix: "%" },
   case_math: { label: "Case Math", icon: IconCaseMath, scoreSuffix: "%" },
   creativity: { label: "Creativity", icon: IconCreativity, scoreSuffix: "/100" },
+  market_sizing: { label: "Market Sizing", icon: IconMarketSizing, scoreSuffix: "/100" },
 };
 
-const DRILL_ORDER: DrillKey[] = ["mental_math", "case_math", "creativity"];
+const DRILL_ORDER: DrillKey[] = ["mental_math", "case_math", "creativity", "market_sizing"];
 
 const fmtScore = (drill: DrillKey, n: number): string => {
   const rounded = Math.round(n);
@@ -145,7 +147,7 @@ const FortschrittPage: React.FC = () => {
         </header>
 
         {/* Stats cards */}
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {DRILL_ORDER.map((drill) => (
             <StatsCard key={drill} drill={drill} agg={aggregate(sessions, drill)} />
           ))}
