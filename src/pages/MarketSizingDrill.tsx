@@ -10,7 +10,7 @@ import MarketSizingGame from "@/components/marketSizing/MarketSizingGame";
 import MarketSizingIntroModal from "@/components/marketSizing/MarketSizingIntroModal";
 import MarketSizingResultView from "@/components/marketSizing/MarketSizingResult";
 import MarketSizingDebrief from "@/components/marketSizing/MarketSizingDebrief";
-import { MarketSizingCase, MarketSizingResult, MarketSizingPhase, MarketSizingEvaluation } from "@/types/marketSizing";
+import { MarketSizingCase, MarketSizingResult, MarketSizingPhase, MarketSizingEvaluation, MarketSizingCategory } from "@/types/marketSizing";
 import {
   fetchMarketSizingCases, getNextMarketSizingCase, resetMarketSizingSession,
   submitMarketSizingAnswer, saveMarketSizingEvaluation,
@@ -42,8 +42,8 @@ const MarketSizingDrill: React.FC = () => {
     setPhase("answering");
   }, []);
 
-  const handleStart = useCallback(async () => {
-    await fetchMarketSizingCases();
+  const handleStart = useCallback(async (category: MarketSizingCategory) => {
+    await fetchMarketSizingCases(category);
     resetMarketSizingSession();
     sessionIdRef.current = crypto.randomUUID();
     setResults([]);
@@ -93,7 +93,6 @@ const MarketSizingDrill: React.FC = () => {
         body: {
           case_prompt: currentCase.prompt,
           unit_hint: currentCase.unit_hint,
-          allowed_methods: currentCase.allowed_methods,
           expected_min: currentCase.expected_order_of_magnitude_min,
           expected_max: currentCase.expected_order_of_magnitude_max,
           answer_text: answerText,

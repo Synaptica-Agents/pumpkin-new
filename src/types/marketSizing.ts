@@ -11,7 +11,11 @@ export interface MarketSizingCase {
   expected_order_of_magnitude_min: number | null;
   expected_order_of_magnitude_max: number | null;
   key_assumptions_examples: string | null;
+  category: string | null;
 }
+
+/** Start-screen grouping by question type. "all" = no filter (Gemischt). */
+export type MarketSizingCategory = "all" | "mengen" | "maerkte" | "physik";
 
 export interface MarketSizingEvaluation {
   total_score: number;
@@ -44,8 +48,6 @@ export type MarketSizingPhase = "config" | "answering" | "evaluating" | "result"
 // Step 1: Verständnis & Methode
 // ============================================
 
-export type MarketSizingMethod = "top_down" | "bottom_up" | "mixed";
-
 export interface MarketSizingClarification {
   id: string;
   question: string;
@@ -55,10 +57,6 @@ export interface MarketSizingClarification {
 export interface MarketSizingUnderstanding {
   /** Optional clarifying questions the user posed and how they answered (max 3). */
   clarifications: MarketSizingClarification[];
-  /** Required method choice. */
-  method: MarketSizingMethod | null;
-  /** Why this method was chosen (1-2 sentences). */
-  methodReason: string;
 }
 
 // ============================================

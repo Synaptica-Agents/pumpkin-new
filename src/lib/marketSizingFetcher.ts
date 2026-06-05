@@ -1,11 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
-import { MarketSizingCase } from "@/types/marketSizing";
+import { MarketSizingCase, MarketSizingCategory } from "@/types/marketSizing";
 
 let casesPool: MarketSizingCase[] = [];
 let seenIds: string[] = [];
 let seenIndustries: string[] = [];
 
-export const fetchMarketSizingCases = async (): Promise<void> => {
+export const fetchMarketSizingCases = async (
+  category: MarketSizingCategory = "all"
+): Promise<void> => {
   const query = supabase
     .from("market_sizing_cases" as any)
     .select("*")
@@ -17,7 +19,13 @@ export const fetchMarketSizingCases = async (): Promise<void> => {
     casesPool = [];
     return;
   }
-  casesPool = (data ?? []) as unknown as MarketSizingCase[];
+  let cases = (data ?? []) as unknown as MarketSizingCase[];
+  if (category !== "all") {
+    const filtered = cases.filter((c) => c.category === category);
+    // Fallback: never leave the pool empty if a category is unexpectedly unset.
+    if (filtered.length > 0) cases = filtered;
+  }
+  casesPool = cases;
 };
 
 export const resetMarketSizingSession = () => {

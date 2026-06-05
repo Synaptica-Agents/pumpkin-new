@@ -10,13 +10,11 @@ import {
   Scale,
   ListTree,
   HelpCircle,
-  Compass,
   StickyNote,
 } from "lucide-react";
 import {
   MarketSizingUnderstanding,
   SanityCheckStructured,
-  MarketSizingMethod,
 } from "@/types/marketSizing";
 
 interface ResultStepProps {
@@ -33,12 +31,6 @@ interface ResultStepProps {
   disabled: boolean;
   unitHint?: string;
 }
-
-const METHOD_LABELS: Record<MarketSizingMethod, string> = {
-  top_down: "Top-Down",
-  bottom_up: "Bottom-Up",
-  mixed: "Mixed",
-};
 
 const ResultStep: React.FC<ResultStepProps> = ({
   understanding,
@@ -81,21 +73,6 @@ const ResultStep: React.FC<ResultStepProps> = ({
         <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold text-foreground">
           <StickyNote className="h-3.5 w-3.5 text-primary" /> Recap deiner Eingaben
         </h3>
-
-        {/* Method */}
-        {understanding.method && (
-          <div className="mb-3">
-            <p className="mb-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <Compass className="h-3 w-3" /> Methode
-            </p>
-            <p className="text-xs text-foreground">
-              <span className="font-medium">{METHOD_LABELS[understanding.method]}</span>
-              {understanding.methodReason.trim() && (
-                <span className="text-muted-foreground"> — {understanding.methodReason.trim()}</span>
-              )}
-            </p>
-          </div>
-        )}
 
         {/* Clarifications */}
         {filledClarifications.length > 0 && (
@@ -145,8 +122,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
         )}
 
         {filledClarifications.length === 0 &&
-          filledAssumptions.length === 0 &&
-          !understanding.method && (
+          filledAssumptions.length === 0 && (
             <p className="text-[11px] italic text-muted-foreground">
               Keine Eingaben aus den vorherigen Schritten.
             </p>

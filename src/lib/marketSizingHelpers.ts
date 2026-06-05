@@ -1,15 +1,8 @@
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import {
-  MarketSizingMethod,
   MarketSizingUnderstanding,
   SanityCheckStructured,
 } from "@/types/marketSizing";
-
-const METHOD_LABELS: Record<MarketSizingMethod, string> = {
-  top_down: "Top-Down",
-  bottom_up: "Bottom-Up",
-  mixed: "Mixed (Top-Down + Bottom-Up)",
-};
 
 export interface MarketSizingLeaf {
   /** Leaf node id, used as key for assumptions/numbers maps */
@@ -196,15 +189,6 @@ export function serializeMarketSizing(args: {
     .filter(Boolean);
   if (clarLines.length > 0) {
     out += `VERSTÄNDNIS:\n${clarLines.join("\n")}\n\n`;
-  }
-
-  // METHODE section
-  if (understanding.method) {
-    out += `METHODE: ${METHOD_LABELS[understanding.method]}`;
-    if (understanding.methodReason.trim()) {
-      out += `\nBegründung: ${understanding.methodReason.trim()}`;
-    }
-    out += `\n\n`;
   }
 
   out += `STRUKTUR:\n${treeText}`;

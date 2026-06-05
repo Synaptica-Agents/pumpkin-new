@@ -1,15 +1,13 @@
 import React, { useCallback } from "react";
 import {
   MarketSizingClarification,
-  MarketSizingMethod,
   MarketSizingUnderstanding,
 } from "@/types/marketSizing";
-import { HelpCircle, Plus, X, Compass } from "lucide-react";
+import { HelpCircle, Plus, X } from "lucide-react";
 
 interface UnderstandingStepProps {
   understanding: MarketSizingUnderstanding;
   onChange: (next: MarketSizingUnderstanding) => void;
-  allowedMethods?: string;
   disabled: boolean;
 }
 
@@ -17,45 +15,11 @@ const MAX_CLARIFICATIONS = 3;
 
 const newId = () => Math.random().toString(36).slice(2, 10);
 
-const METHOD_OPTIONS: Array<{
-  value: MarketSizingMethod;
-  label: string;
-  description: string;
-}> = [
-  {
-    value: "top_down",
-    label: "Top-Down",
-    description: "Von Gesamtmarkt → Filter → Zielsegment.",
-  },
-  {
-    value: "bottom_up",
-    label: "Bottom-Up",
-    description: "Von Einheit/Kapazität × Frequenz hochrechnen.",
-  },
-  {
-    value: "mixed",
-    label: "Mixed",
-    description: "Beide Ansätze kombinieren oder gegenchecken.",
-  },
-];
-
 const UnderstandingStep: React.FC<UnderstandingStepProps> = ({
   understanding,
   onChange,
-  allowedMethods,
   disabled,
 }) => {
-  // DB stores values as "top-down,bottom-up,mixed" but our type uses underscores.
-  // Normalize both to underscores so comparison works.
-  const allowedSet = new Set(
-    (allowedMethods || "")
-      .split(",")
-      .map((s) => s.trim().toLowerCase().replace(/-/g, "_"))
-      .filter(Boolean)
-  );
-  const isAllowed = (m: MarketSizingMethod) =>
-    allowedSet.size === 0 || allowedSet.has(m);
-
   const updateClarification = useCallback(
     (id: string, patch: Partial<MarketSizingClarification>) => {
       onChange({
@@ -93,10 +57,10 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-sm font-semibold text-foreground">
-          1. Verständnis &amp; Methode
+          1. Verständnis
         </h2>
         <p className="text-xs text-muted-foreground">
-          Stell vor dem Start sicher, dass du den Scope verstehst, und entscheide dich für einen Ansatz.
+          Stell vor dem Start sicher, dass du den Scope verstehst und kläre offene Annahmen.
         </p>
       </div>
 
@@ -169,66 +133,6 @@ const UnderstandingStep: React.FC<UnderstandingStepProps> = ({
             ))}
           </div>
         )}
-      </div>
-
-      {/* Method choice */}
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-        <label className="mb-2 flex items-center gap-2 text-xs font-semibold text-foreground">
-          <Compass className="h-3.5 w-3.5 text-primary" /> Methodenwahl
-        </label>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          {METHOD_OPTIONS.map((opt) => {
-            const allowed = isAllowed(opt.value);
-            const selected = understanding.method === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() =>
-                  allowed &&
-                  !disabled &&
-                  onChange({ ...understanding, method: opt.value })
-                }
-                disabled={disabled || !allowed}
-                className={`group flex flex-col gap-1 rounded-lg border p-2.5 text-left transition-all ${
-                  selected
-                    ? "border-primary bg-primary/10 ring-1 ring-primary"
-                    : "border-border bg-background hover:border-primary/40"
-                } ${!allowed ? "cursor-not-allowed opacity-40" : ""}`}
-              >
-                <span
-                  className={`text-xs font-semibold ${
-                    selected ? "text-primary" : "text-foreground"
-                  }`}
-                >
-                  {opt.label}
-                </span>
-                <span className="text-[10px] leading-snug text-muted-foreground">
-                  {opt.description}
-                </span>
-                {!allowed && (
-                  <span className="text-[10px] italic text-muted-foreground/70">
-                    Für diesen Case nicht empfohlen
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <label className="mt-3 mb-1 flex items-center gap-2 text-[11px] font-medium text-muted-foreground">
-          Begründung (1-2 Sätze)
-        </label>
-        <textarea
-          value={understanding.methodReason}
-          onChange={(e) =>
-            onChange({ ...understanding, methodReason: e.target.value })
-          }
-          placeholder="z.B. Top-Down bietet sich an, weil ich die Bevölkerungszahl kenne und schrittweise filtern kann."
-          rows={2}
-          className="w-full resize-y rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          disabled={disabled}
-        />
       </div>
     </div>
   );

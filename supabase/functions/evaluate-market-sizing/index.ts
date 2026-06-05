@@ -19,7 +19,6 @@ serve(async (req) => {
     const {
       case_prompt,
       unit_hint,
-      allowed_methods,
       expected_min,
       expected_max,
       answer_text,
@@ -53,7 +52,6 @@ WICHTIGE REGELN:
 HINWEIS ZUM ANTWORT-FORMAT:
 Die Antwort kommt in strukturiertem Format mit folgenden Sektionen (manche optional):
 - "VERSTÄNDNIS:" (optional) = Klärungsfragen die der User selbst gestellt und beantwortet hat. Werte das positiv für Annahmenqualität (B), wenn sinnvoll.
-- "METHODE:" = Methodenwahl (Top-Down / Bottom-Up / Mixed) + Begründung. Prüfe ob die Methode in der Struktur konsistent durchgezogen wurde (Dimension A).
 - "STRUKTUR:" = Hierarchischer Issue Tree
   - "[Ast N] Titel" = Hauptschritte der Rechnung
   - "  [Unterast N.M] Titel" = Detailschritte (bis dritte Ebene möglich)
@@ -68,7 +66,7 @@ Die Antwort kommt in strukturiertem Format mit folgenden Sektionen (manche optio
 Bewerte jeden Bereich nach der Rubrik.
 
 RUBRIK (0-100 Punkte):
-A) Struktur & MECE (0-35): Klare Methode (top-down/bottom-up/mixed)? Logisch und MECE? Nachvollziehbare Schritte?
+A) Struktur & MECE (0-35): Klarer, nachvollziehbarer Ansatz? Logisch und MECE? Nachvollziehbare Schritte?
 B) Annahmenqualität (0-25): Explizit genannt? Plausibel? Keine falschen Datenquellen behauptet?
 C) Mathematische Konsistenz (0-20): Rechenlogik korrekt? Einheiten konsistent? Keine widersprüchlichen Zwischenergebnisse?
 D) Plausibilität / Sanity Check (0-20): Größenordnung sinnvoll? Mindestens ein Sanity Check? Vergleiche/Anker genutzt?
@@ -76,7 +74,7 @@ D) Plausibilität / Sanity Check (0-20): Größenordnung sinnvoll? Mindestens ei
 SCORING-ANKER (5 Stufen pro Dimension – wende IMMER gleich an):
 
 Struktur & MECE (max 35):
-- 31-35: 4+ klare Rechenschritte, saubere MECE, nachvollziehbarer Top-down/Bottom-up.
+- 31-35: 4+ klare Rechenschritte, saubere MECE, nachvollziehbarer Lösungsweg.
 - 25-30: 3-4 Schritte, grundsätzlich MECE, kleine Logik-Lücken.
 - 18-24: 2-3 Schritte, erkennbare Struktur, aber Überschneidungen.
 - 10-17: Wenige Schritte, Struktur flach oder unvollständig.
@@ -109,7 +107,7 @@ ${difficultyGuidance}
 INTERVIEW-REALISMUS:
 Der User hat eine feste Bearbeitungszeit. Bewerte an realistischen Interview-Erwartungen, NICHT an einer idealen Consulting-Master-Lösung.
 - 100% = klar strukturiert, MECE, plausible Annahmen, richtige Größenordnung, Sanity Check. KEINE Perfektion oder echte Datenquellen verlangt.
-- Wenn unten ein BEISPIEL-LÖSUNGSWEG mitgegeben wurde, nutze ihn als Referenz für *Tiefe und Breite*. User muss NICHT wörtlich treffen – gleichwertige alternative Methoden (top-down vs. bottom-up) verdienen die volle Punktzahl, wenn sauber ausgeführt.
+- Wenn unten ein BEISPIEL-LÖSUNGSWEG mitgegeben wurde, nutze ihn als Referenz für *Tiefe und Breite*. User muss NICHT wörtlich treffen – gleichwertige alternative Lösungswege verdienen die volle Punktzahl, wenn sauber ausgeführt.
 
 FEEDBACK-REGELN:
 - Jede Stärke muss konkret benennen, WAS gut war.
@@ -119,7 +117,6 @@ FEEDBACK-REGELN:
 
     const userPrompt = `AUFGABE: ${case_prompt}
 Einheit: ${unit_hint || "nicht angegeben"}
-Erlaubte Methoden: ${allowed_methods}
 ${rangeInfo}${referenceBlock}
 
 ANTWORT DES USERS:

@@ -25,8 +25,6 @@ interface MarketSizingGameProps {
 
 const emptyUnderstanding = (): MarketSizingUnderstanding => ({
   clarifications: [],
-  method: null,
-  methodReason: "",
 });
 
 const emptySanityCheck = (): SanityCheckStructured => ({
@@ -69,7 +67,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
   const leaves = useMemo(() => getLeaves(nodes), [nodes]);
   const treeText = useMemo(() => serializeFramework({ nodes }), [nodes]);
 
-  const canAdvanceFromUnderstanding = understanding.method !== null;
+  const canAdvanceFromUnderstanding = true;
   const canAdvanceFromStructure = isFrameworkValid({ nodes });
   const canSubmit = !isEvaluating && finalEstimate.trim().length > 0;
 
@@ -155,11 +153,6 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
             </span>
           </div>
         )}
-        {currentCase.allowed_methods && (
-          <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Methode: {currentCase.allowed_methods.replace(/,/g, " / ")}</span>
-          </div>
-        )}
       </div>
 
       <StepperHeader currentStep={currentStep} onJumpTo={setCurrentStep} />
@@ -168,7 +161,6 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
         <UnderstandingStep
           understanding={understanding}
           onChange={setUnderstanding}
-          allowedMethods={currentCase.allowed_methods}
           disabled={isEvaluating}
         />
       )}
