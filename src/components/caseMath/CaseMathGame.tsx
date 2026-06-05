@@ -69,7 +69,7 @@ const CaseMathGame: React.FC<CaseMathGameProps> = ({
           variant="inactive"
           size="sm"
           onClick={onEnd}
-          className="text-muted-foreground hover:text-destructive hover:border-destructive"
+          className="border border-border text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
         >
           <X className="h-4 w-4 mr-1" />
           Beenden

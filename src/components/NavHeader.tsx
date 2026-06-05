@@ -19,7 +19,7 @@ const NavHeader: React.FC<NavHeaderProps> = () => {
     <header className="flex h-[52px] w-full items-center justify-between border-b border-border px-4">
       <Link
         to={withEmail("/")}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="flex items-center gap-1.5 rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> Zurück
       </Link>

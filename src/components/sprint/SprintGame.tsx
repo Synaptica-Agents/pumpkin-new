@@ -44,7 +44,7 @@ const SprintGame: React.FC<SprintGameProps> = ({
           variant="inactive"
           size="sm"
           onClick={onEnd}
-          className="absolute right-0 text-muted-foreground hover:text-destructive hover:border-destructive"
+          className="absolute right-0 border border-border text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
         >
           <X className="h-4 w-4 mr-1" />
           Beenden

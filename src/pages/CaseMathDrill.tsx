@@ -135,7 +135,7 @@ const CaseMathDrill = () => {
           <span className="font-logo text-logo text-foreground">pumpkin.</span>
           <button
             onClick={handleEndEarly}
-            className="flex items-center gap-1 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
+            className="flex items-center gap-1 rounded-lg border border-border px-4 py-2 text-sm text-foreground transition-colors hover:bg-destructive/10 hover:border-destructive hover:text-destructive"
           >
             Beenden ✕
           </button>
