@@ -29,9 +29,6 @@ const emptyUnderstanding = (): MarketSizingUnderstanding => ({
 
 const emptySanityCheck = (): SanityCheckStructured => ({
   magnitudeCheck: "",
-  comparisonRef: "",
-  comparisonValue: "",
-  reasoning: "",
 });
 
 const MarketSizingGame: React.FC<MarketSizingGameProps> = ({

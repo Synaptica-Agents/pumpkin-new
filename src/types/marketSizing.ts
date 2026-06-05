@@ -66,10 +66,4 @@ export interface MarketSizingUnderstanding {
 export interface SanityCheckStructured {
   /** Magnitude reasoning, e.g. "Liegt im Bereich 50-100M, was plausibel ist weil…" */
   magnitudeCheck: string;
-  /** Optional reference label, e.g. "Statistisches Bundesamt: 83M Einwohner" */
-  comparisonRef: string;
-  /** Optional comparison value as raw user input ("83 Mio", "0,5 Mrd"). */
-  comparisonValue: string;
-  /** Plausibility reasoning (1-2 sentences). */
-  reasoning: string;
 }

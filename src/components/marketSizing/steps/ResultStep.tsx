@@ -7,7 +7,6 @@ import {
 import {
   Target,
   ShieldCheck,
-  Scale,
   ListTree,
   HelpCircle,
   StickyNote,
@@ -47,7 +46,6 @@ const ResultStep: React.FC<ResultStepProps> = ({
   unitHint,
 }) => {
   const parsedFinal = parseGermanNumber(finalEstimate);
-  const parsedComparison = parseGermanNumber(sanityCheck.comparisonValue);
 
   const update = (patch: Partial<SanityCheckStructured>) =>
     onSanityCheckChange({ ...sanityCheck, ...patch });
@@ -180,57 +178,6 @@ const ResultStep: React.FC<ResultStepProps> = ({
             value={sanityCheck.magnitudeCheck}
             onChange={(e) => update({ magnitudeCheck: e.target.value })}
             placeholder="z.B. 'Liegt im Bereich 50-100M, was plausibel ist da Deutschland 80M Einwohner hat.'"
-            rows={2}
-            className="w-full resize-y rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            disabled={disabled}
-          />
-        </div>
-
-        <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div className="sm:col-span-2">
-            <label className="mb-1 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-              <Scale className="h-3 w-3" /> Vergleichswert (optional)
-            </label>
-            <input
-              type="text"
-              value={sanityCheck.comparisonRef}
-              onChange={(e) => update({ comparisonRef: e.target.value })}
-              placeholder="z.B. Statistisches Bundesamt oder eigene Erfahrung"
-              className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              disabled={disabled}
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
-              Zahl
-            </label>
-            <input
-              type="text"
-              value={sanityCheck.comparisonValue}
-              onChange={(e) => update({ comparisonValue: e.target.value })}
-              placeholder="z.B. 83 Mio"
-              className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              disabled={disabled}
-            />
-          </div>
-        </div>
-        {parsedComparison != null && (
-          <p className="-mt-2 mb-3 text-[10px] text-muted-foreground">
-            Verstanden als:{" "}
-            <span className="font-medium text-foreground">
-              {formatGermanNumber(parsedComparison)}
-            </span>
-          </p>
-        )}
-
-        <div>
-          <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
-            Plausibilitäts-Begründung (1-2 Sätze)
-          </label>
-          <textarea
-            value={sanityCheck.reasoning}
-            onChange={(e) => update({ reasoning: e.target.value })}
-            placeholder="Warum ist deine Schätzung plausibel? Welche Verzerrungen könnten drinstecken?"
             rows={2}
             className="w-full resize-y rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             disabled={disabled}

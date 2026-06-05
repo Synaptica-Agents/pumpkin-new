@@ -58,11 +58,9 @@ Die Antwort kommt in strukturiertem Format mit folgenden Sektionen (manche optio
   - "  - Punkt" = Annahmen / Zwischenergebnisse
 - "ANNAHMEN:" (optional) = Begründungen pro Leaf, mit Pfad-Verweisen [N.M]
 - "FINALE SCHÄTZUNG:" = Endwert mit Einheit (User rechnet auf Papier — keine RECHNUNG-Sektion mehr im Antwort-Format)
-- "SANITY CHECK:" (optional) = Strukturierter Plausibilitäts-Check mit drei Unterfeldern:
-  - "Größenordnung:" = qualitativer Magnitude-Check
-  - "Vergleich:" = optionaler Vergleichswert mit Quelle
-  - "Begründung:" = Plausibilitäts-Argumentation
-  Werte STARK auf Dimension D: ein vollständig ausgefüllter strukturierter Sanity Check (alle drei Felder) verdient die Top-Stufe; nur Größenordnung ohne Vergleich/Begründung mittlere Stufe.
+- "SANITY CHECK:" (optional) = Plausibilitäts-Check mit dem Feld:
+  - "Größenordnung:" = qualitativer Magnitude-Check (warum die Größenordnung plausibel ist; ein Vergleichsanker im Fließtext zählt positiv).
+  Werte auf Dimension D: ein begründeter Größenordnungs-Check (idealerweise mit Vergleichsanker) verdient die Top-Stufe; eine bloße Behauptung ohne Begründung nur die mittlere Stufe.
 Bewerte jeden Bereich nach der Rubrik.
 
 RUBRIK (0-100 Punkte):

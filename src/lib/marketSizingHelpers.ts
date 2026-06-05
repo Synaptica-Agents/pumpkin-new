@@ -215,20 +215,6 @@ export function serializeMarketSizing(args: {
   if (sanityCheck.magnitudeCheck.trim()) {
     sanityLines.push(`Größenordnung: ${sanityCheck.magnitudeCheck.trim()}`);
   }
-  const ref = sanityCheck.comparisonRef.trim();
-  const refVal = sanityCheck.comparisonValue.trim();
-  if (ref || refVal) {
-    const parts: string[] = [];
-    if (refVal) {
-      const parsed = parseGermanNumber(refVal);
-      parts.push(parsed != null ? `${formatGermanNumber(parsed)} (${refVal})` : refVal);
-    }
-    if (ref) parts.push(`Quelle: ${ref}`);
-    sanityLines.push(`Vergleich: ${parts.join(" — ")}`);
-  }
-  if (sanityCheck.reasoning.trim()) {
-    sanityLines.push(`Begründung: ${sanityCheck.reasoning.trim()}`);
-  }
   if (sanityLines.length > 0) {
     out += `\n\nSANITY CHECK:\n${sanityLines.join("\n")}`;
   }
