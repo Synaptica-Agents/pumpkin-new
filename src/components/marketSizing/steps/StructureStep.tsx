@@ -179,7 +179,7 @@ const StructureStep: React.FC<StructureStepProps> = ({
       </div>
       <div className="rounded-xl border border-border bg-muted/20 p-4">
         <div className="overflow-x-auto pb-2">
-          <div className="flex w-max min-w-full items-start justify-center gap-x-4 gap-y-6 px-1">
+          <div className="flex w-max min-w-full items-start justify-center gap-x-4 gap-y-6 px-1 pt-3">
             {nodes.map((node, i) => (
               <TreeBranch
                 key={node.id}

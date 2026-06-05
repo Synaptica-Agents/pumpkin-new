@@ -65,10 +65,10 @@ const MarketSizingResultView: React.FC<MarketSizingResultProps> = ({
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <Star className="h-4 w-4 text-primary" /> Bewertung nach Rubrik
         </h3>
-        <ScoreBar label="Struktur & MECE" score={eval_.scores.structure_mece} max={35} />
-        <ScoreBar label="Annahmen" score={eval_.scores.assumptions} max={25} />
-        <ScoreBar label="Math. Konsistenz" score={eval_.scores.math_consistency} max={20} />
-        <ScoreBar label="Plausibilität" score={eval_.scores.plausibility_sanity} max={20} />
+        <ScoreBar label="Struktur" score={eval_.scores.structure_mece} max={30} />
+        <ScoreBar label="Annahmen & Zahlen" score={eval_.scores.assumptions} max={30} />
+        <ScoreBar label="Plausibilität" score={eval_.scores.plausibility_sanity} max={25} />
+        <ScoreBar label="Endresultat & Rechnung" score={eval_.scores.math_consistency} max={15} />
       </div>
 
       {/* Strengths & Improvements */}

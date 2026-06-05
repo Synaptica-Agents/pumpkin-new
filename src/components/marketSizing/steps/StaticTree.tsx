@@ -79,7 +79,7 @@ const StaticTree: React.FC<StaticTreeProps> = ({
   showIncomplete = true,
 }) => (
   <div className="overflow-x-auto pb-2">
-    <div className="flex w-max min-w-full items-start justify-center gap-x-4 gap-y-6 px-1">
+    <div className="flex w-max min-w-full items-start justify-center gap-x-4 gap-y-6 px-1 pt-3">
       {nodes.map((node, i) => (
         <Branch
           key={node.id}

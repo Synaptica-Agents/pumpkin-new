@@ -14,10 +14,10 @@ interface MarketSizingIntroModalProps {
 }
 
 const RUBRIC = [
-  { label: "Struktur & MECE", pts: 35 },
-  { label: "Annahmen", pts: 25 },
-  { label: "Math. Konsistenz", pts: 20 },
-  { label: "Plausibilität / Sanity Check", pts: 20 },
+  { label: "Struktur", pts: 30 },
+  { label: "Annahmen & Zahlen", pts: 30 },
+  { label: "Plausibilität / Sanity Check", pts: 25 },
+  { label: "Endresultat & Rechnung", pts: 15 },
 ];
 
 const STEPS = [
