@@ -1,7 +1,7 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import { createEmptyNode } from "@/lib/frameworkSerializer";
-import FrameworkNodeCard from "@/components/frameworkBuilder/FrameworkNodeCard";
+import FrameworkNodeCard, { NodeColor } from "@/components/frameworkBuilder/FrameworkNodeCard";
 import { ChildrenConnector, ChildColumn } from "@/components/frameworkBuilder/FrameworkTreeConnectors";
 import { Plus } from "lucide-react";
 
@@ -9,13 +9,15 @@ const MAX_TOP_LEVEL = 6;
 const MAX_CHILDREN = 4;
 const MAX_DEPTH = 3;
 
-const NODE_COLORS = [
-  "border-t-primary",
-  "border-t-blue-500",
-  "border-t-emerald-500",
-  "border-t-violet-500",
-  "border-t-rose-500",
-  "border-t-cyan-500",
+// Per-branch colour scheme. All classes are full static strings so Tailwind's
+// JIT picks them up. Each branch (and its children) gets one of these.
+const NODE_COLORS: NodeColor[] = [
+  { border: "border-primary/30", ring: "ring-primary/30", shadow: "shadow-primary/20", shadowHover: "hover:shadow-primary/40", tint: "from-primary/15", accent: "text-primary" },
+  { border: "border-blue-500/30", ring: "ring-blue-500/30", shadow: "shadow-blue-500/20", shadowHover: "hover:shadow-blue-500/40", tint: "from-blue-500/15", accent: "text-blue-500" },
+  { border: "border-emerald-500/30", ring: "ring-emerald-500/30", shadow: "shadow-emerald-500/20", shadowHover: "hover:shadow-emerald-500/40", tint: "from-emerald-500/15", accent: "text-emerald-500" },
+  { border: "border-violet-500/30", ring: "ring-violet-500/30", shadow: "shadow-violet-500/20", shadowHover: "hover:shadow-violet-500/40", tint: "from-violet-500/15", accent: "text-violet-500" },
+  { border: "border-rose-500/30", ring: "ring-rose-500/30", shadow: "shadow-rose-500/20", shadowHover: "hover:shadow-rose-500/40", tint: "from-rose-500/15", accent: "text-rose-500" },
+  { border: "border-cyan-500/30", ring: "ring-cyan-500/30", shadow: "shadow-cyan-500/20", shadowHover: "hover:shadow-cyan-500/40", tint: "from-cyan-500/15", accent: "text-cyan-500" },
 ];
 
 function updateNodeInTree(
@@ -50,10 +52,12 @@ interface StructureStepProps {
 
 interface TreeBranchProps {
   node: FrameworkNode;
-  colorClass: string;
+  color: NodeColor;
   depth: number;
   disabled: boolean;
   lastAddedId: string | null;
+  collapsedIds: Set<string>;
+  onToggleCollapse: (id: string) => void;
   onUpdate: (id: string, updated: FrameworkNode) => void;
   onRemove: (id: string) => void;
   onAddChild: (parentId: string) => void;
@@ -61,27 +65,35 @@ interface TreeBranchProps {
 
 const TreeBranch: React.FC<TreeBranchProps> = ({
   node,
-  colorClass,
+  color,
   depth,
   disabled,
   lastAddedId,
+  collapsedIds,
+  onToggleCollapse,
   onUpdate,
   onRemove,
   onAddChild,
 }) => {
   const canAddChild = node.children.length < MAX_CHILDREN && depth < MAX_DEPTH;
+  const hasChildren = node.children.length > 0;
+  const collapsed = hasChildren && collapsedIds.has(node.id);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex shrink-0 flex-col items-center">
       <FrameworkNodeCard
         node={node}
-        colorClass={colorClass}
+        color={color}
         onUpdate={(updated) => onUpdate(node.id, updated)}
         onRemove={() => onRemove(node.id)}
         disabled={disabled}
         autoFocusTitle={node.id === lastAddedId}
+        collapsible={hasChildren}
+        collapsed={collapsed}
+        childCount={node.children.length}
+        onToggleCollapse={() => onToggleCollapse(node.id)}
       />
-      {canAddChild && (
+      {!collapsed && canAddChild && (
         <button
           type="button"
           onClick={() => onAddChild(node.id)}
@@ -91,16 +103,18 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
           <Plus className="h-3 w-3" /> Unterast
         </button>
       )}
-      {node.children.length > 0 && (
+      {!collapsed && hasChildren && (
         <ChildrenConnector childCount={node.children.length}>
           {node.children.map((child) => (
             <ChildColumn key={child.id}>
               <TreeBranch
                 node={child}
-                colorClass={colorClass}
+                color={color}
                 depth={depth + 1}
                 disabled={disabled}
                 lastAddedId={lastAddedId}
+                collapsedIds={collapsedIds}
+                onToggleCollapse={onToggleCollapse}
                 onUpdate={onUpdate}
                 onRemove={onRemove}
                 onAddChild={onAddChild}
@@ -120,6 +134,16 @@ const StructureStep: React.FC<StructureStepProps> = ({
   onLastAddedIdChange,
   disabled,
 }) => {
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
+
+  const toggleCollapse = useCallback((nodeId: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      next.has(nodeId) ? next.delete(nodeId) : next.add(nodeId);
+      return next;
+    });
+  }, []);
+
   const updateNode = useCallback(
     (nodeId: string, updated: FrameworkNode) => {
       onChange(updateNodeInTree(nodes, nodeId, () => updated));
@@ -164,31 +188,35 @@ const StructureStep: React.FC<StructureStepProps> = ({
         </p>
       </div>
       <div className="rounded-xl border border-border bg-muted/20 p-4">
-        <div className="flex flex-wrap items-start justify-center gap-x-4 gap-y-6">
-          {nodes.map((node, i) => (
-            <TreeBranch
-              key={node.id}
-              node={node}
-              colorClass={NODE_COLORS[i % NODE_COLORS.length]}
-              depth={1}
-              disabled={disabled}
-              lastAddedId={lastAddedId}
-              onUpdate={updateNode}
-              onRemove={removeNode}
-              onAddChild={addChildNode}
-            />
-          ))}
-          {nodes.length < MAX_TOP_LEVEL && (
-            <button
-              type="button"
-              onClick={addNode}
-              disabled={disabled}
-              className="flex h-[80px] min-w-[80px] flex-col items-center justify-center gap-1 self-start rounded-lg border-2 border-dashed border-border text-muted-foreground/50 transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-30"
-            >
-              <Plus className="h-5 w-5" />
-              <span className="text-[10px]">Ast</span>
-            </button>
-          )}
+        <div className="overflow-x-auto pb-2">
+          <div className="flex w-max min-w-full items-start justify-center gap-x-4 gap-y-6 px-1">
+            {nodes.map((node, i) => (
+              <TreeBranch
+                key={node.id}
+                node={node}
+                color={NODE_COLORS[i % NODE_COLORS.length]}
+                depth={1}
+                disabled={disabled}
+                lastAddedId={lastAddedId}
+                collapsedIds={collapsedIds}
+                onToggleCollapse={toggleCollapse}
+                onUpdate={updateNode}
+                onRemove={removeNode}
+                onAddChild={addChildNode}
+              />
+            ))}
+            {nodes.length < MAX_TOP_LEVEL && (
+              <button
+                type="button"
+                onClick={addNode}
+                disabled={disabled}
+                className="flex h-[80px] min-w-[80px] shrink-0 flex-col items-center justify-center gap-1 self-start rounded-lg border-2 border-dashed border-border text-muted-foreground/50 transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-30"
+              >
+                <Plus className="h-5 w-5" />
+                <span className="text-[10px]">Ast</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

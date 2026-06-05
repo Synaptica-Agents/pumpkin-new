@@ -1,11 +1,21 @@
 import React, { useRef, useEffect, useLayoutEffect } from "react";
 import { FrameworkNode, FrameworkBulletPoint } from "@/types/frameworkBuilder";
 import { createEmptyBullet } from "@/lib/frameworkSerializer";
-import { X, Plus, Star } from "lucide-react";
+import { X, Plus, Star, ChevronDown, ChevronRight } from "lucide-react";
+
+/** Per-branch colour scheme (full static Tailwind classes). */
+export interface NodeColor {
+  border: string;
+  ring: string;
+  shadow: string;
+  shadowHover: string;
+  tint: string;
+  accent: string;
+}
 
 interface FrameworkNodeCardProps {
   node: FrameworkNode;
-  colorClass: string;
+  color: NodeColor;
   onUpdate: (updated: FrameworkNode) => void;
   onRemove: () => void;
   disabled: boolean;
@@ -15,6 +25,13 @@ interface FrameworkNodeCardProps {
   /** If false, star toggle is visually present but cannot be set (max stars reached elsewhere). */
   canSetPriority?: boolean;
   onTogglePriority?: () => void;
+  /** If true, shows the collapse/expand chevron (node has children). */
+  collapsible?: boolean;
+  /** Whether the branch is currently collapsed. */
+  collapsed?: boolean;
+  /** Number of direct children (for the collapsed "+n" badge). */
+  childCount?: number;
+  onToggleCollapse?: () => void;
 }
 
 /**
@@ -28,7 +45,7 @@ function autoResize(el: HTMLTextAreaElement | null) {
 
 const FrameworkNodeCard: React.FC<FrameworkNodeCardProps> = ({
   node,
-  colorClass,
+  color,
   onUpdate,
   onRemove,
   disabled,
@@ -36,6 +53,10 @@ const FrameworkNodeCard: React.FC<FrameworkNodeCardProps> = ({
   showPriorityToggle = false,
   canSetPriority = true,
   onTogglePriority,
+  collapsible = false,
+  collapsed = false,
+  childCount = 0,
+  onToggleCollapse,
 }) => {
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const bulletRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map());
@@ -130,8 +151,13 @@ const FrameworkNodeCard: React.FC<FrameworkNodeCardProps> = ({
 
   return (
     <div
-      className={`relative min-w-[140px] max-w-[200px] rounded-lg border border-border bg-card ${colorClass} border-t-[3px] transition-all duration-200 animate-in fade-in`}
+      className={`relative min-w-[150px] max-w-[210px] overflow-hidden rounded-xl border ${color.border} bg-card ring-1 ${color.ring} shadow-lg ${color.shadow} ${color.shadowHover} transition-all duration-200 animate-in fade-in`}
     >
+      {/* Coloured glow header */}
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b ${color.tint} to-transparent`}
+      />
+
       {/* Delete button */}
       <button
         type="button"
@@ -144,7 +170,25 @@ const FrameworkNodeCard: React.FC<FrameworkNodeCardProps> = ({
       </button>
 
       {/* Title */}
-      <div className="flex items-start gap-1.5 px-3 pt-2.5 pb-1">
+      <div className="relative flex items-start gap-1.5 px-3 pt-2.5 pb-1">
+        {collapsible && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            disabled={disabled}
+            title={collapsed ? "Ast aufklappen" : "Ast zuklappen"}
+            className={`mt-0.5 flex shrink-0 items-center gap-0.5 transition-colors ${color.accent} hover:opacity-70 disabled:opacity-40`}
+          >
+            {collapsed ? (
+              <ChevronRight className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+            {collapsed && childCount > 0 && (
+              <span className="text-[10px] font-semibold leading-none">+{childCount}</span>
+            )}
+          </button>
+        )}
         {showPriorityToggle && (
           <button
             type="button"
