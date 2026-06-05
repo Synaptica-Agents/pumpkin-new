@@ -151,11 +151,11 @@ const FrameworkNodeCard: React.FC<FrameworkNodeCardProps> = ({
 
   return (
     <div
-      className={`relative min-w-[150px] max-w-[210px] overflow-hidden rounded-xl border ${color.border} bg-card ring-1 ${color.ring} shadow-lg ${color.shadow} ${color.shadowHover} transition-all duration-200 animate-in fade-in`}
+      className={`relative min-w-[150px] max-w-[210px] rounded-xl border ${color.border} bg-card ring-1 ${color.ring} shadow-lg ${color.shadow} ${color.shadowHover} transition-all duration-200 animate-in fade-in`}
     >
       {/* Coloured glow header */}
       <div
-        className={`pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b ${color.tint} to-transparent`}
+        className={`pointer-events-none absolute inset-x-0 top-0 h-10 rounded-t-xl bg-gradient-to-b ${color.tint} to-transparent`}
       />
 
       {/* Delete button */}
