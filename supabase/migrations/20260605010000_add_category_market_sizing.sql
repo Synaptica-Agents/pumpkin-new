@@ -1,16 +1,19 @@
 -- ============================================================
--- Market Sizing: add question-type category for start-screen grouping
--- 3 categories (+ "Gemischt" = no filter in the app):
+-- Market Sizing: add question-type grouping for the start screen.
+-- NOTE: the table already has a vestigial `category` column
+-- (NOT NULL DEFAULT 'market_sizing', a drill-type discriminator),
+-- so we add a SEPARATE `question_type` column to avoid clobbering it.
+-- 3 types (+ "Gemischt" = no filter in the app):
 --   mengen  = Mengen & Bestände  (Wie viele … gibt es / werden gebraucht?)
 --   maerkte = Märkte & Umsätze   (Wie viel Umsatz / pro Jahr verkauft/konsumiert?)
 --   physik  = Physik & Geometrie (Wie schwer / wie groß / wie viel passt rein?)
 -- ============================================================
 
 ALTER TABLE public.market_sizing_cases
-  ADD COLUMN IF NOT EXISTS category text;
+  ADD COLUMN IF NOT EXISTS question_type text;
 
 -- ① Mengen & Bestände
-UPDATE public.market_sizing_cases SET category = 'mengen' WHERE prompt IN (
+UPDATE public.market_sizing_cases SET question_type = 'mengen' WHERE prompt IN (
   'Wie viele Hunde leben in Deutschland?',
   'Wie viele Fahrräder gibt es in Deutschland?',
   'Was ist die durchschnittliche Anzahl an Stühlen in einem Haushalt in Deutschland?',
@@ -28,7 +31,7 @@ UPDATE public.market_sizing_cases SET category = 'mengen' WHERE prompt IN (
 );
 
 -- ② Märkte & Umsätze
-UPDATE public.market_sizing_cases SET category = 'maerkte' WHERE prompt IN (
+UPDATE public.market_sizing_cases SET question_type = 'maerkte' WHERE prompt IN (
   'Wie viel Umsatz wird mit Geschenken für Deutsche gemacht, die am 01.01. Geburtstag haben?',
   'Wie hoch ist der tägliche Kaffee-Konsum in Deutschland (in Tassen) an einem Wochentag?',
   'Wie viel Umsatz könnten wir in einem Jahr generieren, indem wir jedes Mal beim Betreten der Technischen Universität München 1 Euro verlangen?',
@@ -44,7 +47,7 @@ UPDATE public.market_sizing_cases SET category = 'maerkte' WHERE prompt IN (
 );
 
 -- ③ Physik & Geometrie
-UPDATE public.market_sizing_cases SET category = 'physik' WHERE prompt IN (
+UPDATE public.market_sizing_cases SET question_type = 'physik' WHERE prompt IN (
   'Wie viele Smarties passen in einen Smart?',
   'Wie schwer ist New York City?',
   'Wie viele Golfbälle passen in einen Schulbus?',

@@ -11,7 +11,7 @@ export interface MarketSizingCase {
   expected_order_of_magnitude_min: number | null;
   expected_order_of_magnitude_max: number | null;
   key_assumptions_examples: string | null;
-  category: string | null;
+  question_type: string | null;
 }
 
 /** Start-screen grouping by question type. "all" = no filter (Gemischt). */

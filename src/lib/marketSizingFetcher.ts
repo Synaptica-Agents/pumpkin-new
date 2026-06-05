@@ -21,7 +21,7 @@ export const fetchMarketSizingCases = async (
   }
   let cases = (data ?? []) as unknown as MarketSizingCase[];
   if (category !== "all") {
-    const filtered = cases.filter((c) => c.category === category);
+    const filtered = cases.filter((c) => c.question_type === category);
     // Fallback: never leave the pool empty if a category is unexpectedly unset.
     if (filtered.length > 0) cases = filtered;
   }
