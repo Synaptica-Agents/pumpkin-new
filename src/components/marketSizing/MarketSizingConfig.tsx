@@ -44,11 +44,6 @@ const MarketSizingConfig: React.FC<MarketSizingConfigProps> = ({ onStart }) => {
 
   return (
     <div className="flex flex-col gap-8 py-4">
-      {/* Hint */}
-      <div className="mx-auto max-w-md rounded-lg border border-border bg-muted/50 px-4 py-3 text-center text-sm text-muted-foreground">
-        🧠 Market Sizing = Struktur + Annahmen + Plausibilität. Die KI bewertet deine Antwort nach fester Rubrik.
-      </div>
-
       {/* Category choice */}
       <div>
         <h3 className="mb-3 text-center text-sm font-semibold text-foreground">
