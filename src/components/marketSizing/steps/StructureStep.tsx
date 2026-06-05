@@ -184,7 +184,7 @@ const StructureStep: React.FC<StructureStepProps> = ({
       <div>
         <h2 className="text-sm font-semibold text-foreground">2. Deine Struktur</h2>
         <p className="text-xs text-muted-foreground">
-          Teile den Markt in 2–4 MECE-Äste auf. Unteräste für Detailierung. Zahlen kommen im nächsten Schritt.
+          Teile den Markt in 2–4 MECE-Oberbereiche auf — hier nur die Bereiche, noch keine Zahlen. Die kommen im nächsten Schritt.
         </p>
       </div>
       <div className="rounded-xl border border-border bg-muted/20 p-4">
