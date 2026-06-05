@@ -1,16 +1,9 @@
 import React, { useRef, useEffect, useLayoutEffect } from "react";
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import { X, Star, ChevronDown, ChevronRight } from "lucide-react";
+import { NodeColor } from "./nodeColors";
 
-/** Per-branch colour scheme (full static Tailwind classes). */
-export interface NodeColor {
-  border: string;
-  ring: string;
-  shadow: string;
-  shadowHover: string;
-  tint: string;
-  accent: string;
-}
+export type { NodeColor };
 
 interface FrameworkNodeCardProps {
   node: FrameworkNode;

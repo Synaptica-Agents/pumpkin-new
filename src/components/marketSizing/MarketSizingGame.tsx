@@ -3,10 +3,11 @@ import {
   MarketSizingCase,
   MarketSizingUnderstanding,
   SanityCheckStructured,
+  BoxInput,
 } from "@/types/marketSizing";
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import { createEmptyNode, serializeFramework, isFrameworkValid } from "@/lib/frameworkSerializer";
-import { getLeaves, serializeMarketSizing } from "@/lib/marketSizingHelpers";
+import { getAllNodes, serializeMarketSizing } from "@/lib/marketSizingHelpers";
 import { DrillButton } from "@/components/ui/drill-button";
 import { X, Send, Info, ArrowLeft, ArrowRight } from "lucide-react";
 import StepperHeader, { STEP_LABELS } from "./steps/StepperHeader";
@@ -43,7 +44,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
   const [understanding, setUnderstanding] = useState<MarketSizingUnderstanding>(emptyUnderstanding());
   const [nodes, setNodes] = useState<FrameworkNode[]>([createEmptyNode()]);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
-  const [assumptions, setAssumptions] = useState<Record<string, string>>({});
+  const [boxInputs, setBoxInputs] = useState<Record<string, BoxInput>>({});
   const [finalEstimate, setFinalEstimate] = useState("");
   const [estimateUnit, setEstimateUnit] = useState("");
   const [sanityCheck, setSanityCheck] = useState<SanityCheckStructured>(emptySanityCheck());
@@ -54,18 +55,24 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
       setUnderstanding(emptyUnderstanding());
       setNodes([createEmptyNode()]);
       setLastAddedId(null);
-      setAssumptions({});
+      setBoxInputs({});
       setFinalEstimate("");
       setEstimateUnit(currentCase.unit_hint || "");
       setSanityCheck(emptySanityCheck());
     }
   }, [currentCase?.id]);
 
-  const leaves = useMemo(() => getLeaves(nodes), [nodes]);
+  const allNodes = useMemo(() => getAllNodes(nodes), [nodes]);
   const treeText = useMemo(() => serializeFramework({ nodes }), [nodes]);
 
   const canAdvanceFromUnderstanding = true;
   const canAdvanceFromStructure = isFrameworkValid({ nodes });
+  const canAdvanceFromAssumptions =
+    allNodes.length > 0 &&
+    allNodes.every((n) => {
+      const input = boxInputs[n.id];
+      return !!input && input.assumption.trim().length > 0 && input.value.trim().length > 0;
+    });
   const canSubmit = !isEvaluating && finalEstimate.trim().length > 0;
 
   const goNext = useCallback(() => {
@@ -81,8 +88,8 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
     const serialized = serializeMarketSizing({
       understanding,
       treeText,
-      leaves,
-      assumptions,
+      boxes: allNodes,
+      boxInputs,
       finalEstimateInput: finalEstimate,
       finalEstimateUnit: estimateUnit,
       sanityCheck,
@@ -96,8 +103,8 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
     canSubmit,
     understanding,
     treeText,
-    leaves,
-    assumptions,
+    allNodes,
+    boxInputs,
     finalEstimate,
     estimateUnit,
     sanityCheck,
@@ -111,6 +118,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
   const canAdvanceCurrentStep =
     currentStep === 0 ? canAdvanceFromUnderstanding :
     currentStep === 1 ? canAdvanceFromStructure :
+    currentStep === 2 ? canAdvanceFromAssumptions :
     true;
 
   return (
@@ -172,9 +180,9 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
       )}
       {currentStep === 2 && (
         <AssumptionsStep
-          leaves={leaves}
-          assumptions={assumptions}
-          onChange={setAssumptions}
+          nodes={nodes}
+          boxInputs={boxInputs}
+          onChange={setBoxInputs}
           disabled={isEvaluating}
         />
       )}
@@ -182,8 +190,8 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
         <ResultStep
           understanding={understanding}
           treeText={treeText}
-          leaves={leaves}
-          assumptions={assumptions}
+          boxes={allNodes}
+          boxInputs={boxInputs}
           finalEstimate={finalEstimate}
           onFinalEstimateChange={setFinalEstimate}
           unit={estimateUnit}

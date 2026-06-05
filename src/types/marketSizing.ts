@@ -54,6 +54,12 @@ export interface MarketSizingClarification {
   answer: string;
 }
 
+/** Per-box input in Step 3: a textual assumption plus its (raw) numeric value. */
+export interface BoxInput {
+  assumption: string;
+  value: string;
+}
+
 export interface MarketSizingUnderstanding {
   /** Optional clarifying questions the user posed and how they answered (max 3). */
   clarifications: MarketSizingClarification[];

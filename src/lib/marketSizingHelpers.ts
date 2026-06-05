@@ -1,5 +1,6 @@
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import {
+  BoxInput,
   MarketSizingUnderstanding,
   SanityCheckStructured,
 } from "@/types/marketSizing";
@@ -38,6 +39,26 @@ export function getLeaves(nodes: FrameworkNode[]): MarketSizingLeaf[] {
       } else {
         walk(node.children, path, chain);
       }
+    });
+  };
+  walk(nodes, "", []);
+  return out;
+}
+
+/**
+ * Walk a FrameworkNode tree in depth-first order and return EVERY node
+ * (parents and leaves), each with its display label chain and path.
+ */
+export function getAllNodes(nodes: FrameworkNode[]): MarketSizingLeaf[] {
+  const out: MarketSizingLeaf[] = [];
+  const walk = (arr: FrameworkNode[], parentPath: string, parentTitles: string[]) => {
+    arr.forEach((node, i) => {
+      const idx = i + 1;
+      const path = parentPath ? `${parentPath}.${idx}` : `${idx}`;
+      const title = node.title.trim() || "(ohne Titel)";
+      const chain = [...parentTitles, title];
+      out.push({ id: node.id, title, labelChain: chain.join(" › "), path });
+      if (node.children.length > 0) walk(node.children, path, chain);
     });
   };
   walk(nodes, "", []);
@@ -115,6 +136,26 @@ export function shortFormat(n: number): string {
   return formatGermanNumber(n, 2);
 }
 
+/**
+ * Compact display for the per-box value badge in Step 3.
+ * - Percentages stay as typed ("20%" → "20 %").
+ * - Parseable numbers ≥ 10.000 are abbreviated ("10000000" → "10 Mio").
+ * - Everything else (small numbers, fractions like "1/3") shows the raw text.
+ */
+export function formatBoxValue(raw: string): string {
+  const text = (raw ?? "").trim();
+  if (!text) return "";
+  if (text.endsWith("%")) {
+    const n = parseGermanNumber(text);
+    return n != null ? `${formatGermanNumber(n * 100)} %` : text;
+  }
+  const n = parseGermanNumber(text);
+  if (n != null && Math.abs(n) >= 10000) {
+    return shortFormat(n).replace(/^~/, "");
+  }
+  return text;
+}
+
 export interface ProductResult {
   /** Running product of all entered leaf numbers. 1 when no valid inputs. */
   value: number;
@@ -161,8 +202,8 @@ export interface SerializedMarketSizing {
 export function serializeMarketSizing(args: {
   understanding: MarketSizingUnderstanding;
   treeText: string;
-  leaves: MarketSizingLeaf[];
-  assumptions: Record<string, string>;
+  boxes: MarketSizingLeaf[];
+  boxInputs: Record<string, BoxInput>;
   finalEstimateInput: string;
   finalEstimateUnit: string;
   sanityCheck: SanityCheckStructured;
@@ -170,8 +211,8 @@ export function serializeMarketSizing(args: {
   const {
     understanding,
     treeText,
-    leaves,
-    assumptions,
+    boxes,
+    boxInputs,
     finalEstimateInput,
     finalEstimateUnit,
     sanityCheck,
@@ -193,14 +234,19 @@ export function serializeMarketSizing(args: {
 
   out += `STRUKTUR:\n${treeText}`;
 
-  const assumptionLines = leaves
-    .map((l) => {
-      const a = (assumptions[l.id] ?? "").trim();
-      return a ? `- [${l.path}] ${l.labelChain}: ${a}` : null;
+  const assumptionLines = boxes
+    .map((b) => {
+      const input = boxInputs[b.id];
+      const value = (input?.value ?? "").trim();
+      const assumption = (input?.assumption ?? "").trim();
+      if (!value && !assumption) return null;
+      const valuePart = value ? `${value}` : "(keine Zahl)";
+      const reasonPart = assumption ? ` — ${assumption}` : "";
+      return `- [${b.path}] ${b.labelChain}: ${valuePart}${reasonPart}`;
     })
     .filter(Boolean);
   if (assumptionLines.length > 0) {
-    out += `\n\nANNAHMEN:\n${assumptionLines.join("\n")}`;
+    out += `\n\nANNAHMEN (pro Box: Zahl — Begründung):\n${assumptionLines.join("\n")}`;
   }
 
   // Final estimate: solely from user input (no calculation step in flow)

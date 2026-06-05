@@ -2,6 +2,7 @@ import React from "react";
 import {
   formatGermanNumber,
   parseGermanNumber,
+  formatBoxValue,
   MarketSizingLeaf,
 } from "@/lib/marketSizingHelpers";
 import {
@@ -12,6 +13,7 @@ import {
   StickyNote,
 } from "lucide-react";
 import {
+  BoxInput,
   MarketSizingUnderstanding,
   SanityCheckStructured,
 } from "@/types/marketSizing";
@@ -19,8 +21,8 @@ import {
 interface ResultStepProps {
   understanding: MarketSizingUnderstanding;
   treeText: string;
-  leaves: MarketSizingLeaf[];
-  assumptions: Record<string, string>;
+  boxes: MarketSizingLeaf[];
+  boxInputs: Record<string, BoxInput>;
   finalEstimate: string;
   onFinalEstimateChange: (value: string) => void;
   unit: string;
@@ -34,8 +36,8 @@ interface ResultStepProps {
 const ResultStep: React.FC<ResultStepProps> = ({
   understanding,
   treeText,
-  leaves,
-  assumptions,
+  boxes,
+  boxInputs,
   finalEstimate,
   onFinalEstimateChange,
   unit,
@@ -53,9 +55,13 @@ const ResultStep: React.FC<ResultStepProps> = ({
   const filledClarifications = understanding.clarifications.filter(
     (c) => c.question.trim() || c.answer.trim()
   );
-  const filledAssumptions = leaves
-    .map((l) => ({ leaf: l, text: (assumptions[l.id] ?? "").trim() }))
-    .filter((x) => x.text.length > 0);
+  const filledAssumptions = boxes
+    .map((b) => ({
+      box: b,
+      value: formatBoxValue(boxInputs[b.id]?.value ?? ""),
+      text: (boxInputs[b.id]?.assumption ?? "").trim(),
+    }))
+    .filter((x) => x.value.length > 0 || x.text.length > 0);
 
   return (
     <div className="flex flex-col gap-4">
@@ -105,14 +111,14 @@ const ResultStep: React.FC<ResultStepProps> = ({
         {filledAssumptions.length > 0 && (
           <div>
             <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Annahmen pro Ast
+              Annahmen &amp; Zahlen pro Box
             </p>
             <ul className="space-y-0.5 text-xs text-foreground">
-              {filledAssumptions.map(({ leaf, text }) => (
-                <li key={leaf.id}>
-                  <span className="font-medium text-primary">[{leaf.path}]</span>{" "}
-                  <span className="font-medium">{leaf.labelChain}:</span>{" "}
-                  <span className="text-muted-foreground">{text}</span>
+              {filledAssumptions.map(({ box, value, text }) => (
+                <li key={box.id}>
+                  <span className="font-medium">{box.labelChain}:</span>{" "}
+                  {value && <span className="font-semibold text-primary">{value}</span>}
+                  {text && <span className="text-muted-foreground">{value ? " — " : ""}{text}</span>}
                 </li>
               ))}
             </ul>
