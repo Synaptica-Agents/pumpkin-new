@@ -182,7 +182,7 @@ const StructureStep: React.FC<StructureStepProps> = ({
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <h2 className="text-sm font-semibold text-foreground">1. Deine Struktur</h2>
+        <h2 className="text-sm font-semibold text-foreground">2. Deine Struktur</h2>
         <p className="text-xs text-muted-foreground">
           Teile den Markt in 2–4 MECE-Äste auf. Unteräste für Detailierung. Zahlen kommen im nächsten Schritt.
         </p>

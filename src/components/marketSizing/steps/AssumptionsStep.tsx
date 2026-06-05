@@ -22,7 +22,7 @@ const AssumptionsStep: React.FC<AssumptionsStepProps> = ({
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <h2 className="text-sm font-semibold text-foreground">2. Annahmen &amp; Begründung</h2>
+        <h2 className="text-sm font-semibold text-foreground">3. Annahmen &amp; Begründung</h2>
         <p className="text-xs text-muted-foreground">
           Schreib pro Ast in einem Satz, woher du deine Zahl ableitest. Hilft dir, deine Logik zu schärfen (optional).
         </p>
