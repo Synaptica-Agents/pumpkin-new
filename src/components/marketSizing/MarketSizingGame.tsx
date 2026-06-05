@@ -189,8 +189,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
       {currentStep === 3 && (
         <ResultStep
           understanding={understanding}
-          treeText={treeText}
-          boxes={allNodes}
+          nodes={nodes}
           boxInputs={boxInputs}
           finalEstimate={finalEstimate}
           onFinalEstimateChange={setFinalEstimate}

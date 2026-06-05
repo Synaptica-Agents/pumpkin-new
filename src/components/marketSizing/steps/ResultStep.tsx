@@ -1,27 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
+import { FrameworkNode } from "@/types/frameworkBuilder";
 import {
   formatGermanNumber,
   parseGermanNumber,
   formatBoxValue,
-  MarketSizingLeaf,
+  getAllNodes,
 } from "@/lib/marketSizingHelpers";
 import {
   Target,
   ShieldCheck,
-  ListTree,
   HelpCircle,
   StickyNote,
+  MousePointerClick,
 } from "lucide-react";
 import {
   BoxInput,
   MarketSizingUnderstanding,
   SanityCheckStructured,
 } from "@/types/marketSizing";
+import StaticTree from "./StaticTree";
 
 interface ResultStepProps {
   understanding: MarketSizingUnderstanding;
-  treeText: string;
-  boxes: MarketSizingLeaf[];
+  nodes: FrameworkNode[];
   boxInputs: Record<string, BoxInput>;
   finalEstimate: string;
   onFinalEstimateChange: (value: string) => void;
@@ -35,8 +36,7 @@ interface ResultStepProps {
 
 const ResultStep: React.FC<ResultStepProps> = ({
   understanding,
-  treeText,
-  boxes,
+  nodes,
   boxInputs,
   finalEstimate,
   onFinalEstimateChange,
@@ -55,82 +55,19 @@ const ResultStep: React.FC<ResultStepProps> = ({
   const filledClarifications = understanding.clarifications.filter(
     (c) => c.question.trim() || c.answer.trim()
   );
-  const filledAssumptions = boxes
-    .map((b) => ({
-      box: b,
-      value: formatBoxValue(boxInputs[b.id]?.value ?? ""),
-      text: (boxInputs[b.id]?.assumption ?? "").trim(),
-    }))
-    .filter((x) => x.value.length > 0 || x.text.length > 0);
+
+  const allNodes = getAllNodes(nodes);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = allNodes.find((n) => n.id === selectedId) ?? null;
+  const selectedInput = selectedId ? boxInputs[selectedId] : undefined;
 
   return (
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-sm font-semibold text-foreground">4. Ergebnis</h2>
         <p className="text-xs text-muted-foreground">
-          Hier siehst du nochmal alle deine Annahmen — rechne auf Papier und trag dann deine finale Schätzung ein.
+          Rechne auf Papier mit deinen Annahmen, trag deine finale Schätzung ein und mach den Sanity Check.
         </p>
-      </div>
-
-      {/* Recap — read-only */}
-      <div className="rounded-xl border border-border bg-muted/20 p-4">
-        <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold text-foreground">
-          <StickyNote className="h-3.5 w-3.5 text-primary" /> Recap deiner Eingaben
-        </h3>
-
-        {/* Clarifications */}
-        {filledClarifications.length > 0 && (
-          <div className="mb-3">
-            <p className="mb-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <HelpCircle className="h-3 w-3" /> Klärungen
-            </p>
-            <ul className="space-y-0.5 text-xs text-foreground">
-              {filledClarifications.map((c) => (
-                <li key={c.id}>
-                  <span className="font-medium">{c.question.trim() || "(ohne Frage)"}</span>
-                  <span className="text-muted-foreground"> → {c.answer.trim() || "(keine Annahme)"}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Tree */}
-        {treeText.trim() && (
-          <div className="mb-3">
-            <p className="mb-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <ListTree className="h-3 w-3" /> Struktur
-            </p>
-            <pre className="overflow-x-auto whitespace-pre-wrap rounded-md border border-border/60 bg-background/60 p-2 text-[11px] leading-relaxed text-foreground">
-              {treeText}
-            </pre>
-          </div>
-        )}
-
-        {/* Assumptions */}
-        {filledAssumptions.length > 0 && (
-          <div>
-            <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Annahmen &amp; Zahlen pro Box
-            </p>
-            <ul className="space-y-0.5 text-xs text-foreground">
-              {filledAssumptions.map(({ box, value, text }) => (
-                <li key={box.id}>
-                  <span className="font-medium">{box.labelChain}:</span>{" "}
-                  {value && <span className="font-semibold text-primary">{value}</span>}
-                  {text && <span className="text-muted-foreground">{value ? " — " : ""}{text}</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {filledClarifications.length === 0 &&
-          filledAssumptions.length === 0 && (
-            <p className="text-[11px] italic text-muted-foreground">
-              Keine Eingaben aus den vorherigen Schritten.
-            </p>
-          )}
       </div>
 
       {/* Final estimate input */}
@@ -176,7 +113,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
           <ShieldCheck className="h-3.5 w-3.5 text-success" /> Sanity Check
         </label>
 
-        <div className="mb-3">
+        <div>
           <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
             Größenordnung-Check
           </label>
@@ -189,6 +126,78 @@ const ResultStep: React.FC<ResultStepProps> = ({
             disabled={disabled}
           />
         </div>
+      </div>
+
+      {/* Recap — read-only */}
+      <div className="rounded-xl border border-border bg-muted/20 p-4">
+        <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold text-foreground">
+          <StickyNote className="h-3.5 w-3.5 text-primary" /> Recap deiner Eingaben
+        </h3>
+
+        {/* Clarifications */}
+        {filledClarifications.length > 0 && (
+          <div className="mb-3">
+            <p className="mb-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <HelpCircle className="h-3 w-3" /> Klärungen
+            </p>
+            <ul className="space-y-0.5 text-xs text-foreground">
+              {filledClarifications.map((c) => (
+                <li key={c.id}>
+                  <span className="font-medium">{c.question.trim() || "(ohne Frage)"}</span>
+                  <span className="text-muted-foreground"> → {c.answer.trim() || "(keine Annahme)"}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Structure — static, clickable */}
+        {allNodes.length > 0 && (
+          <div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Struktur — Box anklicken für Details
+            </p>
+            <StaticTree
+              nodes={nodes}
+              boxInputs={boxInputs}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              showIncomplete={false}
+            />
+
+            {/* Selected box detail */}
+            <div className="mt-2 rounded-lg border border-border bg-background/60 p-3">
+              {selected ? (
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-foreground">
+                      {selected.labelChain}
+                    </span>
+                    {formatBoxValue(selectedInput?.value ?? "") && (
+                      <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-primary">
+                        {formatBoxValue(selectedInput?.value ?? "")}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedInput?.assumption?.trim() || "(keine Annahme)"}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2 py-2 text-center text-xs text-muted-foreground">
+                  <MousePointerClick className="h-4 w-4 text-muted-foreground/60" />
+                  Box anklicken, um Annahme und Zahl zu sehen.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {filledClarifications.length === 0 && allNodes.length === 0 && (
+          <p className="text-[11px] italic text-muted-foreground">
+            Keine Eingaben aus den vorherigen Schritten.
+          </p>
+        )}
       </div>
     </div>
   );
