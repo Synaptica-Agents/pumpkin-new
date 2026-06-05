@@ -38,8 +38,8 @@ export const ChildrenConnector: React.FC<{
 
   return (
     <div className="flex flex-col items-center">
-      <div className="h-5 w-px bg-border" />
-      <div ref={containerRef} className="relative flex gap-3 pt-5">
+      <div className="h-3 w-px bg-border" />
+      <div ref={containerRef} className="relative flex gap-3">
         {childCount > 1 && (
           <div
             ref={barRef}
@@ -59,7 +59,7 @@ export const ChildrenConnector: React.FC<{
  */
 export const ChildColumn: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div data-child-col className="flex flex-col items-center">
-    <div className="h-5 w-px bg-border" />
+    <div className="h-3 w-px bg-border" />
     {children}
   </div>
 );
