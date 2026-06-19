@@ -62,7 +62,9 @@ Die Antwort kommt in strukturiertem Format mit folgenden Sektionen (manche optio
 - "VERSTÄNDNIS:" (optional, Schritt 1) = Klärungsfragen, die der User selbst gestellt und beantwortet hat. Zählt positiv für A (Struktur), wenn sinnvoll.
 - "STRUKTUR:" (Schritt 2) = Hierarchischer Issue Tree der gewählten Bereiche/Boxen → Dimension A (Struktur).
   - "[Ast N] Titel" = Oberbereiche, "  [Unterast N.M] Titel" = Unteräste (bis zu 4 Ebenen).
-- "ANNAHMEN (pro Box: Zahl — Begründung):" (Schritt 3) = pro Box eine Zahl + Begründung, mit Pfad [N.M] → Dimension B (Annahmen & Zahlen). Prüfe, ob die Boxen Zahlen UND eine nachvollziehbare Begründung haben.
+  - Hat ein Knoten ≥2 Unteräste, steht dahinter "— Kinder verknüpft mit: ×/+/−/÷" (die Rechenoperation, mit der die Unteräste kombiniert werden). Berücksichtige diese Operation bei der Plausibilität (C) und der Rechnung (D).
+  - Hinter einer untersten Box (Blatt) steht ihr Typ in eckigen Klammern: [Annahme] (geschätzt + begründet), [Fakt] (bekannte Zahl, KEINE Begründung nötig) oder [Rechnung] (kurze Inline-Rechnung).
+- "ANNAHMEN & ZAHLEN (...):" (Schritt 3) = NUR die untersten Boxen (Blätter) tragen Zahlen; Eltern-Boxen sind bewusst Rechnungen aus ihren Kindern und haben KEINE eigene Annahme. Format je Typ: "value — Begründung" (Annahme), "value (Fakt)" (bekannte Zahl, Begründung NICHT verlangen), "value (Rechnung: …)" (Inline-Rechnung). → Dimension B (Annahmen & Zahlen). Verlange Begründungen NUR bei Annahmen; bestrafe fehlende Begründung bei Fakt/Rechnung NICHT.
 - "FINALE SCHÄTZUNG:" (Schritt 4) = Endwert mit Einheit → fließt in C (Plausibilität) und D (Rechnung).
 - "SANITY CHECK:" (optional, Schritt 4) = "Größenordnung:" = qualitativer Check, warum das Ergebnis plausibel ist → Dimension C (Plausibilität).
 Berücksichtige WIRKLICH alle vorhandenen Sektionen; ignoriere keine Eingabe.

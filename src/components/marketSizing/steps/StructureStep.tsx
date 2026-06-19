@@ -1,9 +1,11 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { FrameworkNode } from "@/types/frameworkBuilder";
+import { MathOp } from "@/types/marketSizing";
 import { createEmptyNode } from "@/lib/frameworkSerializer";
 import FrameworkNodeCard from "@/components/frameworkBuilder/FrameworkNodeCard";
-import { NodeColor, NODE_COLORS } from "@/components/frameworkBuilder/nodeColors";
+import { NodeColor } from "@/components/frameworkBuilder/nodeColors";
 import { ChildrenConnector, ChildColumn } from "@/components/frameworkBuilder/FrameworkTreeConnectors";
+import ZoomableTree from "@/components/frameworkBuilder/ZoomableTree";
 import { Plus } from "lucide-react";
 
 const MAX_TOP_LEVEL = 6;
@@ -35,6 +37,8 @@ function removeNodeFromTree(nodes: FrameworkNode[], targetId: string): Framework
 interface StructureStepProps {
   nodes: FrameworkNode[];
   onChange: (nodes: FrameworkNode[]) => void;
+  operations: Record<string, MathOp>;
+  onOperationsChange: (operations: Record<string, MathOp>) => void;
   lastAddedId: string | null;
   onLastAddedIdChange: (id: string | null) => void;
   disabled: boolean;
@@ -46,8 +50,8 @@ interface TreeBranchProps {
   depth: number;
   disabled: boolean;
   lastAddedId: string | null;
-  collapsedIds: Set<string>;
-  onToggleCollapse: (id: string) => void;
+  operations: Record<string, MathOp>;
+  onSetOp: (nodeId: string, op: MathOp) => void;
   onUpdate: (id: string, updated: FrameworkNode) => void;
   onRemove: (id: string) => void;
   onAddChild: (parentId: string) => void;
@@ -59,15 +63,15 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
   depth,
   disabled,
   lastAddedId,
-  collapsedIds,
-  onToggleCollapse,
+  operations,
+  onSetOp,
   onUpdate,
   onRemove,
   onAddChild,
 }) => {
   const canAddChild = node.children.length < MAX_CHILDREN && depth < MAX_DEPTH;
   const hasChildren = node.children.length > 0;
-  const collapsed = hasChildren && collapsedIds.has(node.id);
+  const multiChild = node.children.length >= 2;
 
   return (
     <div className="flex shrink-0 flex-col items-center">
@@ -78,12 +82,12 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
         onRemove={() => onRemove(node.id)}
         disabled={disabled}
         autoFocusTitle={node.id === lastAddedId}
-        collapsible={hasChildren}
-        collapsed={collapsed}
+        collapsible={false}
+        collapsed={false}
         childCount={node.children.length}
-        onToggleCollapse={() => onToggleCollapse(node.id)}
+        onToggleCollapse={() => {}}
       />
-      {!collapsed && canAddChild && (
+      {canAddChild && (
         <button
           type="button"
           onClick={() => onAddChild(node.id)}
@@ -93,8 +97,13 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
           <Plus className="h-3 w-3" /> Unterast
         </button>
       )}
-      {!collapsed && hasChildren && (
-        <ChildrenConnector childCount={node.children.length}>
+      {hasChildren && (
+        <ChildrenConnector
+          childCount={node.children.length}
+          op={multiChild ? operations[node.id] : undefined}
+          onOpChange={multiChild && !disabled ? (o) => onSetOp(node.id, o) : undefined}
+          accent={color.accent}
+        >
           {node.children.map((child) => (
             <ChildColumn key={child.id}>
               <TreeBranch
@@ -103,8 +112,8 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
                 depth={depth + 1}
                 disabled={disabled}
                 lastAddedId={lastAddedId}
-                collapsedIds={collapsedIds}
-                onToggleCollapse={onToggleCollapse}
+                operations={operations}
+                onSetOp={onSetOp}
                 onUpdate={onUpdate}
                 onRemove={onRemove}
                 onAddChild={onAddChild}
@@ -120,19 +129,18 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
 const StructureStep: React.FC<StructureStepProps> = ({
   nodes,
   onChange,
+  operations,
+  onOperationsChange,
   lastAddedId,
   onLastAddedIdChange,
   disabled,
 }) => {
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
-
-  const toggleCollapse = useCallback((nodeId: string) => {
-    setCollapsedIds((prev) => {
-      const next = new Set(prev);
-      next.has(nodeId) ? next.delete(nodeId) : next.add(nodeId);
-      return next;
-    });
-  }, []);
+  const setOp = useCallback(
+    (nodeId: string, op: MathOp) => {
+      onOperationsChange({ ...operations, [nodeId]: op });
+    },
+    [operations, onOperationsChange]
+  );
 
   const updateNode = useCallback(
     (nodeId: string, updated: FrameworkNode) => {
@@ -178,36 +186,36 @@ const StructureStep: React.FC<StructureStepProps> = ({
         </p>
       </div>
       <div className="rounded-xl border border-border bg-muted/20 p-4">
-        <div className="overflow-x-auto pb-2">
-          <div className="flex w-max min-w-full items-start justify-center gap-x-4 gap-y-6 px-1 pt-3">
-            {nodes.map((node, i) => (
-              <TreeBranch
-                key={node.id}
-                node={node}
-                color={NODE_COLORS[i % NODE_COLORS.length]}
-                depth={1}
-                disabled={disabled}
-                lastAddedId={lastAddedId}
-                collapsedIds={collapsedIds}
-                onToggleCollapse={toggleCollapse}
-                onUpdate={updateNode}
-                onRemove={removeNode}
-                onAddChild={addChildNode}
-              />
-            ))}
-            {nodes.length < MAX_TOP_LEVEL && (
+        <ZoomableTree
+          nodes={nodes}
+          renderBranch={(node, color, i) => (
+            <TreeBranch
+              node={node}
+              color={color}
+              depth={1}
+              disabled={disabled}
+              lastAddedId={lastAddedId}
+              operations={operations}
+              onSetOp={setOp}
+              onUpdate={updateNode}
+              onRemove={removeNode}
+              onAddChild={addChildNode}
+            />
+          )}
+          headerAddon={
+            nodes.length < MAX_TOP_LEVEL ? (
               <button
                 type="button"
                 onClick={addNode}
                 disabled={disabled}
-                className="flex h-[80px] min-w-[80px] shrink-0 flex-col items-center justify-center gap-1 self-start rounded-lg border-2 border-dashed border-border text-muted-foreground/50 transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-30"
+                className="flex items-center gap-1.5 rounded-lg border-2 border-dashed border-border px-3 py-2 text-xs text-muted-foreground/60 transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-30"
               >
-                <Plus className="h-5 w-5" />
-                <span className="text-[10px]">Ast</span>
+                <Plus className="h-4 w-4" />
+                <span>Oberast hinzufügen</span>
               </button>
-            )}
-          </div>
-        </div>
+            ) : undefined
+          }
+        />
       </div>
     </div>
   );

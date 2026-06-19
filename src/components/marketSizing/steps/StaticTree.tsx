@@ -1,20 +1,19 @@
 import React from "react";
 import { FrameworkNode } from "@/types/frameworkBuilder";
-import { BoxInput } from "@/types/marketSizing";
-import { NodeColor, NODE_COLORS } from "@/components/frameworkBuilder/nodeColors";
+import { BoxInput, MathOp } from "@/types/marketSizing";
+import { NodeColor } from "@/components/frameworkBuilder/nodeColors";
 import {
   ChildrenConnector,
   ChildColumn,
 } from "@/components/frameworkBuilder/FrameworkTreeConnectors";
-import { formatBoxValue } from "@/lib/marketSizingHelpers";
+import { formatBoxValue, isLeafComplete, DEFAULT_BOX_KIND } from "@/lib/marketSizingHelpers";
+import ZoomableTree from "@/components/frameworkBuilder/ZoomableTree";
 import StaticNodeCard from "./StaticNodeCard";
-
-export const isBoxComplete = (input?: BoxInput) =>
-  !!input && input.assumption.trim().length > 0 && input.value.trim().length > 0;
 
 interface StaticTreeProps {
   nodes: FrameworkNode[];
   boxInputs: Record<string, BoxInput>;
+  operations: Record<string, MathOp>;
   selectedId: string | null;
   onSelect: (id: string) => void;
   /** When false, never show the red "!" indicator (e.g. read-only recap). */
@@ -25,6 +24,7 @@ interface BranchProps {
   node: FrameworkNode;
   color: NodeColor;
   boxInputs: Record<string, BoxInput>;
+  operations: Record<string, MathOp>;
   selectedId: string | null;
   onSelect: (id: string) => void;
   showIncomplete: boolean;
@@ -34,29 +34,38 @@ const Branch: React.FC<BranchProps> = ({
   node,
   color,
   boxInputs,
+  operations,
   selectedId,
   onSelect,
   showIncomplete,
 }) => {
+  const isParent = node.children.length > 0;
   const input = boxInputs[node.id];
   return (
     <div className="flex shrink-0 flex-col items-center">
       <StaticNodeCard
         node={node}
         color={color}
+        isParent={isParent}
+        kind={isParent ? undefined : input?.kind ?? DEFAULT_BOX_KIND}
         selected={selectedId === node.id}
-        incomplete={showIncomplete && !isBoxComplete(input)}
-        valueBadge={formatBoxValue(input?.value ?? "")}
+        incomplete={!isParent && showIncomplete && !isLeafComplete(input)}
+        valueBadge={isParent ? "" : formatBoxValue(input?.value ?? "")}
         onSelect={() => onSelect(node.id)}
       />
-      {node.children.length > 0 && (
-        <ChildrenConnector childCount={node.children.length}>
+      {isParent && (
+        <ChildrenConnector
+          childCount={node.children.length}
+          op={node.children.length >= 2 ? operations[node.id] : undefined}
+          accent={color.accent}
+        >
           {node.children.map((child) => (
             <ChildColumn key={child.id}>
               <Branch
                 node={child}
                 color={color}
                 boxInputs={boxInputs}
+                operations={operations}
                 selectedId={selectedId}
                 onSelect={onSelect}
                 showIncomplete={showIncomplete}
@@ -70,29 +79,29 @@ const Branch: React.FC<BranchProps> = ({
 };
 
 /** Read-only, selectable issue tree used in Step 3 (edit assumptions) and
- *  Step 4 (recap). Same visuals as the editable tree, but no editing. */
+ *  Step 4 (recap). Only leaf boxes are selectable; parents are "Rechnung". */
 const StaticTree: React.FC<StaticTreeProps> = ({
   nodes,
   boxInputs,
+  operations,
   selectedId,
   onSelect,
   showIncomplete = true,
 }) => (
-  <div className="overflow-x-auto pb-2">
-    <div className="flex w-max min-w-full items-start justify-center gap-x-4 gap-y-6 px-1 pt-3">
-      {nodes.map((node, i) => (
-        <Branch
-          key={node.id}
-          node={node}
-          color={NODE_COLORS[i % NODE_COLORS.length]}
-          boxInputs={boxInputs}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          showIncomplete={showIncomplete}
-        />
-      ))}
-    </div>
-  </div>
+  <ZoomableTree
+    nodes={nodes}
+    renderBranch={(node, color) => (
+      <Branch
+        node={node}
+        color={color}
+        boxInputs={boxInputs}
+        operations={operations}
+        selectedId={selectedId}
+        onSelect={onSelect}
+        showIncomplete={showIncomplete}
+      />
+    )}
+  />
 );
 
 export default StaticTree;

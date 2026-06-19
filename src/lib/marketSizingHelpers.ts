@@ -1,6 +1,8 @@
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import {
   BoxInput,
+  BoxKind,
+  MathOp,
   MarketSizingUnderstanding,
   SanityCheckStructured,
 } from "@/types/marketSizing";
@@ -63,6 +65,79 @@ export function getAllNodes(nodes: FrameworkNode[]): MarketSizingLeaf[] {
   };
   walk(nodes, "", []);
   return out;
+}
+
+/**
+ * Return every node that has 2+ children. Such a node combines its children
+ * via a math operation (Schritt 2), which is a required field.
+ */
+export function getNodesNeedingOp(nodes: FrameworkNode[]): FrameworkNode[] {
+  const out: FrameworkNode[] = [];
+  const walk = (arr: FrameworkNode[]) => {
+    for (const node of arr) {
+      if (node.children.length >= 2) out.push(node);
+      if (node.children.length > 0) walk(node.children);
+    }
+  };
+  walk(nodes);
+  return out;
+}
+
+/** Default kind for a freshly-touched leaf box. */
+export const DEFAULT_BOX_KIND: BoxKind = "annahme";
+
+/** German label for a box kind. */
+export function boxKindLabel(kind: BoxKind): string {
+  return kind === "fakt" ? "Fakt" : kind === "rechnung" ? "Rechnung" : "Annahme";
+}
+
+/**
+ * Whether a leaf box is fully filled, depending on its kind:
+ *  - annahme:  number + justification required
+ *  - fakt:     number only
+ *  - rechnung: number (result) + formula text required
+ */
+export function isLeafComplete(input?: BoxInput): boolean {
+  if (!input) return false;
+  const hasValue = input.value.trim().length > 0;
+  const hasText = input.assumption.trim().length > 0;
+  const kind = input.kind ?? DEFAULT_BOX_KIND;
+  if (kind === "fakt") return hasValue;
+  return hasValue && hasText; // annahme + rechnung both need text
+}
+
+/**
+ * Build the market-sizing structure text including the math operation between
+ * each parent's children and the kind of each leaf box. Unlike the generic
+ * serializeFramework, this is aware of operations + box kinds.
+ */
+export function serializeMarketSizingTree(
+  nodes: FrameworkNode[],
+  operations: Record<string, MathOp>,
+  boxInputs: Record<string, BoxInput>
+): string {
+  const walk = (arr: FrameworkNode[], parentPath: string, depth: number): string => {
+    let res = "";
+    arr.forEach((node, i) => {
+      const idx = i + 1;
+      const path = parentPath ? `${parentPath}.${idx}` : `${idx}`;
+      const indent = "  ".repeat(depth);
+      const label = depth === 0 ? "Ast" : "Unterast";
+      const title = node.title.trim() || "(kein Titel)";
+      res += `${indent}[${label} ${path}] ${title}`;
+      if (node.children.length >= 2) {
+        const op = operations[node.id];
+        res += ` — Kinder verknüpft mit: ${op ?? "(keine Operation)"}`;
+      } else if (node.children.length === 0) {
+        const kind = boxInputs[node.id]?.kind ?? DEFAULT_BOX_KIND;
+        res += ` [${boxKindLabel(kind)}]`;
+      }
+      res += "\n";
+      if (node.children.length > 0) res += walk(node.children, path, depth + 1);
+    });
+    return res;
+  };
+  return walk(nodes, "", 0).trimEnd();
 }
 
 /**
@@ -201,8 +276,10 @@ export interface SerializedMarketSizing {
  */
 export function serializeMarketSizing(args: {
   understanding: MarketSizingUnderstanding;
-  treeText: string;
-  boxes: MarketSizingLeaf[];
+  nodes: FrameworkNode[];
+  operations: Record<string, MathOp>;
+  /** Leaf boxes only — parents are derived ("Rechnung") and carry no assumption. */
+  leaves: MarketSizingLeaf[];
   boxInputs: Record<string, BoxInput>;
   finalEstimateInput: string;
   finalEstimateUnit: string;
@@ -210,13 +287,16 @@ export function serializeMarketSizing(args: {
 }): SerializedMarketSizing {
   const {
     understanding,
-    treeText,
-    boxes,
+    nodes,
+    operations,
+    leaves,
     boxInputs,
     finalEstimateInput,
     finalEstimateUnit,
     sanityCheck,
   } = args;
+
+  const treeText = serializeMarketSizingTree(nodes, operations, boxInputs);
 
   // VERSTÄNDNIS section (clarifications)
   let out = "";
@@ -234,19 +314,23 @@ export function serializeMarketSizing(args: {
 
   out += `STRUKTUR:\n${treeText}`;
 
-  const assumptionLines = boxes
+  const assumptionLines = leaves
     .map((b) => {
       const input = boxInputs[b.id];
       const value = (input?.value ?? "").trim();
-      const assumption = (input?.assumption ?? "").trim();
-      if (!value && !assumption) return null;
+      const text = (input?.assumption ?? "").trim();
+      if (!value && !text) return null;
+      const kind = input?.kind ?? DEFAULT_BOX_KIND;
       const valuePart = value ? `${value}` : "(keine Zahl)";
-      const reasonPart = assumption ? ` — ${assumption}` : "";
-      return `- [${b.path}] ${b.labelChain}: ${valuePart}${reasonPart}`;
+      let detail = "";
+      if (kind === "fakt") detail = " (Fakt)";
+      else if (kind === "rechnung") detail = text ? ` (Rechnung: ${text})` : " (Rechnung)";
+      else detail = text ? ` — ${text}` : ""; // annahme
+      return `- [${b.path}] ${b.labelChain}: ${valuePart}${detail}`;
     })
     .filter(Boolean);
   if (assumptionLines.length > 0) {
-    out += `\n\nANNAHMEN (pro Box: Zahl — Begründung):\n${assumptionLines.join("\n")}`;
+    out += `\n\nANNAHMEN & ZAHLEN (nur unterste Boxen; Eltern-Boxen sind Rechnungen aus ihren Kindern):\n${assumptionLines.join("\n")}`;
   }
 
   // Final estimate: solely from user input (no calculation step in flow)

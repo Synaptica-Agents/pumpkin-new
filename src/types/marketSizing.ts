@@ -54,10 +54,22 @@ export interface MarketSizingClarification {
   answer: string;
 }
 
-/** Per-box input in Step 3: a textual assumption plus its (raw) numeric value. */
+/** Type of a leaf box in Step 3.
+ *  - "annahme": user estimates a value and must justify it (assumption text).
+ *  - "fakt":    a known fact — number only, no justification needed.
+ *  - "rechnung": an inline calculation — the user writes the formula (in the
+ *                `assumption` field) plus its numeric result. */
+export type BoxKind = "annahme" | "fakt" | "rechnung";
+
+/** Math operation combining the children of a parent node. */
+export type MathOp = "×" | "+" | "−" | "÷";
+
+/** Per-box input in Step 3: a textual assumption/formula plus its (raw) numeric
+ *  value. `kind` selects which fields are required (see BoxKind). */
 export interface BoxInput {
   assumption: string;
   value: string;
+  kind: BoxKind;
 }
 
 export interface MarketSizingUnderstanding {

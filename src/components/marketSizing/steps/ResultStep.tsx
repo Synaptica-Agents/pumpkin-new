@@ -4,7 +4,7 @@ import {
   formatGermanNumber,
   parseGermanNumber,
   formatBoxValue,
-  getAllNodes,
+  getLeaves,
 } from "@/lib/marketSizingHelpers";
 import {
   Target,
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import {
   BoxInput,
+  MathOp,
   MarketSizingUnderstanding,
   SanityCheckStructured,
 } from "@/types/marketSizing";
@@ -24,6 +25,7 @@ interface ResultStepProps {
   understanding: MarketSizingUnderstanding;
   nodes: FrameworkNode[];
   boxInputs: Record<string, BoxInput>;
+  operations: Record<string, MathOp>;
   finalEstimate: string;
   onFinalEstimateChange: (value: string) => void;
   unit: string;
@@ -38,6 +40,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
   understanding,
   nodes,
   boxInputs,
+  operations,
   finalEstimate,
   onFinalEstimateChange,
   unit,
@@ -56,7 +59,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
     (c) => c.question.trim() || c.answer.trim()
   );
 
-  const allNodes = getAllNodes(nodes);
+  const allNodes = getLeaves(nodes);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = allNodes.find((n) => n.id === selectedId) ?? null;
   const selectedInput = selectedId ? boxInputs[selectedId] : undefined;
@@ -160,6 +163,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
             <StaticTree
               nodes={nodes}
               boxInputs={boxInputs}
+              operations={operations}
               selectedId={selectedId}
               onSelect={setSelectedId}
               showIncomplete={false}

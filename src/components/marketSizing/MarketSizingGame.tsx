@@ -4,10 +4,16 @@ import {
   MarketSizingUnderstanding,
   SanityCheckStructured,
   BoxInput,
+  MathOp,
 } from "@/types/marketSizing";
 import { FrameworkNode } from "@/types/frameworkBuilder";
-import { createEmptyNode, serializeFramework, isFrameworkValid } from "@/lib/frameworkSerializer";
-import { getAllNodes, serializeMarketSizing } from "@/lib/marketSizingHelpers";
+import { createEmptyNode, isFrameworkValid } from "@/lib/frameworkSerializer";
+import {
+  getLeaves,
+  getNodesNeedingOp,
+  isLeafComplete,
+  serializeMarketSizing,
+} from "@/lib/marketSizingHelpers";
 import { DrillButton } from "@/components/ui/drill-button";
 import { X, Send, Info, ArrowLeft, ArrowRight } from "lucide-react";
 import StepperHeader, { STEP_LABELS } from "./steps/StepperHeader";
@@ -43,6 +49,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
 
   const [understanding, setUnderstanding] = useState<MarketSizingUnderstanding>(emptyUnderstanding());
   const [nodes, setNodes] = useState<FrameworkNode[]>([createEmptyNode()]);
+  const [operations, setOperations] = useState<Record<string, MathOp>>({});
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const [boxInputs, setBoxInputs] = useState<Record<string, BoxInput>>({});
   const [finalEstimate, setFinalEstimate] = useState("");
@@ -54,6 +61,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
       setCurrentStep(0);
       setUnderstanding(emptyUnderstanding());
       setNodes([createEmptyNode()]);
+      setOperations({});
       setLastAddedId(null);
       setBoxInputs({});
       setFinalEstimate("");
@@ -62,17 +70,14 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
     }
   }, [currentCase?.id]);
 
-  const allNodes = useMemo(() => getAllNodes(nodes), [nodes]);
-  const treeText = useMemo(() => serializeFramework({ nodes }), [nodes]);
+  const leaves = useMemo(() => getLeaves(nodes), [nodes]);
+  const nodesNeedingOp = useMemo(() => getNodesNeedingOp(nodes), [nodes]);
 
   const canAdvanceFromUnderstanding = true;
-  const canAdvanceFromStructure = isFrameworkValid({ nodes });
+  const canAdvanceFromStructure =
+    isFrameworkValid({ nodes }) && nodesNeedingOp.every((n) => operations[n.id] != null);
   const canAdvanceFromAssumptions =
-    allNodes.length > 0 &&
-    allNodes.every((n) => {
-      const input = boxInputs[n.id];
-      return !!input && input.assumption.trim().length > 0 && input.value.trim().length > 0;
-    });
+    leaves.length > 0 && leaves.every((n) => isLeafComplete(boxInputs[n.id]));
   const canSubmit = !isEvaluating && finalEstimate.trim().length > 0;
 
   const goNext = useCallback(() => {
@@ -87,8 +92,9 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
     if (!canSubmit) return;
     const serialized = serializeMarketSizing({
       understanding,
-      treeText,
-      boxes: allNodes,
+      nodes,
+      operations,
+      leaves,
       boxInputs,
       finalEstimateInput: finalEstimate,
       finalEstimateUnit: estimateUnit,
@@ -102,8 +108,9 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
   }, [
     canSubmit,
     understanding,
-    treeText,
-    allNodes,
+    nodes,
+    operations,
+    leaves,
     boxInputs,
     finalEstimate,
     estimateUnit,
@@ -173,6 +180,8 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
         <StructureStep
           nodes={nodes}
           onChange={setNodes}
+          operations={operations}
+          onOperationsChange={setOperations}
           lastAddedId={lastAddedId}
           onLastAddedIdChange={setLastAddedId}
           disabled={isEvaluating}
@@ -182,6 +191,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
         <AssumptionsStep
           nodes={nodes}
           boxInputs={boxInputs}
+          operations={operations}
           onChange={setBoxInputs}
           disabled={isEvaluating}
         />
@@ -191,6 +201,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
           understanding={understanding}
           nodes={nodes}
           boxInputs={boxInputs}
+          operations={operations}
           finalEstimate={finalEstimate}
           onFinalEstimateChange={setFinalEstimate}
           unit={estimateUnit}
