@@ -74,29 +74,31 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
   const multiChild = node.children.length >= 2;
 
   return (
-    <div className="flex shrink-0 flex-col items-center">
-      <FrameworkNodeCard
-        node={node}
-        color={color}
-        onUpdate={(updated) => onUpdate(node.id, updated)}
-        onRemove={() => onRemove(node.id)}
-        disabled={disabled}
-        autoFocusTitle={node.id === lastAddedId}
-        collapsible={false}
-        collapsed={false}
-        childCount={node.children.length}
-        onToggleCollapse={() => {}}
-      />
-      {canAddChild && (
-        <button
-          type="button"
-          onClick={() => onAddChild(node.id)}
+    <div className="flex shrink-0 flex-row items-center">
+      <div className="flex flex-col items-center">
+        <FrameworkNodeCard
+          node={node}
+          color={color}
+          onUpdate={(updated) => onUpdate(node.id, updated)}
+          onRemove={() => onRemove(node.id)}
           disabled={disabled}
-          className="mt-2 flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-muted-foreground/60 transition-colors hover:bg-muted hover:text-primary disabled:opacity-30"
-        >
-          <Plus className="h-3 w-3" /> Unterast
-        </button>
-      )}
+          autoFocusTitle={node.id === lastAddedId}
+          collapsible={false}
+          collapsed={false}
+          childCount={node.children.length}
+          onToggleCollapse={() => {}}
+        />
+        {canAddChild && (
+          <button
+            type="button"
+            onClick={() => onAddChild(node.id)}
+            disabled={disabled}
+            className="mt-2 flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-muted-foreground/60 transition-colors hover:bg-muted hover:text-primary disabled:opacity-30"
+          >
+            <Plus className="h-3 w-3" /> Unterast
+          </button>
+        )}
+      </div>
       {hasChildren && (
         <ChildrenConnector
           childCount={node.children.length}

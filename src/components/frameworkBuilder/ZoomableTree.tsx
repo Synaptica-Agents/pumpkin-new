@@ -81,7 +81,7 @@ const ZoomableTree: React.FC<ZoomableTreeProps> = ({
           </div>
         </div>
         <div className="overflow-x-auto pb-2">
-          <div className="flex w-max min-w-full items-start justify-center px-1 pt-3">
+          <div className="flex w-max min-w-full items-start justify-start px-1 pt-3">
             {renderBranch(zoomedNode, colorFor(zoomedIndex), zoomedIndex)}
           </div>
         </div>
@@ -104,14 +104,16 @@ const ZoomableTree: React.FC<ZoomableTreeProps> = ({
 };
 
 /**
- * Scales its content down (never up) so the natural width fits the container.
- * Reserves the scaled height so no empty space is left below.
+ * Scales its content down (never up) so the natural width always fits the
+ * container — the whole tree stays inside the field, no horizontal scrolling.
+ * Reserves the scaled height and horizontally centres the result.
  */
 const ScaledOverview: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [height, setHeight] = useState<number | undefined>(undefined);
+  const [offsetX, setOffsetX] = useState(0);
 
   const measure = useCallback(() => {
     const container = containerRef.current;
@@ -122,6 +124,7 @@ const ScaledOverview: React.FC<{ children: React.ReactNode }> = ({ children }) =
     const next = contentWidth > 0 ? Math.min(1, containerWidth / contentWidth) : 1;
     setScale(next);
     setHeight(content.scrollHeight * next);
+    setOffsetX(Math.max(0, (containerWidth - contentWidth * next) / 2));
   }, []);
 
   useLayoutEffect(() => {
@@ -136,12 +139,15 @@ const ScaledOverview: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }, [measure]);
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="w-full overflow-hidden">
       <div style={{ height }}>
         <div
           ref={contentRef}
-          style={{ transform: `scale(${scale})`, transformOrigin: "top center" }}
-          className="flex w-max items-start justify-center gap-x-4 gap-y-6 px-1 pt-3"
+          style={{
+            transform: `translateX(${offsetX}px) scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+          className="flex w-max flex-col items-start gap-6 px-1 pt-3"
         >
           {children}
         </div>

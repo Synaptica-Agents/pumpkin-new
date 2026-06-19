@@ -4,10 +4,12 @@ import { MathOp } from "@/types/marketSizing";
 const MATH_OPS: MathOp[] = ["×", "+", "−", "÷"];
 
 /**
- * Renders the connector lines from a parent node down to its children:
- *  - one vertical stem down from the parent,
- *  - a horizontal bar spanning from the first to the last child center,
- *  - per-child vertical stems (via <ChildColumn>).
+ * Horizontal connector from a parent node (left) to its children (stacked on
+ * the right):
+ *  - a short horizontal stem out of the parent,
+ *  - the optional math-operation control,
+ *  - a vertical bar spanning from the first to the last child center,
+ *  - per-child horizontal stems (via <ChildColumn>).
  *
  * The container queries children marked with `data-child-col` and measures
  * their rects on every layout to keep the bar aligned when text wraps.
@@ -41,22 +43,22 @@ export const ChildrenConnector: React.FC<{
 
     const firstRect = first.getBoundingClientRect();
     const lastRect = last.getBoundingClientRect();
-    const firstCenter = firstRect.left + firstRect.width / 2 - containerRect.left;
-    const lastCenter = lastRect.left + lastRect.width / 2 - containerRect.left;
+    const firstCenter = firstRect.top + firstRect.height / 2 - containerRect.top;
+    const lastCenter = lastRect.top + lastRect.height / 2 - containerRect.top;
 
-    barRef.current.style.left = `${firstCenter}px`;
-    barRef.current.style.width = `${lastCenter - firstCenter}px`;
+    barRef.current.style.top = `${firstCenter}px`;
+    barRef.current.style.height = `${lastCenter - firstCenter}px`;
   });
 
   const showOp = childCount > 1 && (onOpChange != null || op != null);
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="h-3 w-px bg-border" />
+    <div className="flex flex-row items-center">
+      <div className="h-px w-3 bg-border" />
       {showOp &&
         (onOpChange ? (
           <div
-            className={`z-10 mb-1 inline-flex items-center overflow-hidden rounded-md border bg-background shadow-sm ${
+            className={`z-10 mx-1 inline-flex items-center overflow-hidden rounded-md border bg-background shadow-sm ${
               op == null ? "border-destructive/50" : "border-border"
             }`}
             title="Rechenoperation zwischen den Ästen (Pflicht)"
@@ -78,18 +80,19 @@ export const ChildrenConnector: React.FC<{
           </div>
         ) : (
           <span
-            className={`z-10 mb-1 flex h-6 w-6 items-center justify-center rounded-md border border-border bg-background text-sm font-bold shadow-sm ${accent}`}
+            className={`z-10 mx-1 flex h-6 w-6 items-center justify-center rounded-md border border-border bg-background text-sm font-bold shadow-sm ${accent}`}
             title="Rechenoperation zwischen den Ästen"
           >
             {op}
           </span>
         ))}
-      <div ref={containerRef} className="relative flex gap-3">
+      {showOp && <div className="h-px w-3 bg-border" />}
+      <div ref={containerRef} className="relative flex flex-col gap-3">
         {childCount > 1 && (
           <div
             ref={barRef}
-            className="absolute top-0 h-px bg-border"
-            style={{ left: 0, width: 0 }}
+            className="absolute left-0 w-px bg-border"
+            style={{ top: 0, height: 0 }}
           />
         )}
         {children}
@@ -99,12 +102,12 @@ export const ChildrenConnector: React.FC<{
 };
 
 /**
- * Child column with a short vertical stem above it. Marked so
- * <ChildrenConnector> can measure its center for the horizontal bar.
+ * Child row with a short horizontal stem to its left. Marked so
+ * <ChildrenConnector> can measure its center for the vertical bar.
  */
 export const ChildColumn: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div data-child-col className="flex flex-col items-center">
-    <div className="h-3 w-px bg-border" />
+  <div data-child-col className="flex flex-row items-center">
+    <div className="h-px w-3 bg-border" />
     {children}
   </div>
 );

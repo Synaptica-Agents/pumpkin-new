@@ -42,7 +42,7 @@ const Branch: React.FC<BranchProps> = ({
   const isParent = node.children.length > 0;
   const input = boxInputs[node.id];
   return (
-    <div className="flex shrink-0 flex-col items-center">
+    <div className="flex shrink-0 flex-row items-center">
       <StaticNodeCard
         node={node}
         color={color}
