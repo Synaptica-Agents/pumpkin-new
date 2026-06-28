@@ -10,7 +10,6 @@ import {
   formatComputedBadge,
   isLeafComplete,
   DEFAULT_BOX_KIND,
-  ROOT_OP_KEY,
 } from "@/lib/marketSizingHelpers";
 import StaticTree from "./StaticTree";
 import RollupSummary from "./RollupSummary";
@@ -98,7 +97,7 @@ const AssumptionsStep: React.FC<AssumptionsStepProps> = ({
             nodes={nodes}
             values={values}
             total={total}
-            rootOp={operations[ROOT_OP_KEY]}
+            operations={operations}
             unit={unit}
           />
 
@@ -136,25 +135,23 @@ const AssumptionsStep: React.FC<AssumptionsStepProps> = ({
 
                 <div className="rounded-lg border border-border bg-muted/20 p-3">
                   <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                    {selectedNode.children.map((c, i) => {
-                      const op =
-                        selectedNode.children.length >= 2 ? operations[selectedNode.id] : undefined;
-                      return (
-                        <React.Fragment key={c.id}>
-                          {i > 0 && (
-                            <span className="font-bold text-muted-foreground">{op ?? "·"}</span>
-                          )}
-                          <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1">
-                            <span className="max-w-[140px] truncate font-medium text-foreground">
-                              {c.title.trim() || "(ohne Titel)"}
-                            </span>
-                            <span className="font-semibold text-primary">
-                              {formatComputedBadge(values[c.id]) || "—"}
-                            </span>
+                    {selectedNode.children.map((c, i) => (
+                      <React.Fragment key={c.id}>
+                        {i > 0 && (
+                          <span className="font-bold text-muted-foreground">
+                            {operations[c.id] ?? "·"}
                           </span>
-                        </React.Fragment>
-                      );
-                    })}
+                        )}
+                        <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1">
+                          <span className="max-w-[140px] truncate font-medium text-foreground">
+                            {c.title.trim() || "(ohne Titel)"}
+                          </span>
+                          <span className="font-semibold text-primary">
+                            {formatComputedBadge(values[c.id]) || "—"}
+                          </span>
+                        </span>
+                      </React.Fragment>
+                    ))}
                     <span className="font-bold text-muted-foreground">=</span>
                     <span className="rounded-md bg-primary/15 px-2 py-1 font-bold text-primary">
                       {formatComputedBadge(values[selectedNode.id]) || "noch unvollständig"}

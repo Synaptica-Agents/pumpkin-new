@@ -2,12 +2,15 @@ import React, { useCallback } from "react";
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import { MathOp } from "@/types/marketSizing";
 import { createEmptyNode } from "@/lib/frameworkSerializer";
-import { ROOT_OP_KEY, topLevelNeedsOp } from "@/lib/marketSizingHelpers";
 import FrameworkNodeCard from "@/components/frameworkBuilder/FrameworkNodeCard";
 import { NodeColor } from "@/components/frameworkBuilder/nodeColors";
-import { ChildrenConnector, ChildColumn } from "@/components/frameworkBuilder/FrameworkTreeConnectors";
+import {
+  ChildrenConnector,
+  ChildColumn,
+  OpRow,
+} from "@/components/frameworkBuilder/FrameworkTreeConnectors";
 import ZoomableTree from "@/components/frameworkBuilder/ZoomableTree";
-import RootOpRail from "./RootOpRail";
+import OpChip from "./OpChip";
 import { Plus } from "lucide-react";
 
 const MAX_TOP_LEVEL = 6;
@@ -73,7 +76,6 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
 }) => {
   const canAddChild = node.children.length < MAX_CHILDREN && depth < MAX_DEPTH;
   const hasChildren = node.children.length > 0;
-  const multiChild = node.children.length >= 2;
 
   return (
     <div className="flex shrink-0 flex-row items-center">
@@ -102,27 +104,34 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
         )}
       </div>
       {hasChildren && (
-        <ChildrenConnector
-          childCount={node.children.length}
-          op={multiChild ? operations[node.id] : undefined}
-          onOpChange={multiChild && !disabled ? (o) => onSetOp(node.id, o) : undefined}
-          accent={color.accent}
-        >
-          {node.children.map((child) => (
-            <ChildColumn key={child.id}>
-              <TreeBranch
-                node={child}
-                color={color}
-                depth={depth + 1}
-                disabled={disabled}
-                lastAddedId={lastAddedId}
-                operations={operations}
-                onSetOp={onSetOp}
-                onUpdate={onUpdate}
-                onRemove={onRemove}
-                onAddChild={onAddChild}
-              />
-            </ChildColumn>
+        <ChildrenConnector childCount={node.children.length}>
+          {node.children.map((child, i) => (
+            <React.Fragment key={child.id}>
+              {i > 0 && (
+                <OpRow>
+                  <OpChip
+                    op={operations[child.id]}
+                    onChange={disabled ? undefined : (o) => onSetOp(child.id, o)}
+                    accent={color.accent}
+                    disabled={disabled}
+                  />
+                </OpRow>
+              )}
+              <ChildColumn>
+                <TreeBranch
+                  node={child}
+                  color={color}
+                  depth={depth + 1}
+                  disabled={disabled}
+                  lastAddedId={lastAddedId}
+                  operations={operations}
+                  onSetOp={onSetOp}
+                  onUpdate={onUpdate}
+                  onRemove={onRemove}
+                  onAddChild={onAddChild}
+                />
+              </ChildColumn>
+            </React.Fragment>
           ))}
         </ChildrenConnector>
       )}
@@ -186,7 +195,7 @@ const StructureStep: React.FC<StructureStepProps> = ({
       <div>
         <h2 className="text-sm font-semibold text-foreground">2. Deine Struktur</h2>
         <p className="text-xs text-muted-foreground">
-          Bau deine Struktur als Boxen auf — meist ein paar Oberbereiche, darunter feinere Unteräste. Hier nur die Bereiche, noch keine Zahlen — die kommen im nächsten Schritt. Bei mehreren Oberästen wähl links, wie sie verrechnet werden (×, +, −, ÷).
+          Bau deine Struktur als Boxen auf — meist ein paar Oberbereiche, darunter feinere Unteräste. Hier nur die Bereiche, noch keine Zahlen — die kommen im nächsten Schritt. Zwischen je zwei benachbarten Boxen wählst du eine Rechenoperation (×, +, −, ÷) — Symbol anklicken zum Ändern.
         </p>
       </div>
       <div className="rounded-xl border border-border bg-muted/20 p-4">
@@ -206,15 +215,14 @@ const StructureStep: React.FC<StructureStepProps> = ({
               onAddChild={addChildNode}
             />
           )}
-          leftRail={
-            topLevelNeedsOp(nodes) ? (
-              <RootOpRail
-                op={operations[ROOT_OP_KEY]}
-                onChange={(o) => setOp(ROOT_OP_KEY, o)}
-                disabled={disabled}
-              />
-            ) : undefined
-          }
+          renderTopOp={(linkId) => (
+            <OpChip
+              op={operations[linkId]}
+              onChange={disabled ? undefined : (o) => setOp(linkId, o)}
+              accent="text-foreground"
+              disabled={disabled}
+            />
+          )}
           headerAddon={
             nodes.length < MAX_TOP_LEVEL ? (
               <button

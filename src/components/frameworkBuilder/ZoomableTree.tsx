@@ -16,9 +16,9 @@ interface ZoomableTreeProps {
   renderBranch: (node: FrameworkNode, color: NodeColor, index: number) => React.ReactNode;
   /** Optional control shown below the overview (e.g. "+ Ast"). */
   headerAddon?: React.ReactNode;
-  /** Optional rail rendered to the left of the overview stack (overview mode
-   *  only), vertically centred — e.g. the operation that joins the Oberäste. */
-  leftRail?: React.ReactNode;
+  /** Render the operation linking top-level branch `linkNodeId` to the previous
+   *  one (overview mode only). Called for every Oberast after the first. */
+  renderTopOp?: (linkNodeId: string) => React.ReactNode;
   /** Colour for a top-level branch by index. Defaults to the shared palette. */
   colorFor?: (index: number) => NodeColor;
 }
@@ -38,7 +38,7 @@ const ZoomableTree: React.FC<ZoomableTreeProps> = ({
   nodes,
   renderBranch,
   headerAddon,
-  leftRail,
+  renderTopOp,
   colorFor = defaultColorFor,
 }) => {
   const [zoomedId, setZoomedId] = useState<string | null>(null);
@@ -95,18 +95,18 @@ const ZoomableTree: React.FC<ZoomableTreeProps> = ({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-row items-stretch gap-2">
-        {leftRail && <div className="flex shrink-0 items-center">{leftRail}</div>}
-        <div className="min-w-0 flex-1">
-          <ScaledOverview>
-            {nodes.map((node, i) => (
-              <OverviewBranch key={node.id} onZoom={() => setZoomedId(node.id)}>
-                {renderBranch(node, colorFor(i), i)}
-              </OverviewBranch>
-            ))}
-          </ScaledOverview>
-        </div>
-      </div>
+      <ScaledOverview>
+        {nodes.map((node, i) => (
+          <React.Fragment key={node.id}>
+            {i > 0 && renderTopOp && (
+              <div className="relative z-10 flex self-start pl-12">{renderTopOp(node.id)}</div>
+            )}
+            <OverviewBranch onZoom={() => setZoomedId(node.id)}>
+              {renderBranch(node, colorFor(i), i)}
+            </OverviewBranch>
+          </React.Fragment>
+        ))}
+      </ScaledOverview>
       {headerAddon && <div className="flex justify-center">{headerAddon}</div>}
     </div>
   );

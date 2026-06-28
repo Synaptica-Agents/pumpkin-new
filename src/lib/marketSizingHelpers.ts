@@ -68,35 +68,28 @@ export function getAllNodes(nodes: FrameworkNode[]): MarketSizingLeaf[] {
 }
 
 /**
- * Return every node that has 2+ children. Such a node combines its children
- * via a math operation (Schritt 2), which is a required field.
+ * Operations model: each entry in `operations` is keyed by a node id and holds
+ * the math operation that links that node to its PREVIOUS sibling. The first
+ * node in any sibling group — top-level Oberäste included — has no entry. So a
+ * group of N boxes is joined by N−1 pairwise operations, evaluated left-to-right.
+ *
+ * Return every node that needs such an operation: every node that is not the
+ * first in its sibling group (i.e. has a sibling before it), at every level.
  */
 export function getNodesNeedingOp(nodes: FrameworkNode[]): FrameworkNode[] {
   const out: FrameworkNode[] = [];
-  const walk = (arr: FrameworkNode[]) => {
-    for (const node of arr) {
-      if (node.children.length >= 2) out.push(node);
+  const walk = (siblings: FrameworkNode[]) => {
+    siblings.forEach((node, i) => {
+      if (i >= 1) out.push(node);
       if (node.children.length > 0) walk(node.children);
-    }
+    });
   };
   walk(nodes);
   return out;
 }
 
-/**
- * Reserved key in the `operations` map for the operation that combines the
- * top-level branches (Oberäste) into the final number. Real node ids are
- * UUIDs, so this sentinel never collides with one.
- */
-export const ROOT_OP_KEY = "__root__";
-
 /** The selectable math operations, in display order. */
 export const MATH_OPS: MathOp[] = ["×", "+", "−", "÷"];
-
-/** Whether the top-level branches need a combining operation (2+ Oberäste). */
-export function topLevelNeedsOp(nodes: FrameworkNode[]): boolean {
-  return nodes.length >= 2;
-}
 
 /** Find a node anywhere in the tree by id (depth-first), or null. */
 export function findNodeById(nodes: FrameworkNode[], id: string): FrameworkNode | null {
@@ -152,16 +145,12 @@ export function serializeMarketSizingTree(
       const indent = "  ".repeat(depth);
       const label = depth === 0 ? "Ast" : "Unterast";
       const title = node.title.trim() || "(kein Titel)";
-      res += `${indent}[${label} ${path}] ${title}`;
+      // Operation linking this box to its previous sibling (none for the first).
+      const opPrefix = i >= 1 ? `${operations[node.id] ?? "(keine Operation)"} ` : "";
+      res += `${indent}${opPrefix}[${label} ${path}] ${title}`;
       const computed = values?.[node.id];
-      const computedSuffix =
-        computed != null && isFinite(computed) ? ` ⇒ ${formatGermanNumber(computed)}` : "";
-      if (node.children.length >= 2) {
-        const op = operations[node.id];
-        res += ` — Kinder verknüpft mit: ${op ?? "(keine Operation)"}${computedSuffix}`;
-      } else if (node.children.length === 1) {
-        res += computedSuffix;
-      } else {
+      if (computed != null && isFinite(computed)) res += ` ⇒ ${formatGermanNumber(computed)}`;
+      if (node.children.length === 0) {
         const kind = boxInputs[node.id]?.kind ?? DEFAULT_BOX_KIND;
         res += ` [${boxKindLabel(kind)}]`;
       }
@@ -280,17 +269,27 @@ function applyOp(a: number, b: number, op: MathOp): number {
 }
 
 /**
- * Fold operand values left-to-right with a single operation. Returns null if
- * any operand is missing, or — for 2+ operands — if no operation is set. A
- * single operand passes through unchanged (order matters for − and ÷).
+ * Combine a sibling group left-to-right using the pairwise operations: each
+ * sibling after the first carries operations[sibling.id] linking it to the
+ * running result. Returns null if any operand is missing or a required
+ * operation is unset (order matters for − and ÷).
  */
-function foldValues(values: (number | null)[], op: MathOp | undefined): number | null {
-  if (values.length === 0) return null;
-  if (values.some((v) => v == null)) return null;
-  const nums = values as number[];
-  if (nums.length === 1) return nums[0];
-  if (op == null) return null;
-  return nums.reduce((acc, v) => applyOp(acc, v, op));
+function combineSiblings(
+  siblings: FrameworkNode[],
+  getVal: (n: FrameworkNode) => number | null,
+  operations: Record<string, MathOp>
+): number | null {
+  if (siblings.length === 0) return null;
+  let acc = getVal(siblings[0]);
+  if (acc == null) return null;
+  for (let i = 1; i < siblings.length; i++) {
+    const v = getVal(siblings[i]);
+    if (v == null) return null;
+    const op = operations[siblings[i].id];
+    if (op == null) return null;
+    acc = applyOp(acc, v, op);
+  }
+  return acc;
 }
 
 export interface RollupResult {
@@ -302,10 +301,9 @@ export interface RollupResult {
 
 /**
  * Roll the whole tree up into numbers. Leaf values come from the user's typed
- * box inputs; each parent is derived by combining its children with the
- * operation stored under its id; the top-level branches are combined with
- * operations[ROOT_OP_KEY]. Any node is null when an input below it is
- * missing/unparseable or a required operation is still unset.
+ * box inputs; each parent is derived by combining its children pairwise; the
+ * top-level branches are combined the same way. Any node is null when an input
+ * below it is missing/unparseable or a required operation is still unset.
  */
 export function computeRollup(
   nodes: FrameworkNode[],
@@ -317,17 +315,15 @@ export function computeRollup(
     let v: number | null;
     if (node.children.length === 0) {
       v = parseGermanNumber(boxInputs[node.id]?.value ?? "");
-    } else if (node.children.length === 1) {
-      v = visit(node.children[0]);
     } else {
-      v = foldValues(node.children.map(visit), operations[node.id]);
+      node.children.forEach(visit); // populate every child value first (no short-circuit)
+      v = combineSiblings(node.children, (c) => values[c.id], operations);
     }
     values[node.id] = v;
     return v;
   };
-  const topValues = nodes.map(visit);
-  const total =
-    nodes.length <= 1 ? topValues[0] ?? null : foldValues(topValues, operations[ROOT_OP_KEY]);
+  nodes.forEach(visit);
+  const total = combineSiblings(nodes, (n) => values[n.id], operations);
   return { values, total };
 }
 
@@ -392,10 +388,6 @@ export function serializeMarketSizing(args: {
   }
 
   out += `STRUKTUR:\n${treeText}`;
-  if (nodes.length >= 2) {
-    const rootOp = operations[ROOT_OP_KEY];
-    out += `\nOberäste (oberste Boxen) verknüpft mit: ${rootOp ?? "(keine Operation)"}`;
-  }
 
   const assumptionLines = leaves
     .map((b) => {

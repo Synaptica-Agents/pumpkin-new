@@ -14,9 +14,7 @@ import {
   isLeafComplete,
   serializeMarketSizing,
   computeRollup,
-  topLevelNeedsOp,
   formatGermanNumber,
-  ROOT_OP_KEY,
 } from "@/lib/marketSizingHelpers";
 import { DrillButton } from "@/components/ui/drill-button";
 import { X, Send, Info, ArrowLeft, ArrowRight } from "lucide-react";
@@ -93,9 +91,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
 
   const canAdvanceFromUnderstanding = true;
   const canAdvanceFromStructure =
-    isFrameworkValid({ nodes }) &&
-    nodesNeedingOp.every((n) => operations[n.id] != null) &&
-    (!topLevelNeedsOp(nodes) || operations[ROOT_OP_KEY] != null);
+    isFrameworkValid({ nodes }) && nodesNeedingOp.every((n) => operations[n.id] != null);
   const canAdvanceFromAssumptions =
     leaves.length > 0 && leaves.every((n) => isLeafComplete(boxInputs[n.id]));
   const canSubmit = !isEvaluating && finalEstimate.trim().length > 0;

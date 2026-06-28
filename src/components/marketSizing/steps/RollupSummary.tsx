@@ -11,27 +11,26 @@ interface RollupSummaryProps {
   values: Record<string, number | null>;
   /** Combined value of all Oberäste. */
   total: number | null;
-  /** Operation that combines the Oberäste (only relevant with 2+ branches). */
-  rootOp?: MathOp;
+  /** Pairwise operations: operations[branch.id] links a branch to the previous. */
+  operations: Record<string, MathOp>;
   /** Unit appended to the total, e.g. "Haushalte". */
   unit?: string;
 }
 
 /**
  * Compact readout of the final combination: each Oberast with its rolled-up
- * value, joined by the root operation, equalling the total. Makes the
- * "im letzten Schritt nur noch die Oberäste verrechnen" idea explicit — all the
- * sub-math is already done in the boxes; only the top level is combined here.
+ * value, joined by the pairwise top-level operations, equalling the total.
+ * Makes the "im letzten Schritt nur noch die Oberäste verrechnen" idea
+ * explicit — all the sub-math is already done in the boxes.
  */
 const RollupSummary: React.FC<RollupSummaryProps> = ({
   nodes,
   values,
   total,
-  rootOp,
+  operations,
   unit,
 }) => {
   if (nodes.length === 0) return null;
-  const op = nodes.length >= 2 ? rootOp : undefined;
   const totalReady = total != null && isFinite(total);
 
   return (
@@ -44,7 +43,9 @@ const RollupSummary: React.FC<RollupSummaryProps> = ({
           const v = formatComputedBadge(values[n.id]);
           return (
             <React.Fragment key={n.id}>
-              {i > 0 && <span className="font-bold text-muted-foreground">{op ?? "·"}</span>}
+              {i > 0 && (
+                <span className="font-bold text-muted-foreground">{operations[n.id] ?? "·"}</span>
+              )}
               <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1">
                 <span className="max-w-[140px] truncate font-medium text-foreground">
                   {n.title.trim() || `Ast ${i + 1}`}

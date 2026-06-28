@@ -7,7 +7,6 @@ import {
   formatComputedBadge,
   getAllNodes,
   findNodeById,
-  ROOT_OP_KEY,
 } from "@/lib/marketSizingHelpers";
 import {
   Target,
@@ -91,7 +90,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
           nodes={nodes}
           values={values}
           total={total}
-          rootOp={operations[ROOT_OP_KEY]}
+          operations={operations}
           unit={unit || unitHint}
         />
       )}

@@ -5,6 +5,7 @@ import { NodeColor } from "@/components/frameworkBuilder/nodeColors";
 import {
   ChildrenConnector,
   ChildColumn,
+  OpRow,
 } from "@/components/frameworkBuilder/FrameworkTreeConnectors";
 import {
   formatBoxValue,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/marketSizingHelpers";
 import ZoomableTree from "@/components/frameworkBuilder/ZoomableTree";
 import StaticNodeCard from "./StaticNodeCard";
+import OpChip from "./OpChip";
 
 interface StaticTreeProps {
   nodes: FrameworkNode[];
@@ -70,25 +72,28 @@ const Branch: React.FC<BranchProps> = ({
         onSelect={() => onSelect(node.id)}
       />
       {isParent && (
-        <ChildrenConnector
-          childCount={node.children.length}
-          op={node.children.length >= 2 ? operations[node.id] : undefined}
-          accent={color.accent}
-        >
-          {node.children.map((child) => (
-            <ChildColumn key={child.id}>
-              <Branch
-                node={child}
-                color={color}
-                boxInputs={boxInputs}
-                operations={operations}
-                selectedId={selectedId}
-                onSelect={onSelect}
-                showIncomplete={showIncomplete}
-                values={values}
-                selectableParents={selectableParents}
-              />
-            </ChildColumn>
+        <ChildrenConnector childCount={node.children.length}>
+          {node.children.map((child, i) => (
+            <React.Fragment key={child.id}>
+              {i > 0 && (
+                <OpRow>
+                  <OpChip op={operations[child.id]} accent={color.accent} />
+                </OpRow>
+              )}
+              <ChildColumn>
+                <Branch
+                  node={child}
+                  color={color}
+                  boxInputs={boxInputs}
+                  operations={operations}
+                  selectedId={selectedId}
+                  onSelect={onSelect}
+                  showIncomplete={showIncomplete}
+                  values={values}
+                  selectableParents={selectableParents}
+                />
+              </ChildColumn>
+            </React.Fragment>
           ))}
         </ChildrenConnector>
       )}
@@ -98,8 +103,8 @@ const Branch: React.FC<BranchProps> = ({
 
 /** Read-only, selectable issue tree used in Step 3 (edit assumptions) and
  *  Step 4 (recap). Leaf boxes are always selectable; parent boxes are derived
- *  "Rechnungen" and selectable when `selectableParents` is set (to inspect the
- *  computed value). */
+ *  "Rechnungen" and selectable when `selectableParents` is set. The pairwise
+ *  operations between siblings show as read-only symbols. */
 const StaticTree: React.FC<StaticTreeProps> = ({
   nodes,
   boxInputs,
@@ -112,6 +117,7 @@ const StaticTree: React.FC<StaticTreeProps> = ({
 }) => (
   <ZoomableTree
     nodes={nodes}
+    renderTopOp={(linkId) => <OpChip op={operations[linkId]} accent="text-foreground" />}
     renderBranch={(node, color) => (
       <Branch
         node={node}
