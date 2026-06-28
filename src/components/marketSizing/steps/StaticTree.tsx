@@ -6,7 +6,12 @@ import {
   ChildrenConnector,
   ChildColumn,
 } from "@/components/frameworkBuilder/FrameworkTreeConnectors";
-import { formatBoxValue, isLeafComplete, DEFAULT_BOX_KIND } from "@/lib/marketSizingHelpers";
+import {
+  formatBoxValue,
+  formatComputedBadge,
+  isLeafComplete,
+  DEFAULT_BOX_KIND,
+} from "@/lib/marketSizingHelpers";
 import ZoomableTree from "@/components/frameworkBuilder/ZoomableTree";
 import StaticNodeCard from "./StaticNodeCard";
 
@@ -18,6 +23,10 @@ interface StaticTreeProps {
   onSelect: (id: string) => void;
   /** When false, never show the red "!" indicator (e.g. read-only recap). */
   showIncomplete?: boolean;
+  /** Computed value per node id (parents derived). Enables parent value badges. */
+  values?: Record<string, number | null>;
+  /** Allow selecting parent boxes (to inspect their Rechnung). */
+  selectableParents?: boolean;
 }
 
 interface BranchProps {
@@ -28,6 +37,8 @@ interface BranchProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   showIncomplete: boolean;
+  values?: Record<string, number | null>;
+  selectableParents: boolean;
 }
 
 const Branch: React.FC<BranchProps> = ({
@@ -38,6 +49,8 @@ const Branch: React.FC<BranchProps> = ({
   selectedId,
   onSelect,
   showIncomplete,
+  values,
+  selectableParents,
 }) => {
   const isParent = node.children.length > 0;
   const input = boxInputs[node.id];
@@ -47,10 +60,13 @@ const Branch: React.FC<BranchProps> = ({
         node={node}
         color={color}
         isParent={isParent}
+        selectable={isParent ? selectableParents : true}
         kind={isParent ? undefined : input?.kind ?? DEFAULT_BOX_KIND}
         selected={selectedId === node.id}
         incomplete={!isParent && showIncomplete && !isLeafComplete(input)}
-        valueBadge={isParent ? "" : formatBoxValue(input?.value ?? "")}
+        valueBadge={
+          isParent ? formatComputedBadge(values?.[node.id]) : formatBoxValue(input?.value ?? "")
+        }
         onSelect={() => onSelect(node.id)}
       />
       {isParent && (
@@ -69,6 +85,8 @@ const Branch: React.FC<BranchProps> = ({
                 selectedId={selectedId}
                 onSelect={onSelect}
                 showIncomplete={showIncomplete}
+                values={values}
+                selectableParents={selectableParents}
               />
             </ChildColumn>
           ))}
@@ -79,7 +97,9 @@ const Branch: React.FC<BranchProps> = ({
 };
 
 /** Read-only, selectable issue tree used in Step 3 (edit assumptions) and
- *  Step 4 (recap). Only leaf boxes are selectable; parents are "Rechnung". */
+ *  Step 4 (recap). Leaf boxes are always selectable; parent boxes are derived
+ *  "Rechnungen" and selectable when `selectableParents` is set (to inspect the
+ *  computed value). */
 const StaticTree: React.FC<StaticTreeProps> = ({
   nodes,
   boxInputs,
@@ -87,6 +107,8 @@ const StaticTree: React.FC<StaticTreeProps> = ({
   selectedId,
   onSelect,
   showIncomplete = true,
+  values,
+  selectableParents = false,
 }) => (
   <ZoomableTree
     nodes={nodes}
@@ -99,6 +121,8 @@ const StaticTree: React.FC<StaticTreeProps> = ({
         selectedId={selectedId}
         onSelect={onSelect}
         showIncomplete={showIncomplete}
+        values={values}
+        selectableParents={selectableParents}
       />
     )}
   />

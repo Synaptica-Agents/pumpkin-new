@@ -14,8 +14,10 @@ interface StaticNodeCardProps {
   valueBadge?: string;
   /** Leaf type badge (Annahme/Fakt/Rechnung). Omitted for parent boxes. */
   kind?: BoxKind;
-  /** Parent boxes are derived ("Rechnung") and not selectable. */
+  /** Parent boxes are derived ("Rechnung aus Unterästen"). */
   isParent?: boolean;
+  /** Allow clicking this card even when it's a parent (to inspect its Rechnung). */
+  selectable?: boolean;
   onSelect: () => void;
 }
 
@@ -39,17 +41,19 @@ const StaticNodeCard: React.FC<StaticNodeCardProps> = ({
   valueBadge,
   kind,
   isParent = false,
+  selectable = false,
   onSelect,
 }) => {
   const title = node.title.trim() || "(ohne Titel)";
 
-  const Tag: React.ElementType = isParent ? "div" : "button";
+  const clickable = !isParent || selectable;
+  const Tag: React.ElementType = clickable ? "button" : "div";
 
   return (
     <Tag
-      {...(isParent ? {} : { type: "button", onClick: onSelect })}
+      {...(clickable ? { type: "button", onClick: onSelect } : {})}
       className={`relative min-w-[150px] max-w-[210px] rounded-xl border ${color.border} bg-card text-left ring-1 ${color.ring} shadow-lg ${color.shadow} transition-all duration-200 ${
-        isParent ? "cursor-default opacity-90" : `${color.shadowHover} cursor-pointer`
+        clickable ? `${color.shadowHover} cursor-pointer` : "cursor-default opacity-90"
       } ${selected ? "ring-2 ring-offset-1 ring-offset-background" : ""}`}
     >
       {/* Coloured glow header */}

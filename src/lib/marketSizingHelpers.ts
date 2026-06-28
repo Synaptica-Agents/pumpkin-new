@@ -83,6 +83,33 @@ export function getNodesNeedingOp(nodes: FrameworkNode[]): FrameworkNode[] {
   return out;
 }
 
+/**
+ * Reserved key in the `operations` map for the operation that combines the
+ * top-level branches (Oberäste) into the final number. Real node ids are
+ * UUIDs, so this sentinel never collides with one.
+ */
+export const ROOT_OP_KEY = "__root__";
+
+/** The selectable math operations, in display order. */
+export const MATH_OPS: MathOp[] = ["×", "+", "−", "÷"];
+
+/** Whether the top-level branches need a combining operation (2+ Oberäste). */
+export function topLevelNeedsOp(nodes: FrameworkNode[]): boolean {
+  return nodes.length >= 2;
+}
+
+/** Find a node anywhere in the tree by id (depth-first), or null. */
+export function findNodeById(nodes: FrameworkNode[], id: string): FrameworkNode | null {
+  for (const n of nodes) {
+    if (n.id === id) return n;
+    if (n.children.length > 0) {
+      const found = findNodeById(n.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 /** Default kind for a freshly-touched leaf box. */
 export const DEFAULT_BOX_KIND: BoxKind = "annahme";
 
@@ -114,7 +141,8 @@ export function isLeafComplete(input?: BoxInput): boolean {
 export function serializeMarketSizingTree(
   nodes: FrameworkNode[],
   operations: Record<string, MathOp>,
-  boxInputs: Record<string, BoxInput>
+  boxInputs: Record<string, BoxInput>,
+  values?: Record<string, number | null>
 ): string {
   const walk = (arr: FrameworkNode[], parentPath: string, depth: number): string => {
     let res = "";
@@ -125,10 +153,15 @@ export function serializeMarketSizingTree(
       const label = depth === 0 ? "Ast" : "Unterast";
       const title = node.title.trim() || "(kein Titel)";
       res += `${indent}[${label} ${path}] ${title}`;
+      const computed = values?.[node.id];
+      const computedSuffix =
+        computed != null && isFinite(computed) ? ` ⇒ ${formatGermanNumber(computed)}` : "";
       if (node.children.length >= 2) {
         const op = operations[node.id];
-        res += ` — Kinder verknüpft mit: ${op ?? "(keine Operation)"}`;
-      } else if (node.children.length === 0) {
+        res += ` — Kinder verknüpft mit: ${op ?? "(keine Operation)"}${computedSuffix}`;
+      } else if (node.children.length === 1) {
+        res += computedSuffix;
+      } else {
         const kind = boxInputs[node.id]?.kind ?? DEFAULT_BOX_KIND;
         res += ` [${boxKindLabel(kind)}]`;
       }
@@ -231,33 +264,78 @@ export function formatBoxValue(raw: string): string {
   return text;
 }
 
-export interface ProductResult {
-  /** Running product of all entered leaf numbers. 1 when no valid inputs. */
-  value: number;
-  /** Number of leaves that successfully parsed. */
-  parsedCount: number;
-  /** Total leaf count. */
-  totalCount: number;
+/** Apply a single math operation to two operands. */
+function applyOp(a: number, b: number, op: MathOp): number {
+  switch (op) {
+    case "+":
+      return a + b;
+    case "−":
+      return a - b;
+    case "÷":
+      return b === 0 ? NaN : a / b;
+    case "×":
+    default:
+      return a * b;
+  }
 }
 
 /**
- * Compute the product of all parsed leaf numbers. Unparsed or empty leaves
- * are skipped (not treated as 0, which would zero out the product).
+ * Fold operand values left-to-right with a single operation. Returns null if
+ * any operand is missing, or — for 2+ operands — if no operation is set. A
+ * single operand passes through unchanged (order matters for − and ÷).
  */
-export function computeProduct(
-  leaves: MarketSizingLeaf[],
-  numbers: Record<string, string>
-): ProductResult {
-  let product = 1;
-  let parsed = 0;
-  for (const l of leaves) {
-    const n = parseGermanNumber(numbers[l.id] ?? "");
-    if (n != null) {
-      product *= n;
-      parsed++;
+function foldValues(values: (number | null)[], op: MathOp | undefined): number | null {
+  if (values.length === 0) return null;
+  if (values.some((v) => v == null)) return null;
+  const nums = values as number[];
+  if (nums.length === 1) return nums[0];
+  if (op == null) return null;
+  return nums.reduce((acc, v) => applyOp(acc, v, op));
+}
+
+export interface RollupResult {
+  /** Computed value per node id: leaves = parsed input, parents = derived. */
+  values: Record<string, number | null>;
+  /** Final combined value of all top-level branches (the market size). */
+  total: number | null;
+}
+
+/**
+ * Roll the whole tree up into numbers. Leaf values come from the user's typed
+ * box inputs; each parent is derived by combining its children with the
+ * operation stored under its id; the top-level branches are combined with
+ * operations[ROOT_OP_KEY]. Any node is null when an input below it is
+ * missing/unparseable or a required operation is still unset.
+ */
+export function computeRollup(
+  nodes: FrameworkNode[],
+  operations: Record<string, MathOp>,
+  boxInputs: Record<string, BoxInput>
+): RollupResult {
+  const values: Record<string, number | null> = {};
+  const visit = (node: FrameworkNode): number | null => {
+    let v: number | null;
+    if (node.children.length === 0) {
+      v = parseGermanNumber(boxInputs[node.id]?.value ?? "");
+    } else if (node.children.length === 1) {
+      v = visit(node.children[0]);
+    } else {
+      v = foldValues(node.children.map(visit), operations[node.id]);
     }
-  }
-  return { value: parsed > 0 ? product : 0, parsedCount: parsed, totalCount: leaves.length };
+    values[node.id] = v;
+    return v;
+  };
+  const topValues = nodes.map(visit);
+  const total =
+    nodes.length <= 1 ? topValues[0] ?? null : foldValues(topValues, operations[ROOT_OP_KEY]);
+  return { values, total };
+}
+
+/** Format a computed (numeric) node value for a compact badge, "" when empty. */
+export function formatComputedBadge(n: number | null | undefined): string {
+  if (n == null || !isFinite(n)) return "";
+  if (Math.abs(n) >= 10000) return shortFormat(n).replace(/^~/, "");
+  return formatGermanNumber(n);
 }
 
 export interface SerializedMarketSizing {
@@ -296,7 +374,8 @@ export function serializeMarketSizing(args: {
     sanityCheck,
   } = args;
 
-  const treeText = serializeMarketSizingTree(nodes, operations, boxInputs);
+  const { values, total } = computeRollup(nodes, operations, boxInputs);
+  const treeText = serializeMarketSizingTree(nodes, operations, boxInputs, values);
 
   // VERSTÄNDNIS section (clarifications)
   let out = "";
@@ -313,6 +392,10 @@ export function serializeMarketSizing(args: {
   }
 
   out += `STRUKTUR:\n${treeText}`;
+  if (nodes.length >= 2) {
+    const rootOp = operations[ROOT_OP_KEY];
+    out += `\nOberäste (oberste Boxen) verknüpft mit: ${rootOp ?? "(keine Operation)"}`;
+  }
 
   const assumptionLines = leaves
     .map((b) => {
@@ -333,7 +416,14 @@ export function serializeMarketSizing(args: {
     out += `\n\nANNAHMEN & ZAHLEN (nur unterste Boxen; Eltern-Boxen sind Rechnungen aus ihren Kindern):\n${assumptionLines.join("\n")}`;
   }
 
-  // Final estimate: solely from user input (no calculation step in flow)
+  // Computed roll-up: parents derived from children, top branches combined.
+  if (total != null && isFinite(total)) {
+    out += `\n\nBERECHNETES ERGEBNIS (aus der Struktur hochgerechnet): ${formatGermanNumber(total)}${
+      finalEstimateUnit ? " " + finalEstimateUnit : ""
+    }`;
+  }
+
+  // Final estimate: the user's committed number (auto-filled from the roll-up).
   const finalParsed = parseGermanNumber(finalEstimateInput);
   const finalValue = finalParsed;
   const finalDisplay = finalParsed != null ? finalEstimateInput.trim() : "—";

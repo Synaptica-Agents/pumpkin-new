@@ -2,10 +2,12 @@ import React, { useCallback } from "react";
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import { MathOp } from "@/types/marketSizing";
 import { createEmptyNode } from "@/lib/frameworkSerializer";
+import { ROOT_OP_KEY, topLevelNeedsOp } from "@/lib/marketSizingHelpers";
 import FrameworkNodeCard from "@/components/frameworkBuilder/FrameworkNodeCard";
 import { NodeColor } from "@/components/frameworkBuilder/nodeColors";
 import { ChildrenConnector, ChildColumn } from "@/components/frameworkBuilder/FrameworkTreeConnectors";
 import ZoomableTree from "@/components/frameworkBuilder/ZoomableTree";
+import RootOpRail from "./RootOpRail";
 import { Plus } from "lucide-react";
 
 const MAX_TOP_LEVEL = 6;
@@ -184,7 +186,7 @@ const StructureStep: React.FC<StructureStepProps> = ({
       <div>
         <h2 className="text-sm font-semibold text-foreground">2. Deine Struktur</h2>
         <p className="text-xs text-muted-foreground">
-          Bau deine Struktur als Boxen auf — meist ein paar Oberbereiche, darunter feinere Unteräste. Hier nur die Bereiche, noch keine Zahlen — die kommen im nächsten Schritt.
+          Bau deine Struktur als Boxen auf — meist ein paar Oberbereiche, darunter feinere Unteräste. Hier nur die Bereiche, noch keine Zahlen — die kommen im nächsten Schritt. Bei mehreren Oberästen wähl links, wie sie verrechnet werden (×, +, −, ÷).
         </p>
       </div>
       <div className="rounded-xl border border-border bg-muted/20 p-4">
@@ -204,6 +206,15 @@ const StructureStep: React.FC<StructureStepProps> = ({
               onAddChild={addChildNode}
             />
           )}
+          leftRail={
+            topLevelNeedsOp(nodes) ? (
+              <RootOpRail
+                op={operations[ROOT_OP_KEY]}
+                onChange={(o) => setOp(ROOT_OP_KEY, o)}
+                disabled={disabled}
+              />
+            ) : undefined
+          }
           headerAddon={
             nodes.length < MAX_TOP_LEVEL ? (
               <button

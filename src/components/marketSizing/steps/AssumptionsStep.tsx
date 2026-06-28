@@ -3,20 +3,30 @@ import { FrameworkNode } from "@/types/frameworkBuilder";
 import { BoxInput, BoxKind, MathOp } from "@/types/marketSizing";
 import {
   getLeaves,
+  getAllNodes,
+  findNodeById,
   formatGermanNumber,
   parseGermanNumber,
+  formatComputedBadge,
   isLeafComplete,
   DEFAULT_BOX_KIND,
+  ROOT_OP_KEY,
 } from "@/lib/marketSizingHelpers";
 import StaticTree from "./StaticTree";
+import RollupSummary from "./RollupSummary";
 import { MousePointerClick } from "lucide-react";
 
 interface AssumptionsStepProps {
   nodes: FrameworkNode[];
   boxInputs: Record<string, BoxInput>;
   operations: Record<string, MathOp>;
+  /** Computed value per node id (parents derived). */
+  values: Record<string, number | null>;
+  /** Combined value of all Oberäste. */
+  total: number | null;
   onChange: (boxInputs: Record<string, BoxInput>) => void;
   disabled: boolean;
+  unit?: string;
 }
 
 const KIND_OPTIONS: { value: BoxKind; label: string; hint: string }[] = [
@@ -29,25 +39,30 @@ const AssumptionsStep: React.FC<AssumptionsStepProps> = ({
   nodes,
   boxInputs,
   operations,
+  values,
+  total,
   onChange,
   disabled,
+  unit,
 }) => {
   const leaves = getLeaves(nodes);
+  const allNodes = getAllNodes(nodes);
   const [selectedId, setSelectedId] = useState<string | null>(leaves[0]?.id ?? null);
 
-  // Selection may only target leaves; ignore clicks on parent boxes.
-  const handleSelect = (id: string) => {
-    if (leaves.some((l) => l.id === id)) setSelectedId(id);
-  };
+  // Any box is now selectable: leaves to edit, parents to inspect their Rechnung.
+  const handleSelect = (id: string) => setSelectedId(id);
 
-  const selected = leaves.find((n) => n.id === selectedId) ?? null;
+  const selectedNode = selectedId ? findNodeById(nodes, selectedId) : null;
+  const selectedMeta = allNodes.find((n) => n.id === selectedId) ?? null;
+  const isParentSel = !!selectedNode && selectedNode.children.length > 0;
+  const selectedLeaf = leaves.find((n) => n.id === selectedId) ?? null;
   const selectedInput = selectedId ? boxInputs[selectedId] : undefined;
   const kind: BoxKind = selectedInput?.kind ?? DEFAULT_BOX_KIND;
 
   const update = (patch: Partial<BoxInput>) => {
-    if (!selectedId) return;
-    const prev = boxInputs[selectedId] ?? { assumption: "", value: "", kind: DEFAULT_BOX_KIND };
-    onChange({ ...boxInputs, [selectedId]: { ...prev, ...patch } });
+    if (!selectedLeaf) return;
+    const prev = boxInputs[selectedLeaf.id] ?? { assumption: "", value: "", kind: DEFAULT_BOX_KIND };
+    onChange({ ...boxInputs, [selectedLeaf.id]: { ...prev, ...patch } });
   };
 
   const parsedValue = parseGermanNumber(selectedInput?.value ?? "");
@@ -66,8 +81,8 @@ const AssumptionsStep: React.FC<AssumptionsStepProps> = ({
         <h2 className="text-sm font-semibold text-foreground">3. Annahmen &amp; Zahlen</h2>
         <p className="text-xs text-muted-foreground">
           Trag die Zahlen nur auf den <span className="font-medium">untersten Boxen</span> ein —
-          Eltern-Boxen ergeben sich als Rechnung aus ihren Unterästen. Wähl pro Box einen Typ:
-          Annahme (begründen), Fakt (nur Zahl) oder Rechnung. Boxen mit{" "}
+          Eltern-Boxen werden automatisch aus ihren Unterästen <span className="font-medium">berechnet</span>.
+          Klick eine Eltern-Box an, um ihre Rechnung zu sehen. Boxen mit{" "}
           <span className="font-medium text-destructive">!</span> fehlen noch.
         </p>
       </div>
@@ -78,20 +93,80 @@ const AssumptionsStep: React.FC<AssumptionsStepProps> = ({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
+          {/* Running roll-up — only the Oberäste are combined here */}
+          <RollupSummary
+            nodes={nodes}
+            values={values}
+            total={total}
+            rootOp={operations[ROOT_OP_KEY]}
+            unit={unit}
+          />
+
           {/* Static tree — full width */}
           <div className="rounded-xl border border-border bg-muted/20 p-4">
             <StaticTree
               nodes={nodes}
               boxInputs={boxInputs}
               operations={operations}
+              values={values}
+              selectableParents
               selectedId={selectedId}
               onSelect={handleSelect}
             />
           </div>
 
-          {/* Editor panel */}
+          {/* Editor / inspector panel */}
           <div className="rounded-xl border border-border bg-card p-4">
-            {selected ? (
+            {isParentSel && selectedNode ? (
+              /* Parent box — read-only auto-calculation */
+              <div className="flex flex-col gap-3">
+                <div className="flex items-baseline justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      Rechnung (aus Unterästen)
+                    </p>
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {selectedMeta?.labelChain ?? selectedNode.title}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-[11px] text-muted-foreground">
+                    automatisch berechnet
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-border bg-muted/20 p-3">
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    {selectedNode.children.map((c, i) => {
+                      const op =
+                        selectedNode.children.length >= 2 ? operations[selectedNode.id] : undefined;
+                      return (
+                        <React.Fragment key={c.id}>
+                          {i > 0 && (
+                            <span className="font-bold text-muted-foreground">{op ?? "·"}</span>
+                          )}
+                          <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1">
+                            <span className="max-w-[140px] truncate font-medium text-foreground">
+                              {c.title.trim() || "(ohne Titel)"}
+                            </span>
+                            <span className="font-semibold text-primary">
+                              {formatComputedBadge(values[c.id]) || "—"}
+                            </span>
+                          </span>
+                        </React.Fragment>
+                      );
+                    })}
+                    <span className="font-bold text-muted-foreground">=</span>
+                    <span className="rounded-md bg-primary/15 px-2 py-1 font-bold text-primary">
+                      {formatComputedBadge(values[selectedNode.id]) || "noch unvollständig"}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-muted-foreground">
+                  Diese Box rechnet automatisch — Zahlen trägst du nur auf den untersten Boxen ein.
+                </p>
+              </div>
+            ) : selectedLeaf ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-baseline justify-between gap-3">
                   <div className="min-w-0">
@@ -99,7 +174,7 @@ const AssumptionsStep: React.FC<AssumptionsStepProps> = ({
                       Ausgewählte Box
                     </p>
                     <p className="truncate text-sm font-semibold text-foreground">
-                      {selected.labelChain}
+                      {selectedLeaf.labelChain}
                     </p>
                   </div>
                   <p className="shrink-0 text-[11px] text-muted-foreground">
@@ -174,7 +249,7 @@ const AssumptionsStep: React.FC<AssumptionsStepProps> = ({
             ) : (
               <div className="flex items-center justify-center gap-2 py-6 text-center text-sm text-muted-foreground">
                 <MousePointerClick className="h-5 w-5 text-muted-foreground/60" />
-                Wähle oben eine unterste Box, um Typ, Annahme und Zahl einzutragen.
+                Wähle oben eine Box: unterste Boxen zum Eintragen, Eltern-Boxen zeigen ihre Rechnung.
               </div>
             )}
           </div>

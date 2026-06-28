@@ -4,7 +4,10 @@ import {
   formatGermanNumber,
   parseGermanNumber,
   formatBoxValue,
-  getLeaves,
+  formatComputedBadge,
+  getAllNodes,
+  findNodeById,
+  ROOT_OP_KEY,
 } from "@/lib/marketSizingHelpers";
 import {
   Target,
@@ -20,12 +23,17 @@ import {
   SanityCheckStructured,
 } from "@/types/marketSizing";
 import StaticTree from "./StaticTree";
+import RollupSummary from "./RollupSummary";
 
 interface ResultStepProps {
   understanding: MarketSizingUnderstanding;
   nodes: FrameworkNode[];
   boxInputs: Record<string, BoxInput>;
   operations: Record<string, MathOp>;
+  /** Computed value per node id (parents derived). */
+  values: Record<string, number | null>;
+  /** Combined value of all Oberäste. */
+  total: number | null;
   finalEstimate: string;
   onFinalEstimateChange: (value: string) => void;
   unit: string;
@@ -41,6 +49,8 @@ const ResultStep: React.FC<ResultStepProps> = ({
   nodes,
   boxInputs,
   operations,
+  values,
+  total,
   finalEstimate,
   onFinalEstimateChange,
   unit,
@@ -59,19 +69,32 @@ const ResultStep: React.FC<ResultStepProps> = ({
     (c) => c.question.trim() || c.answer.trim()
   );
 
-  const allNodes = getLeaves(nodes);
+  const allNodes = getAllNodes(nodes);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = allNodes.find((n) => n.id === selectedId) ?? null;
+  const selectedNode = selectedId ? findNodeById(nodes, selectedId) : null;
+  const isParentSel = !!selectedNode && selectedNode.children.length > 0;
   const selectedInput = selectedId ? boxInputs[selectedId] : undefined;
+  const selectedComputed = selectedId ? values[selectedId] : null;
 
   return (
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-sm font-semibold text-foreground">4. Ergebnis</h2>
         <p className="text-xs text-muted-foreground">
-          Rechne auf Papier mit deinen Annahmen, trag deine finale Schätzung ein und mach den Sanity Check.
+          Deine Struktur ist hochgerechnet — im letzten Schritt werden nur noch die Oberäste verrechnet. Prüf das Ergebnis, pass es bei Bedarf an und mach den Sanity Check.
         </p>
       </div>
+
+      {allNodes.length > 0 && (
+        <RollupSummary
+          nodes={nodes}
+          values={values}
+          total={total}
+          rootOp={operations[ROOT_OP_KEY]}
+          unit={unit || unitHint}
+        />
+      )}
 
       {/* Final estimate input */}
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
@@ -79,7 +102,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
           <Target className="h-3.5 w-3.5 text-primary" /> Finale Schätzung
         </label>
         <p className="mb-2 text-[11px] text-muted-foreground">
-          Rechne auf Papier mit deinen Annahmen und trag das Ergebnis hier ein.
+          Aus deiner Struktur berechnet und hier eingetragen — du kannst den Wert anpassen (z.B. runden).
         </p>
         <div className="flex items-center gap-2">
           <input
@@ -164,6 +187,8 @@ const ResultStep: React.FC<ResultStepProps> = ({
               nodes={nodes}
               boxInputs={boxInputs}
               operations={operations}
+              values={values}
+              selectableParents
               selectedId={selectedId}
               onSelect={setSelectedId}
               showIncomplete={false}
@@ -177,14 +202,21 @@ const ResultStep: React.FC<ResultStepProps> = ({
                     <span className="text-xs font-semibold text-foreground">
                       {selected.labelChain}
                     </span>
-                    {formatBoxValue(selectedInput?.value ?? "") && (
-                      <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-primary">
-                        {formatBoxValue(selectedInput?.value ?? "")}
-                      </span>
-                    )}
+                    {(() => {
+                      const badge = isParentSel
+                        ? formatComputedBadge(selectedComputed)
+                        : formatBoxValue(selectedInput?.value ?? "");
+                      return badge ? (
+                        <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-primary">
+                          {badge}
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {selectedInput?.assumption?.trim() || "(keine Annahme)"}
+                    {isParentSel
+                      ? "Rechnung (aus Unterästen)"
+                      : selectedInput?.assumption?.trim() || "(keine Annahme)"}
                   </p>
                 </div>
               ) : (

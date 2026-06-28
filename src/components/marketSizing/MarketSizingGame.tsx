@@ -13,6 +13,10 @@ import {
   getNodesNeedingOp,
   isLeafComplete,
   serializeMarketSizing,
+  computeRollup,
+  topLevelNeedsOp,
+  formatGermanNumber,
+  ROOT_OP_KEY,
 } from "@/lib/marketSizingHelpers";
 import { DrillButton } from "@/components/ui/drill-button";
 import { X, Send, Info, ArrowLeft, ArrowRight } from "lucide-react";
@@ -53,6 +57,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const [boxInputs, setBoxInputs] = useState<Record<string, BoxInput>>({});
   const [finalEstimate, setFinalEstimate] = useState("");
+  const [finalEstimateTouched, setFinalEstimateTouched] = useState(false);
   const [estimateUnit, setEstimateUnit] = useState("");
   const [sanityCheck, setSanityCheck] = useState<SanityCheckStructured>(emptySanityCheck());
 
@@ -65,6 +70,7 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
       setLastAddedId(null);
       setBoxInputs({});
       setFinalEstimate("");
+      setFinalEstimateTouched(false);
       setEstimateUnit(currentCase.unit_hint || "");
       setSanityCheck(emptySanityCheck());
     }
@@ -72,10 +78,24 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
 
   const leaves = useMemo(() => getLeaves(nodes), [nodes]);
   const nodesNeedingOp = useMemo(() => getNodesNeedingOp(nodes), [nodes]);
+  const { values, total } = useMemo(
+    () => computeRollup(nodes, operations, boxInputs),
+    [nodes, operations, boxInputs]
+  );
+
+  // Auto-fill the final estimate from the rolled-up total until the user edits it.
+  useEffect(() => {
+    if (finalEstimateTouched) return;
+    if (total != null && isFinite(total)) {
+      setFinalEstimate(formatGermanNumber(total));
+    }
+  }, [total, finalEstimateTouched]);
 
   const canAdvanceFromUnderstanding = true;
   const canAdvanceFromStructure =
-    isFrameworkValid({ nodes }) && nodesNeedingOp.every((n) => operations[n.id] != null);
+    isFrameworkValid({ nodes }) &&
+    nodesNeedingOp.every((n) => operations[n.id] != null) &&
+    (!topLevelNeedsOp(nodes) || operations[ROOT_OP_KEY] != null);
   const canAdvanceFromAssumptions =
     leaves.length > 0 && leaves.every((n) => isLeafComplete(boxInputs[n.id]));
   const canSubmit = !isEvaluating && finalEstimate.trim().length > 0;
@@ -86,6 +106,11 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
 
   const goBack = useCallback(() => {
     setCurrentStep((s) => Math.max(s - 1, 0));
+  }, []);
+
+  const handleFinalEstimateChange = useCallback((v: string) => {
+    setFinalEstimateTouched(true);
+    setFinalEstimate(v);
   }, []);
 
   const handleSubmit = useCallback(() => {
@@ -192,8 +217,11 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
           nodes={nodes}
           boxInputs={boxInputs}
           operations={operations}
+          values={values}
+          total={total}
           onChange={setBoxInputs}
           disabled={isEvaluating}
+          unit={estimateUnit}
         />
       )}
       {currentStep === 3 && (
@@ -202,8 +230,10 @@ const MarketSizingGame: React.FC<MarketSizingGameProps> = ({
           nodes={nodes}
           boxInputs={boxInputs}
           operations={operations}
+          values={values}
+          total={total}
           finalEstimate={finalEstimate}
-          onFinalEstimateChange={setFinalEstimate}
+          onFinalEstimateChange={handleFinalEstimateChange}
           unit={estimateUnit}
           onUnitChange={setEstimateUnit}
           sanityCheck={sanityCheck}

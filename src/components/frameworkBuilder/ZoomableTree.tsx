@@ -16,6 +16,9 @@ interface ZoomableTreeProps {
   renderBranch: (node: FrameworkNode, color: NodeColor, index: number) => React.ReactNode;
   /** Optional control shown below the overview (e.g. "+ Ast"). */
   headerAddon?: React.ReactNode;
+  /** Optional rail rendered to the left of the overview stack (overview mode
+   *  only), vertically centred — e.g. the operation that joins the Oberäste. */
+  leftRail?: React.ReactNode;
   /** Colour for a top-level branch by index. Defaults to the shared palette. */
   colorFor?: (index: number) => NodeColor;
 }
@@ -35,6 +38,7 @@ const ZoomableTree: React.FC<ZoomableTreeProps> = ({
   nodes,
   renderBranch,
   headerAddon,
+  leftRail,
   colorFor = defaultColorFor,
 }) => {
   const [zoomedId, setZoomedId] = useState<string | null>(null);
@@ -91,13 +95,18 @@ const ZoomableTree: React.FC<ZoomableTreeProps> = ({
 
   return (
     <div className="flex flex-col gap-3">
-      <ScaledOverview>
-        {nodes.map((node, i) => (
-          <OverviewBranch key={node.id} onZoom={() => setZoomedId(node.id)}>
-            {renderBranch(node, colorFor(i), i)}
-          </OverviewBranch>
-        ))}
-      </ScaledOverview>
+      <div className="flex flex-row items-stretch gap-2">
+        {leftRail && <div className="flex shrink-0 items-center">{leftRail}</div>}
+        <div className="min-w-0 flex-1">
+          <ScaledOverview>
+            {nodes.map((node, i) => (
+              <OverviewBranch key={node.id} onZoom={() => setZoomedId(node.id)}>
+                {renderBranch(node, colorFor(i), i)}
+              </OverviewBranch>
+            ))}
+          </ScaledOverview>
+        </div>
+      </div>
       {headerAddon && <div className="flex justify-center">{headerAddon}</div>}
     </div>
   );
