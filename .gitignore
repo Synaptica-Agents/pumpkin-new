@@ -31,3 +31,5 @@ AENDERUNGEN_*.md
 .env
 .env.local
 .env.*.local
+__pycache__/
+*.pyc
