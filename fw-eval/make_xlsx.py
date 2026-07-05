@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Baut Frameworks-Bewertungstest.xlsx aus results.json (Vorbild: ms-eval)."""
-import json, os
+"""Baut Frameworks-Bewertungstest.xlsx aus results.json (Vorbild: ms-eval).
+Optionales Argument: Ausgabedateiname (Default Frameworks-Bewertungstest.xlsx)."""
+import json, os, sys
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
@@ -81,6 +82,6 @@ add_summary("Nur Schwer", [r for r in rows if r["difficulty"] == "hard"])
 for i, w in enumerate([14, 6, 10, 14, 12, 12, 10, 8, 8], 1):
     ws2.column_dimensions[chr(64 + i)].width = w
 
-out = os.path.join(ROOT, "Frameworks-Bewertungstest.xlsx")
+out = os.path.join(ROOT, sys.argv[1] if len(sys.argv) > 1 else "Frameworks-Bewertungstest.xlsx")
 wb.save(out)
 print("geschrieben:", out)

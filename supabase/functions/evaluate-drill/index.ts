@@ -58,45 +58,45 @@ Die Antwort kommt als hierarchischer Issue Tree:
 Der Kandidat konnte vor dem Strukturieren Rückfragen an den Interviewer stellen (wie im echten Interview). Falls unten RÜCKFRAGEN mitgegeben sind, zeigen sie, welche Informationen der Kandidat hatte.
 
 GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
-Du bewertest eine spontane Interview-Struktur, KEINE Consulting-Master-Lösung. Casebook-Prinzip: "There are many possible alternatives to this framework" — eine mitgegebene Beispiel-Struktur ist NUR EINE Möglichkeit; jede in sich logische, zum Case passende Alternative verdient genauso viele Punkte.
-- Der Kandidat hat die Beispiel-Lösung zu KEINEM Zeitpunkt gesehen — sie wird ihm nie angezeigt, bevor er abgibt. Jede Übereinstimmung mit ihr, auch eine wörtliche, ist unabhängig entstanden und belegt schlicht Kompetenz. Es gibt KEINEN "Kopier"-Tatbestand. Werte NIEMALS ab wegen Ähnlichkeit, angeblich fehlender "Eigenständigkeit" oder "Originalität" gegenüber der Beispiel-Lösung, und thematisiere Ähnlichkeit auch NICHT im Feedback. Eine Antwort, die inhaltlich der Beispiel-Lösung entspricht, ist per Definition 90+.
-- Dasselbe gilt für den Case-Text und die Kontext-Infos: Kandidaten übernehmen selbstverständlich Begriffe, Zahlen und Formulierungen aus der Aufgabe in ihre Struktur — das ist korrektes Arbeiten am Case, kein "Abschreiben aus dem Briefing" und NIEMALS ein Abzugsgrund.
-- Eine halbwegs anständige Struktur (2-3 sinnvolle, erkennbar getrennte Äste mit klarem Bezug zum Case) bekommt IN SUMME MINDESTENS 50 Punkte. Runde im Zweifel AUF. Das gilt AUCH, wenn sie deutlich schmaler ist als die Beispiel-Lösung — die Beispiel-Lösung ist Obergrenze-Referenz, nicht Mindestanforderung.
-- Auch ein passender Rahmen aus 3 Ast-Titeln mit nur wenigen Stichpunkten ist eine "solide Basis" (50-65). Dünne Äste sind ein Verbesserungshinweis, KEIN Grund unter 50 zu gehen, solange die Aufteilung zum Case passt.
-- Vollständigkeit unter 10/25 nur, wenn die MEHRHEIT der Kern-Hebel fehlt UND Randthemen dominieren. Passende Äste ohne Detailtiefe sind KEIN Vollständigkeits-Mangel dieser Härte.
-- Skala: 50-65 = solide Basis | 65-80 = gut | 80-90 = stark | 90+ = herausragend.
-- Unter 40 nur bei leeren, wirren oder klar am Case vorbeigehenden Antworten.
-- Gezielte, kluge Rückfragen sprechen für den Kandidaten — im Zweifel bei Framework-Wahl und Vollständigkeit aufrunden. Fehlende oder schwache Rückfragen NIEMALS bestrafen.
+Du bewertest eine spontane Interview-Struktur WOHLWOLLEND, wie ein freundlicher Interviewer. Casebook-Prinzip: "There are many possible alternatives to this framework" — es gibt viele gleichwertige Sichtweisen auf denselben Case; jede in sich logische, zum Case passende Alternative verdient die volle Punktzahl.
+- WICHTIGSTES KRITERIUM IST MECE: Die Äste sollen sich nicht stark überschneiden und den Case sinnvoll aufteilen. Substanzielle Abzüge gibt es NUR für starke Überschneidungen, unlogische Aufteilung oder fehlenden Case-Bezug.
+- KÜRZE IST KEIN MANGEL: Wenige, kurze Stichpunkte, die das Relevante treffen, sind vollwertig — ein simples, sauberes Framework ist ein gutes Framework. Es gibt KEINE Mindestanzahl an Unterpunkten oder Ebenen, und "mehr Tiefe/Ausführlichkeit" ist NIEMALS ein Grund für substanziellen Abzug.
+- Der Kandidat hat die Beispiel-Lösung NIE gesehen. Übereinstimmung mit ihr (auch wörtlich) belegt Kompetenz — es gibt keinen "Kopier"-Tatbestand, Ähnlichkeit ist nie ein Mangel und gehört nicht ins Feedback. Gleiches gilt für Begriffe aus Case-Text/Briefing: Übernahme ist korrektes Arbeiten am Case.
 
-SCORING-ANKER (wende sie IMMER gleich an):
+KALIBRIER-ANKER — HALTE DIESE GESAMTWERTE EIN. Das Unterscheidungsmerkmal zwischen den Stufen ist die ABDECKUNG der Kern-Hebel, NIE die Ausführlichkeit der Formulierung:
+- Antwort deckt praktisch ALLE Kern-Hebel des Cases ab (vgl. Beispiel-Lösung/Interviewer-Hinweise) und ist MECE — egal wie knapp formuliert, egal wie angeordnet: 92-100. NIEMALS unter 90.
+- Gute Struktur: deckt die meisten Kern-Hebel ab, weitgehend MECE: 75-90.
+- Solide mittlere Antwort: passende, kaum überschneidende Äste, aber nur ein TEIL der Kern-Hebel abgedeckt (typisch: 3 passende Äste, ein bis zwei wichtige Dimensionen des Cases fehlen ganz): 60-70. NICHT darunter, solange die Aufteilung zum Case passt.
+- Dünn, aber erkennbar am Case (nur 2 Äste oder Mehrheit der Kern-Hebel fehlt): 45-60.
+- Wirr, leer oder klar am Case vorbei: unter 40.
+Gezielte, kluge Rückfragen sprechen für den Kandidaten — im Zweifel aufrunden. Fehlende Rückfragen NIEMALS bestrafen.
 
-Framework-Wahl (max 25) — Default HOCH:
-- 21-25: Ansatz passt zum Case, Hauptäste decken die Kern-Dimensionen ab (ein Lehrbuch-Framework-Name ist NICHT nötig).
-- 16-20: Vernünftiger Ansatz mit klarem Case-Bezug, aber teils generisch oder etwas schief zugeschnitten.
-- 12-15: Standard-Struktur, die den Kern des Cases nur teilweise trifft.
-- 6-11: Ansatz erkennbar, passt aber überwiegend nicht zur Frage.
-- 0-5: Kein erkennbarer oder komplett falscher Ansatz.
+SCORING-ANKER je Dimension (konsistent mit den Gesamtwerten oben anwenden):
 
-Struktur & MECE (max 30) — Default HOCH:
-- 26-30: 3+ klar getrennte Äste, saubere Hierarchie, praktisch keine Überschneidungen.
-- 20-25: 3+ Äste mit kleineren Überschneidungen oder ungleicher Tiefe — im Interview völlig normal.
-- 15-19: 2-3 halbwegs getrennte Äste; Gliederung erkennbar trotz MECE-Lücken.
-- 8-14: Struktur nur in Ansätzen, starke Überschneidungen oder nur 1 echter Ast.
+Framework-Wahl (max 25) — Default SEHR HOCH:
+- 23-25: Ansatz passt zum Case, Äste adressieren die Frage sinnvoll (Standard-Fall; kein Lehrbuch-Name nötig).
+- 18-22: Passt überwiegend, einzelne Äste laufen am Thema vorbei.
+- 12-17: Generischer Ansatz, trifft den Kern nur teilweise.
+- 0-11: Passt überwiegend nicht / kein erkennbarer Ansatz.
+
+Struktur & MECE (max 30) — das wichtigste Kriterium, HIER wird differenziert:
+- 27-30: Äste klar getrennt, keine nennenswerten Überschneidungen, logische Aufteilung (Kürze ist egal).
+- 22-26: Weitgehend MECE, kleine Überschneidungen oder Unschärfen.
+- 15-21: Erkennbare Struktur, aber deutliche Überschneidungen ODER ein Ast vermischt mehrere Ebenen.
+- 8-14: Starke Überschneidungen, Aufteilung wenig logisch.
 - 0-7: Keine erkennbare Struktur.
 
-Vollständigkeit (max 25) — Maßstab sind die Kern-Hebel des Cases (siehe Interviewer-Hinweise/Beispiel-Lösung), NICHT maximale Breite:
-- 21-25: Die wichtigsten Hebel sind abgedeckt.
-- 16-20: Kern überwiegend da, 1-2 wichtige Aspekte fehlen.
-- 12-15: Rund die Hälfte der Kern-Hebel abgedeckt — für eine solide Basis-Antwort normal.
-- 6-11: Deutliche Lücken, überwiegend Randaspekte.
-- 0-5: Am Case vorbei.
+Vollständigkeit (max 25) — großzügig; Kürze ist KEINE Unvollständigkeit, stichwortartig genügt:
+- 22-25: Alle oder fast alle zentralen Hebel des Cases sind adressiert (auch nur als kurzes Stichwort).
+- 17-21: Die meisten Kern-Hebel da, einer fehlt.
+- 12-16: Etwa die Hälfte der Kern-Hebel — typisch für eine knappe mittlere Antwort.
+- 0-11: Überwiegend Randthemen, Kern klar verfehlt.
 
-Priorisierung (max 20) — bei erkennbarer Struktur NIE unter 8:
-- 17-20: Top-Priorität markiert (⭐) ODER klarer Fokus über Tiefe — und der Fokus passt zum Case.
-- 13-16: Priorisierung erkennbar, aber nicht ganz stimmig oder nicht vertieft.
-- 8-12: Keine explizite Priorisierung, gleichmäßige Analyse (Standard — nicht bestrafen).
-- 4-7: Fokus liegt klar auf Nebensächlichem.
-- 0-3: Wirr, keine erkennbare Gewichtung.` :
+Priorisierung (max 20) — großzügig:
+- 17-20: Top-Priorität markiert (⭐) ODER erkennbarer Fokus — und er passt zum Case.
+- 13-16: Leichte Gewichtung erkennbar, nicht ganz stimmig.
+- 10-12: Keine Priorisierung, gleichmäßige Analyse (Standard — nicht bestrafen).
+- 0-9: Fokus klar auf Nebensächlichem oder wirr.` :
     drillType === "charts" ? `
 SCORING-ANKER (für Konsistenz – wende diese IMMER gleich an):
 - Daten-Ablesung: Zahlen korrekt gelesen und benannt = 20-25. Größtenteils korrekt = 12-19. Falsche/fehlende Werte = 0-11.
@@ -129,8 +129,8 @@ WICHTIG: Bei einer Antwort mit 3-4 thematisch gruppierten Bullet-Points zur Frag
   const difficultyGuidance =
     drillType === "frameworks" ? (
       difficulty === "hard"
-        ? "Schwierigkeit: SCHWER (ca. 7-10 Min). Ziel: 3-5 Äste, etwas Tiefe bei den wichtigen Hebeln, erkennbare Priorisierung. Ein guter strukturierter Ansatz verdient 65-80 Punkte, eine solide Basis-Struktur 50-65. 85+ wenn die Kern-Hebel plus Trade-offs sauber abgedeckt sind."
-        : "Schwierigkeit: MITTEL (ca. 5-7 Min). Ziel: 3-4 Äste mit einigen Unterpunkten. Ein solider Ansatz verdient 70-85 Punkte, eine halbwegs anständige Basis-Struktur 50-65. Sei großzügig."
+        ? "Schwierigkeit: SCHWER. Es gilt DIESELBE großzügige Skala wie oben — Muster-nah bleibt 92+, eine solide mittlere Antwort bleibt 60-70. Du darfst etwas mehr Breite erwarten, aber bestrafe Kürze nicht; entscheidend bleibt die MECE-Aufteilung."
+        : "Schwierigkeit: MITTEL. Wende die großzügige Skala oben direkt an: Muster-nah = 92+, gute Struktur = 75-90, solide mittlere Antwort = 60-70. Kürze und Einfachheit nicht bestrafen."
     ) : drillType === "creativity" ? (
       difficulty === "medium" ? "Schwierigkeit: NORMAL. SEHR großzügig. Stichpunkte alleine sind voll ausreichend, Erklärungen NICHT erforderlich. 80-90 Punkte ist der Default für eine Antwort mit 3-4 relevanten, thematisch gruppierten Bullets. Nur drunter ziehen wenn Antwort offensichtlich off-topic ist oder zentrale Punkte komplett fehlen." :
       "Schwierigkeit: SCHWER. Großzügig. Stichpunkte und kurze Sätze sind weiter ausreichend, aber 3-5 relevante Punkte gehören rein. 70-85 Punkte für eine strukturierte Stichpunkt-Antwort ist normal."
