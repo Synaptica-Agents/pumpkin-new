@@ -14,6 +14,28 @@ export function createEmptyNode(): FrameworkNode {
   };
 }
 
+export function updateNodeInTree(
+  nodes: FrameworkNode[],
+  targetId: string,
+  updater: (n: FrameworkNode) => FrameworkNode
+): FrameworkNode[] {
+  return nodes.map((n) => {
+    if (n.id === targetId) return updater(n);
+    if (n.children.length > 0) {
+      return { ...n, children: updateNodeInTree(n.children, targetId, updater) };
+    }
+    return n;
+  });
+}
+
+export function removeNodeFromTree(nodes: FrameworkNode[], targetId: string): FrameworkNode[] {
+  return nodes
+    .filter((n) => n.id !== targetId)
+    .map((n) =>
+      n.children.length > 0 ? { ...n, children: removeNodeFromTree(n.children, targetId) } : n
+    );
+}
+
 function serializeNode(node: FrameworkNode, path: string, depth: number): string {
   const indent = "  ".repeat(depth);
   const label = depth === 0 ? "Ast" : "Unterast";

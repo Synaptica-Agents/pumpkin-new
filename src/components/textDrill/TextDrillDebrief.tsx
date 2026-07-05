@@ -26,6 +26,7 @@ const TextDrillDebrief: React.FC<TextDrillDebriefProps> = ({
       : 0;
   }
 
+  const isSprint = config.sprintMode !== false;
   const firstRubric = config.rubricLabels[0];
   const emoji = avgScore >= 80 ? "\uD83C\uDFC6" : avgScore >= 60 ? "\uD83C\uDFAF" : avgScore >= 40 ? "\uD83D\uDCAA" : "\uD83D\uDCC8";
 
@@ -41,9 +42,14 @@ const TextDrillDebrief: React.FC<TextDrillDebriefProps> = ({
       {/* Header */}
       <div className="text-center">
         <span className="text-4xl">{emoji}</span>
-        <h2 className="mt-2 text-2xl font-bold text-foreground">{config.title} Sprint beendet!</h2>
+        <h2 className="mt-2 text-2xl font-bold text-foreground">
+          {config.title} {isSprint ? "Sprint" : "Session"} beendet!
+        </h2>
         <p className="text-muted-foreground">
-          {getDurationLabel(durationSeconds)} Sprint &bull; {results.length} Aufgabe{results.length !== 1 ? "n" : ""}
+          {isSprint
+            ? `${getDurationLabel(durationSeconds)} Sprint`
+            : `${Math.max(1, Math.round(durationSeconds / 60))} Min`}{" "}
+          &bull; {results.length} Aufgabe{results.length !== 1 ? "n" : ""}
         </p>
       </div>
 
@@ -107,7 +113,7 @@ const TextDrillDebrief: React.FC<TextDrillDebriefProps> = ({
       {/* Restart */}
       <div className="flex justify-center pt-2">
         <DrillButton variant="active" size="lg" onClick={onRestart} className="gap-2">
-          <RotateCcw className="h-4 w-4" /> Neuer Sprint
+          <RotateCcw className="h-4 w-4" /> {isSprint ? "Neuer Sprint" : "Neue Session"}
         </DrillButton>
       </div>
     </div>

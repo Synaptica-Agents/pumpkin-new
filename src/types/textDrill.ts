@@ -1,3 +1,5 @@
+import { FrameworkNode } from "@/types/frameworkBuilder";
+
 export interface TextDrillCase {
   id: string;
   difficulty: "easy" | "medium" | "hard";
@@ -5,6 +7,7 @@ export interface TextDrillCase {
   category?: string;
   context_info?: string | null;
   reference_solution?: string | null;
+  reference_tree?: FrameworkNode[] | null; // only for frameworks drill: graphical sample solution
 }
 
 export interface TextDrillEvaluation {

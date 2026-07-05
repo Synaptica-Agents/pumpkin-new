@@ -16,6 +16,7 @@ import {
   IconCaseMath,
   IconCreativity,
   IconMarketSizing,
+  IconFrameworks,
 } from "@/components/drillIcons";
 
 const modules: Omit<ModuleCardProps, "emailParam">[] = [
@@ -42,6 +43,14 @@ const modules: Omit<ModuleCardProps, "emailParam">[] = [
     status: "active",
     href: "/market-sizing-drill",
     drillType: "market_sizing",
+  },
+  {
+    title: "Frameworks",
+    description: "Wähle das passende Framework und baue eine strukturierte Analyse.",
+    icon: <IconFrameworks size={80} />,
+    status: "active",
+    href: "/frameworks-drill",
+    drillType: "frameworks",
   },
   {
     title: "Creativity",

@@ -1,6 +1,7 @@
 import React from "react";
 import { TextDrillResult as TDResult, DrillConfig } from "@/types/textDrill";
 import { DrillButton } from "@/components/ui/drill-button";
+import FrameworkTreeViewer from "@/components/frameworkBuilder/FrameworkTreeViewer";
 import { ArrowRight, CheckCircle, AlertTriangle, Star, TrendingUp, BookOpen } from "lucide-react";
 
 interface TextDrillResultProps {
@@ -118,15 +119,19 @@ const TextDrillResultView: React.FC<TextDrillResultProps> = ({
       )}
 
       {/* Reference Solution */}
-      {result.case.reference_solution && (
+      {(result.case.reference_tree?.length || result.case.reference_solution) && (
         <details className="rounded-xl border border-border p-4">
           <summary className="text-sm font-semibold text-foreground cursor-pointer flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-primary" /> Beispiel-Lösung anzeigen
           </summary>
           <div className="mt-3">
-            <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
-              {result.case.reference_solution}
-            </p>
+            {result.case.reference_tree?.length ? (
+              <FrameworkTreeViewer nodes={result.case.reference_tree} />
+            ) : (
+              <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
+                {result.case.reference_solution}
+              </p>
+            )}
           </div>
         </details>
       )}

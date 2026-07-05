@@ -10,19 +10,21 @@ import {
   IconCaseMath,
   IconCreativity,
   IconMarketSizing,
+  IconFrameworks,
 } from "@/components/drillIcons";
 import { TrendingUp, Hash, Award } from "lucide-react";
 
-type DrillKey = "mental_math" | "case_math" | "creativity" | "market_sizing";
+type DrillKey = "mental_math" | "case_math" | "creativity" | "market_sizing" | "frameworks";
 
 const DRILL_META: Record<DrillKey, { label: string; icon: React.FC<{ size?: number }>; scoreSuffix: string }> = {
   mental_math: { label: "Mental Math", icon: IconMentalMath, scoreSuffix: "%" },
   case_math: { label: "Case Math", icon: IconCaseMath, scoreSuffix: "%" },
   creativity: { label: "Creativity", icon: IconCreativity, scoreSuffix: "/100" },
   market_sizing: { label: "Market Sizing", icon: IconMarketSizing, scoreSuffix: "/100" },
+  frameworks: { label: "Frameworks", icon: IconFrameworks, scoreSuffix: "/100" },
 };
 
-const DRILL_ORDER: DrillKey[] = ["mental_math", "case_math", "creativity", "market_sizing"];
+const DRILL_ORDER: DrillKey[] = ["mental_math", "case_math", "creativity", "market_sizing", "frameworks"];
 
 const fmtScore = (drill: DrillKey, n: number): string => {
   const rounded = Math.round(n);
