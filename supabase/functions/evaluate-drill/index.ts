@@ -59,7 +59,11 @@ Der Kandidat konnte vor dem Strukturieren Rückfragen an den Interviewer stellen
 
 GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
 Du bewertest eine spontane Interview-Struktur, KEINE Consulting-Master-Lösung. Casebook-Prinzip: "There are many possible alternatives to this framework" — eine mitgegebene Beispiel-Struktur ist NUR EINE Möglichkeit; jede in sich logische, zum Case passende Alternative verdient genauso viele Punkte.
-- Eine halbwegs anständige Struktur (2-3 sinnvolle, erkennbar getrennte Äste mit klarem Bezug zum Case) bekommt IN SUMME MINDESTENS 50 Punkte. Runde im Zweifel AUF.
+- Der Kandidat hat die Beispiel-Lösung zu KEINEM Zeitpunkt gesehen — sie wird ihm nie angezeigt, bevor er abgibt. Jede Übereinstimmung mit ihr, auch eine wörtliche, ist unabhängig entstanden und belegt schlicht Kompetenz. Es gibt KEINEN "Kopier"-Tatbestand. Werte NIEMALS ab wegen Ähnlichkeit, angeblich fehlender "Eigenständigkeit" oder "Originalität" gegenüber der Beispiel-Lösung, und thematisiere Ähnlichkeit auch NICHT im Feedback. Eine Antwort, die inhaltlich der Beispiel-Lösung entspricht, ist per Definition 90+.
+- Dasselbe gilt für den Case-Text und die Kontext-Infos: Kandidaten übernehmen selbstverständlich Begriffe, Zahlen und Formulierungen aus der Aufgabe in ihre Struktur — das ist korrektes Arbeiten am Case, kein "Abschreiben aus dem Briefing" und NIEMALS ein Abzugsgrund.
+- Eine halbwegs anständige Struktur (2-3 sinnvolle, erkennbar getrennte Äste mit klarem Bezug zum Case) bekommt IN SUMME MINDESTENS 50 Punkte. Runde im Zweifel AUF. Das gilt AUCH, wenn sie deutlich schmaler ist als die Beispiel-Lösung — die Beispiel-Lösung ist Obergrenze-Referenz, nicht Mindestanforderung.
+- Auch ein passender Rahmen aus 3 Ast-Titeln mit nur wenigen Stichpunkten ist eine "solide Basis" (50-65). Dünne Äste sind ein Verbesserungshinweis, KEIN Grund unter 50 zu gehen, solange die Aufteilung zum Case passt.
+- Vollständigkeit unter 10/25 nur, wenn die MEHRHEIT der Kern-Hebel fehlt UND Randthemen dominieren. Passende Äste ohne Detailtiefe sind KEIN Vollständigkeits-Mangel dieser Härte.
 - Skala: 50-65 = solide Basis | 65-80 = gut | 80-90 = stark | 90+ = herausragend.
 - Unter 40 nur bei leeren, wirren oder klar am Case vorbeigehenden Antworten.
 - Gezielte, kluge Rückfragen sprechen für den Kandidaten — im Zweifel bei Framework-Wahl und Vollständigkeit aufrunden. Fehlende oder schwache Rückfragen NIEMALS bestrafen.

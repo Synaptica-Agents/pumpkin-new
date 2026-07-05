@@ -17,6 +17,13 @@ import {
 import ZoomableTree from "@/components/frameworkBuilder/ZoomableTree";
 import StepperHeader from "@/components/marketSizing/steps/StepperHeader";
 import { DrillButton } from "@/components/ui/drill-button";
+import { AudioRecorder } from "@/components/ui/AudioRecorder";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import {
   X,
@@ -93,6 +100,7 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
           collapsed={false}
           childCount={node.children.length}
           onToggleCollapse={() => {}}
+          editableBullets
         />
         {canAddChild && (
           <button
@@ -145,6 +153,7 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
   const [isAsking, setIsAsking] = useState(false);
   const [nodes, setNodes] = useState<FrameworkNode[]>([createEmptyNode()]);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+  const [notesHintOpen, setNotesHintOpen] = useState(false);
   const qaEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -155,6 +164,7 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
       setQaInput("");
       setNodes([createEmptyNode()]);
       setLastAddedId(null);
+      setNotesHintOpen(true);
     }
   }, [currentCase?.id]);
 
@@ -286,6 +296,27 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
         labels={FRAMEWORK_STEPS}
       />
 
+      {/* Notizen-Hinweis als Popup beim Case-Start */}
+      <Dialog open={notesHintOpen} onOpenChange={setNotesHintOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <StickyNote className="h-5 w-5 text-primary" /> Mach dir Notizen!
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm leading-relaxed text-foreground">
+            Im nächsten Schritt ist der Case-Text <strong>ausgeblendet</strong> — du baust
+            deine Struktur nur mit deinen Notizen, wie im echten Interview. Notiere dir
+            Klient, Ziel und die wichtigsten Fakten aus deinen Rückfragen.
+          </p>
+          <div className="flex justify-end pt-2">
+            <DrillButton variant="active" onClick={() => setNotesHintOpen(false)}>
+              Verstanden
+            </DrillButton>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* ── Schritt 1: Case-Vorstellung + Rückfragen ── */}
       {currentStep === 0 && (
         <>
@@ -293,14 +324,6 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
             <p className="text-lg font-medium text-foreground leading-relaxed">
               {currentCase.prompt}
             </p>
-            <div className="mt-3 flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
-              <StickyNote className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <span>
-                <strong>Mach dir Notizen!</strong> Im nächsten Schritt ist der Case-Text
-                ausgeblendet — du baust deine Struktur nur mit deinen Notizen, wie im echten
-                Interview.
-              </span>
-            </div>
           </div>
 
           {/* Rückfragen an den Interviewer */}
@@ -372,14 +395,30 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
                 Fragen
               </DrillButton>
             </div>
+            <div className="flex justify-end">
+              <AudioRecorder
+                onTranscript={(text) =>
+                  setQaInput((prev) => (prev ? prev.trimEnd() + " " + text : text))
+                }
+                disabled={isAsking || questionsLeft <= 0 || isEvaluating}
+              />
+            </div>
           </div>
 
           {/* Notizen */}
           <div className="flex flex-col gap-2">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <StickyNote className="h-4 w-4 text-primary" />
-              Deine Notizen
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <StickyNote className="h-4 w-4 text-primary" />
+                Deine Notizen
+              </h2>
+              <AudioRecorder
+                onTranscript={(text) =>
+                  setNotes((prev) => (prev ? prev.trimEnd() + "\n" + text : text))
+                }
+                disabled={isEvaluating}
+              />
+            </div>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -396,13 +435,21 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
       {currentStep === 1 && (
         <>
           <div className="rounded-xl border border-border bg-muted/20 p-4">
-            <div className="mb-1.5 flex items-center justify-between">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                 <StickyNote className="h-3.5 w-3.5 text-primary" /> Deine Notizen
               </span>
-              <span className="text-[11px] text-muted-foreground">
-                Der Case-Text ist ausgeblendet — wie im echten Interview.
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-muted-foreground">
+                  Der Case-Text ist ausgeblendet — wie im echten Interview.
+                </span>
+                <AudioRecorder
+                  onTranscript={(text) =>
+                    setNotes((prev) => (prev ? prev.trimEnd() + "\n" + text : text))
+                  }
+                  disabled={isEvaluating}
+                />
+              </div>
             </div>
             {notes.trim() ? (
               <textarea
@@ -423,9 +470,10 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
           <div>
             <h2 className="text-sm font-semibold text-foreground">Dein Framework</h2>
             <p className="text-xs text-muted-foreground">
-              Bau deine Struktur als Boxen auf — meist ein paar Hauptäste, darunter feinere
-              Unteräste. Klick auf einen Ast, um reinzuzoomen und ihn zu bearbeiten. Markiere
-              mit dem Stern bis zu {MAX_PRIORITIES} Hauptäste als Top-Priorität.
+              Bau deine Struktur als Boxen auf — jede Box hat einen Titel und darunter
+              Stichpunkte; für feinere Aufteilung hängst du Unteräste an. Klick auf einen Ast,
+              um reinzuzoomen und ihn zu bearbeiten. Markiere mit dem Stern bis zu{" "}
+              {MAX_PRIORITIES} Hauptäste als Top-Priorität.
             </p>
           </div>
 
