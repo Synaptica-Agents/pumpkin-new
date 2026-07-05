@@ -40,7 +40,7 @@ const FrameworkIntroModal: React.FC<FrameworkIntroModalProps> = ({
         {structureGuide && structureGuide.length > 0 && (
           <section className="mt-2">
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              So baust du dein Framework
+              So läuft der Drill — wie im echten Interview
             </h3>
             <ol className="space-y-1 text-sm text-foreground">
               {structureGuide.map((step, i) => (
@@ -50,6 +50,10 @@ const FrameworkIntroModal: React.FC<FrameworkIntroModalProps> = ({
                 </li>
               ))}
             </ol>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Der KI-Interviewer beantwortet Rückfragen nur, wenn es dazu Informationen gibt —
+              sonst sagt er dir das offen. Genau wie ein echter Interviewer.
+            </p>
           </section>
         )}
 

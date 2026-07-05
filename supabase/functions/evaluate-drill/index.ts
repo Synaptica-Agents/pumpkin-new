@@ -55,37 +55,44 @@ Die Antwort kommt als hierarchischer Issue Tree:
 - "  - Punkt" = Unterpunkte je Ast
 - "  [Unterast N.M] Titel" = Unteräste (children)
 - "    - Punkt" = Unterpunkte der Unteräste
-Bewerte Baumstruktur, MECE-Eigenschaft, Tiefe der Analyse, und ob die Aufteilung logisch zum Szenario passt.
+Der Kandidat konnte vor dem Strukturieren Rückfragen an den Interviewer stellen (wie im echten Interview). Falls unten RÜCKFRAGEN mitgegeben sind, zeigen sie, welche Informationen der Kandidat hatte.
 
-SCORING-ANKER (5 Stufen pro Dimension – wende IMMER gleich an):
+GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
+Du bewertest eine spontane Interview-Struktur, KEINE Consulting-Master-Lösung. Casebook-Prinzip: "There are many possible alternatives to this framework" — eine mitgegebene Beispiel-Struktur ist NUR EINE Möglichkeit; jede in sich logische, zum Case passende Alternative verdient genauso viele Punkte.
+- Eine halbwegs anständige Struktur (2-3 sinnvolle, erkennbar getrennte Äste mit klarem Bezug zum Case) bekommt IN SUMME MINDESTENS 50 Punkte. Runde im Zweifel AUF.
+- Skala: 50-65 = solide Basis | 65-80 = gut | 80-90 = stark | 90+ = herausragend.
+- Unter 40 nur bei leeren, wirren oder klar am Case vorbeigehenden Antworten.
+- Gezielte, kluge Rückfragen sprechen für den Kandidaten — im Zweifel bei Framework-Wahl und Vollständigkeit aufrunden. Fehlende oder schwache Rückfragen NIEMALS bestrafen.
 
-Framework-Wahl (max 25):
-- 23-25: Passendes Framework klar erkennbar, Top-Level-Äste decken Kern-Dimensionen des Szenarios ab.
-- 19-22: Richtiger Ansatz, aber nicht perfekt zugeschnitten (z.B. generisches Framework statt spezifisch).
-- 15-18: Grundlegend richtig, aber Äste passen nur teilweise.
-- 10-14: Ansatz erkennbar, aber Framework passt schlecht.
-- 0-9: Kein erkennbares/falsches Framework.
+SCORING-ANKER (wende sie IMMER gleich an):
 
-Struktur & MECE (max 30):
-- 27-30: 3+ MECE-Äste, saubere Hierarchie, keine Überschneidungen, konsistente Tiefe.
-- 22-26: 3+ Äste mit kleinen MECE-Lücken oder leicht unterschiedlicher Tiefe.
-- 17-21: 2-3 Äste, grundsätzlich logisch, aber Überschneidungen oder fehlende Ebenen.
-- 10-16: Struktur vorhanden, aber nicht MECE oder sehr flach.
-- 0-9: Keine erkennbare Struktur.
+Framework-Wahl (max 25) — Default HOCH:
+- 21-25: Ansatz passt zum Case, Hauptäste decken die Kern-Dimensionen ab (ein Lehrbuch-Framework-Name ist NICHT nötig).
+- 16-20: Vernünftiger Ansatz mit klarem Case-Bezug, aber teils generisch oder etwas schief zugeschnitten.
+- 12-15: Standard-Struktur, die den Kern des Cases nur teilweise trifft.
+- 6-11: Ansatz erkennbar, passt aber überwiegend nicht zur Frage.
+- 0-5: Kein erkennbarer oder komplett falscher Ansatz.
 
-Vollständigkeit (max 25):
-- 23-25: Alle zentralen Hebel abgedeckt, keine wichtigen Aspekte fehlen.
-- 19-22: Zentrale Hebel da, 1-2 kleinere Lücken.
-- 15-18: Wichtigste Punkte da, aber sichtbare Lücken in Kern-Dimensionen.
-- 10-14: Mehrere wichtige Aspekte fehlen.
-- 0-9: Nur oberflächlich, meiste zentrale Hebel fehlen.
+Struktur & MECE (max 30) — Default HOCH:
+- 26-30: 3+ klar getrennte Äste, saubere Hierarchie, praktisch keine Überschneidungen.
+- 20-25: 3+ Äste mit kleineren Überschneidungen oder ungleicher Tiefe — im Interview völlig normal.
+- 15-19: 2-3 halbwegs getrennte Äste; Gliederung erkennbar trotz MECE-Lücken.
+- 8-14: Struktur nur in Ansätzen, starke Überschneidungen oder nur 1 echter Ast.
+- 0-7: Keine erkennbare Struktur.
 
-Priorisierung (max 20):
-- 18-20: Top-Priorität markiert UND genau diese Äste tiefer analysiert (mehr Unteräste/Bullets).
-- 14-17: Top-Priorität markiert, aber Analyse-Tiefe nicht fokussiert, ODER keine Markierung aber klarer Fokus über Tiefe.
-- 10-13: Kein Stern + gleichmäßige Analyse (neutral).
-- 5-9: Kein Stern + unpassende Tiefen-Verteilung (z.B. Nebensache vertieft).
-- 0-4: Keine erkennbare Priorisierung.` :
+Vollständigkeit (max 25) — Maßstab sind die Kern-Hebel des Cases (siehe Interviewer-Hinweise/Beispiel-Lösung), NICHT maximale Breite:
+- 21-25: Die wichtigsten Hebel sind abgedeckt.
+- 16-20: Kern überwiegend da, 1-2 wichtige Aspekte fehlen.
+- 12-15: Rund die Hälfte der Kern-Hebel abgedeckt — für eine solide Basis-Antwort normal.
+- 6-11: Deutliche Lücken, überwiegend Randaspekte.
+- 0-5: Am Case vorbei.
+
+Priorisierung (max 20) — bei erkennbarer Struktur NIE unter 8:
+- 17-20: Top-Priorität markiert (⭐) ODER klarer Fokus über Tiefe — und der Fokus passt zum Case.
+- 13-16: Priorisierung erkennbar, aber nicht ganz stimmig oder nicht vertieft.
+- 8-12: Keine explizite Priorisierung, gleichmäßige Analyse (Standard — nicht bestrafen).
+- 4-7: Fokus liegt klar auf Nebensächlichem.
+- 0-3: Wirr, keine erkennbare Gewichtung.` :
     drillType === "charts" ? `
 SCORING-ANKER (für Konsistenz – wende diese IMMER gleich an):
 - Daten-Ablesung: Zahlen korrekt gelesen und benannt = 20-25. Größtenteils korrekt = 12-19. Falsche/fehlende Werte = 0-11.
@@ -117,9 +124,9 @@ WICHTIG: Bei einer Antwort mit 3-4 thematisch gruppierten Bullet-Points zur Frag
 
   const difficultyGuidance =
     drillType === "frameworks" ? (
-      difficulty === "easy" ? "Schwierigkeit: EINFACH (ca. 5 Min Bearbeitung). Ziel: 2-3 MECE-Äste mit je 2-3 Bullets. Ein solider, strukturierter Ansatz verdient 75-85 Punkte. 90+ nur wenn Framework-Wahl UND Priorisierung klar erkennbar UND Tiefe stimmt." :
-      difficulty === "medium" ? "Schwierigkeit: MITTEL (ca. 5-7 Min). Ziel: 3-4 MECE-Äste mit Unterästen, klare Priorisierung. Ein solider Ansatz verdient 70-80 Punkte. 85+ wenn alle Kern-Dimensionen sauber ausgebaut sind." :
-      "Schwierigkeit: SCHWER (ca. 7-10 Min). Ziel: 4+ MECE-Äste, tiefe Unterebenen, klare Priorisierung mit Begründungs-Logik. Ein guter Ansatz verdient 65-75 Punkte. 85+ wenn auch Trade-offs und sekundäre Hebel erkennbar sind."
+      difficulty === "hard"
+        ? "Schwierigkeit: SCHWER (ca. 7-10 Min). Ziel: 3-5 Äste, etwas Tiefe bei den wichtigen Hebeln, erkennbare Priorisierung. Ein guter strukturierter Ansatz verdient 65-80 Punkte, eine solide Basis-Struktur 50-65. 85+ wenn die Kern-Hebel plus Trade-offs sauber abgedeckt sind."
+        : "Schwierigkeit: MITTEL (ca. 5-7 Min). Ziel: 3-4 Äste mit einigen Unterpunkten. Ein solider Ansatz verdient 70-85 Punkte, eine halbwegs anständige Basis-Struktur 50-65. Sei großzügig."
     ) : drillType === "creativity" ? (
       difficulty === "medium" ? "Schwierigkeit: NORMAL. SEHR großzügig. Stichpunkte alleine sind voll ausreichend, Erklärungen NICHT erforderlich. 80-90 Punkte ist der Default für eine Antwort mit 3-4 relevanten, thematisch gruppierten Bullets. Nur drunter ziehen wenn Antwort offensichtlich off-topic ist oder zentrale Punkte komplett fehlen." :
       "Schwierigkeit: SCHWER. Großzügig. Stichpunkte und kurze Sätze sind weiter ausreichend, aber 3-5 relevante Punkte gehören rein. 70-85 Punkte für eine strukturierte Stichpunkt-Antwort ist normal."
@@ -249,6 +256,9 @@ serve(async (req) => {
       difficulty,
       context_info,
       reference_solution,
+      framework_guidance,
+      interviewer_notes,
+      asked_qa,
     } = body;
 
     if (!drill_type || !case_prompt || !answer_text) {
@@ -271,11 +281,23 @@ serve(async (req) => {
       ? `\nKONTEXT / HINWEISE:\n${context_info}`
       : "";
 
-    const referenceBlock = reference_solution
-      ? `\nBEISPIEL-LÖSUNG (nur als Referenz für Tiefe und Breite – User muss sie nicht wörtlich treffen):\n${reference_solution}`
+    const referenceText = framework_guidance || reference_solution;
+    const referenceBlock = referenceText
+      ? `\nBEISPIEL-LÖSUNG (nur EINE von vielen möglichen Strukturen – Referenz für Tiefe und Breite, der User muss sie NICHT treffen):\n${referenceText}`
       : "";
 
-    const userPrompt = `AUFGABE: ${case_prompt}${contextBlock}${referenceBlock}
+    const notesBlock = interviewer_notes
+      ? `\nINTERVIEWER-HINWEISE (interner Bewertungsmaßstab: welche Hebel in diesem Case wirklich zählen):\n${interviewer_notes}`
+      : "";
+
+    const askedQaBlock =
+      Array.isArray(asked_qa) && asked_qa.length > 0
+        ? `\nRÜCKFRAGEN DES KANDIDATEN AN DEN INTERVIEWER (vor dem Strukturieren gestellt):\n${asked_qa
+            .map((p: { q?: string; a?: string }) => `- Frage: ${p?.q ?? ""}\n  Antwort: ${p?.a ?? ""}`)
+            .join("\n")}`
+        : "";
+
+    const userPrompt = `AUFGABE: ${case_prompt}${contextBlock}${notesBlock}${referenceBlock}${askedQaBlock}
 
 ANTWORT DES USERS:
 ${answer_text}

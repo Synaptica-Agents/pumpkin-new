@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { TextDrillCase } from "@/types/textDrill";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { TextDrillCase, ClarifyingQA } from "@/types/textDrill";
 import { FrameworkNode } from "@/types/frameworkBuilder";
 import {
   createEmptyNode,
@@ -15,21 +15,38 @@ import {
   ChildColumn,
 } from "@/components/frameworkBuilder/FrameworkTreeConnectors";
 import ZoomableTree from "@/components/frameworkBuilder/ZoomableTree";
+import StepperHeader from "@/components/marketSizing/steps/StepperHeader";
 import { DrillButton } from "@/components/ui/drill-button";
-import { X, Send, Info, Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  X,
+  Send,
+  Info,
+  Plus,
+  ArrowLeft,
+  ArrowRight,
+  MessageCircleQuestion,
+  StickyNote,
+  Loader2,
+} from "lucide-react";
 
 const MAX_TOP_LEVEL = 6;
 const MAX_CHILDREN = 4;
 const MAX_DEPTH = 4;
 const MAX_PRIORITIES = 2;
+const MAX_QUESTIONS = 5;
+
+const FRAMEWORK_STEPS = ["Case & Rückfragen", "Struktur"] as const;
 
 interface FrameworksGameProps {
   currentCase: TextDrillCase | null;
-  onSubmit: (answerText: string) => void;
+  onSubmit: (answerText: string, askedQA: ClarifyingQA[]) => void;
   onEnd: () => void;
   isEvaluating: boolean;
   onOpenIntro?: () => void;
 }
+
+/* ── Baum (wie Market-Sizing-Strukturschritt, ohne Rechenoperationen) ── */
 
 interface TreeBranchProps {
   node: FrameworkNode;
@@ -44,8 +61,6 @@ interface TreeBranchProps {
   onAddChild: (parentId: string) => void;
 }
 
-/** Same tree building as the Market-Sizing structure step — just without
- *  the pairwise math operations. Top-level nodes carry the priority star. */
 const TreeBranch: React.FC<TreeBranchProps> = ({
   node,
   color,
@@ -114,6 +129,8 @@ const TreeBranch: React.FC<TreeBranchProps> = ({
   );
 };
 
+/* ── Hauptkomponente ── */
+
 const FrameworksGame: React.FC<FrameworksGameProps> = ({
   currentCase,
   onSubmit,
@@ -121,17 +138,71 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
   isEvaluating,
   onOpenIntro,
 }) => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [notes, setNotes] = useState("");
+  const [qaHistory, setQaHistory] = useState<ClarifyingQA[]>([]);
+  const [qaInput, setQaInput] = useState("");
+  const [isAsking, setIsAsking] = useState(false);
   const [nodes, setNodes] = useState<FrameworkNode[]>([createEmptyNode()]);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+  const qaEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (currentCase) {
+      setCurrentStep(0);
+      setNotes("");
+      setQaHistory([]);
+      setQaInput("");
       setNodes([createEmptyNode()]);
       setLastAddedId(null);
     }
   }, [currentCase?.id]);
 
+  // Neue Antworten im Q&A-Verlauf ins Sichtfeld scrollen.
+  useEffect(() => {
+    qaEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [qaHistory, isAsking]);
+
   const priorityCount = useMemo(() => nodes.filter((n) => n.isPriority).length, [nodes]);
+  const questionsLeft = MAX_QUESTIONS - qaHistory.length;
+
+  const askQuestion = useCallback(async () => {
+    const question = qaInput.trim();
+    if (!question || !currentCase || isAsking || qaHistory.length >= MAX_QUESTIONS) return;
+    setIsAsking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("frameworks-interviewer", {
+        body: {
+          case_prompt: currentCase.prompt,
+          question,
+          clarifying_qa: currentCase.clarifying_qa ?? null,
+          context_info: currentCase.context_info ?? null,
+          interviewer_notes: currentCase.interviewer_notes ?? null,
+          history: qaHistory,
+        },
+      });
+      if (error) throw error;
+      const answer: string =
+        data?.answer ||
+        data?.error ||
+        "Dazu liegen mir keine Informationen vor — das ist für deine Struktur aber nicht entscheidend.";
+      setQaHistory((prev) => [...prev, { q: question, a: answer }]);
+      setQaInput("");
+    } catch (err) {
+      console.error("Interviewer error:", err);
+      setQaHistory((prev) => [
+        ...prev,
+        {
+          q: question,
+          a: "Entschuldige, die Antwort ist gerade fehlgeschlagen. Stell die Frage gern noch einmal.",
+        },
+      ]);
+    } finally {
+      setIsAsking(false);
+    }
+  }, [qaInput, currentCase, isAsking, qaHistory]);
+
+  /* ── Baum-Handler ── */
 
   const updateNode = useCallback((nodeId: string, updated: FrameworkNode) => {
     setNodes((prev) => updateNodeInTree(prev, nodeId, () => updated));
@@ -162,7 +233,6 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
     setLastAddedId(child.id);
   }, []);
 
-  // Priority stars live on top-level nodes only (max 2).
   const togglePriority = useCallback((nodeId: string) => {
     setNodes((prev) => {
       const target = prev.find((n) => n.id === nodeId);
@@ -176,8 +246,8 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
 
   const handleSubmit = useCallback(() => {
     if (!isFrameworkValid({ nodes })) return;
-    onSubmit(serializeFramework({ nodes }));
-  }, [nodes, onSubmit]);
+    onSubmit(serializeFramework({ nodes }), qaHistory);
+  }, [nodes, qaHistory, onSubmit]);
 
   if (!currentCase) return null;
 
@@ -185,6 +255,7 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Kopfzeile */}
       <div className="flex w-full items-center gap-3">
         <div className="flex-1">
           <span className="text-xs text-muted-foreground">Nimm dir die Zeit, die du brauchst.</span>
@@ -209,76 +280,238 @@ const FrameworksGame: React.FC<FrameworksGameProps> = ({
         </DrillButton>
       </div>
 
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
-        <p className="text-lg font-medium text-foreground leading-relaxed">{currentCase.prompt}</p>
-        {currentCase.context_info && (
-          <div className="mt-2 flex items-start gap-2 text-sm text-muted-foreground">
-            <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-            <span>{currentCase.context_info}</span>
+      <StepperHeader
+        currentStep={currentStep}
+        onJumpTo={setCurrentStep}
+        labels={FRAMEWORK_STEPS}
+      />
+
+      {/* ── Schritt 1: Case-Vorstellung + Rückfragen ── */}
+      {currentStep === 0 && (
+        <>
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
+            <p className="text-lg font-medium text-foreground leading-relaxed">
+              {currentCase.prompt}
+            </p>
+            <div className="mt-3 flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
+              <StickyNote className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span>
+                <strong>Mach dir Notizen!</strong> Im nächsten Schritt ist der Case-Text
+                ausgeblendet — du baust deine Struktur nur mit deinen Notizen, wie im echten
+                Interview.
+              </span>
+            </div>
           </div>
-        )}
-      </div>
 
-      <div>
-        <h2 className="text-sm font-semibold text-foreground">Dein Framework</h2>
-        <p className="text-xs text-muted-foreground">
-          Bau deine Struktur als Boxen auf — meist ein paar Hauptäste, darunter feinere
-          Unteräste. Klick auf einen Ast, um reinzuzoomen und ihn zu bearbeiten. Markiere
-          mit dem Stern bis zu {MAX_PRIORITIES} Hauptäste als Top-Priorität.
-        </p>
-      </div>
+          {/* Rückfragen an den Interviewer */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <MessageCircleQuestion className="h-4 w-4 text-primary" />
+                Rückfragen an den Interviewer
+              </h2>
+              <span className="text-xs text-muted-foreground">
+                {questionsLeft > 0
+                  ? `Noch ${questionsLeft} Frage${questionsLeft !== 1 ? "n" : ""}`
+                  : "Fragen-Limit erreicht"}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Wie im echten Interview: Die Informationen sind begrenzt — zu manchen Fragen gibt
+              es schlicht keine Daten. 1-2 gezielte Fragen reichen oft.
+            </p>
 
-      <div className="rounded-xl border border-border bg-muted/20 p-4">
-        <ZoomableTree
-          nodes={nodes}
-          renderBranch={(node, color) => (
-            <TreeBranch
-              node={node}
-              color={color}
-              depth={1}
-              disabled={isEvaluating}
-              lastAddedId={lastAddedId}
-              canSetPriority={priorityCount < MAX_PRIORITIES}
-              onTogglePriority={togglePriority}
-              onUpdate={updateNode}
-              onRemove={removeNode}
-              onAddChild={addChildNode}
-            />
-          )}
-          headerAddon={
-            nodes.length < MAX_TOP_LEVEL ? (
-              <button
-                type="button"
-                onClick={addNode}
-                disabled={isEvaluating}
-                className="flex items-center gap-1.5 rounded-lg border-2 border-dashed border-border px-3 py-2 text-xs text-muted-foreground/60 transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-30"
+            {(qaHistory.length > 0 || isAsking) && (
+              <div className="flex max-h-[300px] flex-col gap-3 overflow-y-auto rounded-xl border border-border bg-muted/20 p-4">
+                {qaHistory.map((qa, i) => (
+                  <div key={i} className="flex flex-col gap-1.5">
+                    <div className="self-end rounded-xl rounded-br-sm bg-primary/15 px-3 py-2 text-sm text-foreground max-w-[85%]">
+                      {qa.q}
+                    </div>
+                    <div className="self-start rounded-xl rounded-bl-sm border border-border bg-card px-3 py-2 text-sm text-foreground max-w-[85%]">
+                      {qa.a}
+                    </div>
+                  </div>
+                ))}
+                {isAsking && (
+                  <div className="flex items-center gap-2 self-start rounded-xl border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Interviewer überlegt...
+                  </div>
+                )}
+                <div ref={qaEndRef} />
+              </div>
+            )}
+
+            <div className="flex items-start gap-2">
+              <textarea
+                value={qaInput}
+                onChange={(e) => setQaInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    askQuestion();
+                  }
+                }}
+                placeholder={
+                  questionsLeft > 0
+                    ? "z.B. Was ist das Ziel des Klienten?"
+                    : "Du hast dein Fragen-Limit erreicht."
+                }
+                rows={1}
+                disabled={isAsking || questionsLeft <= 0 || isEvaluating}
+                className="min-h-[42px] flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none disabled:opacity-50"
+              />
+              <DrillButton
+                variant="active"
+                size="default"
+                onClick={askQuestion}
+                disabled={!qaInput.trim() || isAsking || questionsLeft <= 0 || isEvaluating}
+                className="h-[42px] gap-1.5 px-4"
               >
-                <Plus className="h-4 w-4" />
-                <span>Hauptast hinzufügen</span>
-              </button>
-            ) : undefined
-          }
-        />
-      </div>
+                {isAsking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                Fragen
+              </DrillButton>
+            </div>
+          </div>
 
-      <div className="flex justify-center pt-2">
+          {/* Notizen */}
+          <div className="flex flex-col gap-2">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <StickyNote className="h-4 w-4 text-primary" />
+              Deine Notizen
+            </h2>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder={"Klient: ...\nZiel: ...\nWichtige Fakten aus den Rückfragen: ..."}
+              rows={5}
+              disabled={isEvaluating}
+              className="w-full resize-y rounded-xl border border-border bg-background px-3 py-2.5 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50 focus:outline-none"
+            />
+          </div>
+        </>
+      )}
+
+      {/* ── Schritt 2: Struktur (nur mit Notizen) ── */}
+      {currentStep === 1 && (
+        <>
+          <div className="rounded-xl border border-border bg-muted/20 p-4">
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                <StickyNote className="h-3.5 w-3.5 text-primary" /> Deine Notizen
+              </span>
+              <span className="text-[11px] text-muted-foreground">
+                Der Case-Text ist ausgeblendet — wie im echten Interview.
+              </span>
+            </div>
+            {notes.trim() ? (
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={Math.min(8, Math.max(2, notes.split("\n").length))}
+                disabled={isEvaluating}
+                className="w-full resize-y rounded-lg border border-transparent bg-transparent px-1 py-1 text-sm leading-relaxed text-foreground focus:border-border focus:outline-none"
+              />
+            ) : (
+              <p className="px-1 py-1 text-sm italic text-muted-foreground/60">
+                Keine Notizen gemacht — du kannst im Schritt zurück nochmal nachlesen und
+                notieren.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Dein Framework</h2>
+            <p className="text-xs text-muted-foreground">
+              Bau deine Struktur als Boxen auf — meist ein paar Hauptäste, darunter feinere
+              Unteräste. Klick auf einen Ast, um reinzuzoomen und ihn zu bearbeiten. Markiere
+              mit dem Stern bis zu {MAX_PRIORITIES} Hauptäste als Top-Priorität.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-muted/20 p-4">
+            <ZoomableTree
+              nodes={nodes}
+              renderBranch={(node, color) => (
+                <TreeBranch
+                  node={node}
+                  color={color}
+                  depth={1}
+                  disabled={isEvaluating}
+                  lastAddedId={lastAddedId}
+                  canSetPriority={priorityCount < MAX_PRIORITIES}
+                  onTogglePriority={togglePriority}
+                  onUpdate={updateNode}
+                  onRemove={removeNode}
+                  onAddChild={addChildNode}
+                />
+              )}
+              headerAddon={
+                nodes.length < MAX_TOP_LEVEL ? (
+                  <button
+                    type="button"
+                    onClick={addNode}
+                    disabled={isEvaluating}
+                    className="flex items-center gap-1.5 rounded-lg border-2 border-dashed border-border px-3 py-2 text-xs text-muted-foreground/60 transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-30"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Hauptast hinzufügen</span>
+                  </button>
+                ) : undefined
+              }
+            />
+          </div>
+        </>
+      )}
+
+      {/* Navigation / Abgabe */}
+      <div className="flex items-center justify-between gap-3 pt-2">
         <DrillButton
-          variant="active"
-          size="lg"
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          className="gap-2 px-8"
+          variant="inactive"
+          size="default"
+          onClick={() => setCurrentStep(0)}
+          disabled={currentStep === 0 || isEvaluating}
+          className="gap-2"
         >
-          {isEvaluating ? (
-            <>
-              <span className="animate-spin">&#9203;</span> KI bewertet...
-            </>
-          ) : (
-            <>
-              <Send className="h-4 w-4" /> Abgeben &amp; Bewerten
-            </>
-          )}
+          <ArrowLeft className="h-4 w-4" /> Zurück
         </DrillButton>
+
+        {currentStep === 0 ? (
+          <div className="flex items-center gap-3">
+            {!notes.trim() && (
+              <span className="text-xs text-muted-foreground/70">
+                Tipp: Ohne Notizen wird der nächste Schritt schwer.
+              </span>
+            )}
+            <DrillButton
+              variant="active"
+              size="default"
+              onClick={() => setCurrentStep(1)}
+              disabled={isEvaluating || isAsking}
+              className="gap-2"
+            >
+              Struktur bauen <ArrowRight className="h-4 w-4" />
+            </DrillButton>
+          </div>
+        ) : (
+          <DrillButton
+            variant="active"
+            size="default"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className="gap-2 px-6"
+          >
+            {isEvaluating ? (
+              <>
+                <span className="animate-spin">&#9203;</span> KI bewertet...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" /> Abgeben &amp; Bewerten
+              </>
+            )}
+          </DrillButton>
+        )}
       </div>
     </div>
   );

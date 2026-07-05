@@ -4,14 +4,16 @@ import { Check } from "lucide-react";
 export const STEP_LABELS = ["Verständnis", "Struktur", "Annahmen", "Ergebnis"] as const;
 
 interface StepperHeaderProps {
-  currentStep: number; // 0..3
+  currentStep: number; // 0..labels.length-1
   onJumpTo?: (step: number) => void;
+  /** Step labels; defaults to the Market-Sizing steps. */
+  labels?: readonly string[];
 }
 
-const StepperHeader: React.FC<StepperHeaderProps> = ({ currentStep, onJumpTo }) => {
+const StepperHeader: React.FC<StepperHeaderProps> = ({ currentStep, onJumpTo, labels = STEP_LABELS }) => {
   return (
     <div className="flex items-center gap-0 rounded-xl border border-border bg-muted/30 p-2">
-      {STEP_LABELS.map((label, i) => {
+      {labels.map((label, i) => {
         const isActive = i === currentStep;
         const isDone = i < currentStep;
         const clickable = !!onJumpTo && i <= currentStep;
@@ -42,7 +44,7 @@ const StepperHeader: React.FC<StepperHeaderProps> = ({ currentStep, onJumpTo }) 
               </span>
               <span className="truncate">{label}</span>
             </button>
-            {i < STEP_LABELS.length - 1 && (
+            {i < labels.length - 1 && (
               <div className="mx-1 h-px w-4 bg-border" />
             )}
           </React.Fragment>

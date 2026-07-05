@@ -11,7 +11,8 @@ import FrameworkIntroModal from "@/components/frameworkBuilder/FrameworkIntroMod
 import TextDrillResultView from "@/components/textDrill/TextDrillResult";
 import TextDrillDebrief from "@/components/textDrill/TextDrillDebrief";
 import { SprintDuration } from "@/types/drill";
-import { TextDrillCase, TextDrillResult, TextDrillPhase, TextDrillEvaluation, DrillConfig } from "@/types/textDrill";
+import { TextDrillCase, TextDrillResult, TextDrillPhase, TextDrillEvaluation, DrillConfig, ClarifyingQA } from "@/types/textDrill";
+import { serializeFramework } from "@/lib/frameworkSerializer";
 import {
   fetchTextDrillCases, getNextTextDrillCase,
   submitTextDrillAnswer, saveTextDrillEvaluation,
@@ -36,11 +37,10 @@ const drillConfig: DrillConfig = {
     { value: "operations", label: "Operations" },
   ],
   difficultyOptions: [
-    { value: "easy", label: "Einfach", desc: "1 Framework, klares Szenario" },
-    { value: "medium", label: "Mittel", desc: "Kombinierte Frameworks" },
-    { value: "hard", label: "Schwer", desc: "Mehrstufig, Trade-offs" },
+    { value: "medium", label: "Mittel", desc: "Klares Szenario, solide Struktur gefragt" },
+    { value: "hard", label: "Schwer", desc: "Mehrstufig, Trade-offs, mehr Tiefe" },
   ],
-  hintText: "Baue dein Framework als Issue Tree — Hauptäste MECE aufteilen, Unteräste für die Tiefe. Die KI bewertet deine Struktur nach fester Rubrik.",
+  hintText: "Wie im echten Interview: Erst den Case verstehen und Rückfragen stellen, dann die Struktur bauen — nur mit deinen Notizen. Die KI bewertet fair nach fester Rubrik.",
   startButtonText: "Case starten →",
   rubricLabels: [
     { key: "framework_choice", label: "Framework-Wahl", max: 25 },
@@ -50,9 +50,9 @@ const drillConfig: DrillConfig = {
   ],
   placeholder: "",
   structureGuide: [
-    "2–4 Hauptäste anlegen — MECE aufteilen",
-    "Unteräste ergänzen — bis zu 4 Ebenen tief für die wichtigsten Hebel",
-    "Auf einen Ast klicken zum Reinzoomen & Bearbeiten",
+    "Case lesen und dir Notizen machen — der Case-Text ist beim Strukturieren ausgeblendet",
+    "Rückfragen an den KI-Interviewer stellen (max. 5) — die Infos sind bewusst begrenzt",
+    "2–4 Hauptäste anlegen (MECE), Unteräste für die Tiefe — Klick auf einen Ast zoomt rein",
     "Bis zu 2 Hauptäste mit dem Stern als Top-Priorität markieren",
   ],
   sprintMode: false,
@@ -62,7 +62,7 @@ const drillConfig: DrillConfig = {
 const FrameworksDrill: React.FC = () => {
   const userEmail = useUserEmail();
   const [duration, setDuration] = useState<SprintDuration>(300);
-  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [categories, setCategories] = useState<string[]>(["all"]);
   const [phase, setPhase] = useState<TextDrillPhase>("config");
   const [currentCase, setCurrentCase] = useState<TextDrillCase | null>(null);
@@ -109,19 +109,25 @@ const FrameworksDrill: React.FC = () => {
     setPhase("debrief");
   }, []);
 
-  const handleSubmit = useCallback(async (answerText: string) => {
+  const handleSubmit = useCallback(async (answerText: string, askedQA: ClarifyingQA[]) => {
     if (!currentCase) return;
     setIsEvaluating(true);
     setPhase("evaluating");
 
     const timeSpentSec = Math.round((Date.now() - taskStartTime.current) / 1000);
 
+    // Rückfragen mit in die gespeicherte Antwort aufnehmen (Nachvollziehbarkeit).
+    const storedAnswer =
+      askedQA.length > 0
+        ? `${answerText}\n\n[Rückfragen im Interview]\n${askedQA.map((p) => `F: ${p.q}\nA: ${p.a}`).join("\n")}`
+        : answerText;
+
     const submissionId = await submitTextDrillAnswer({
       drillType: drillConfig.drillType,
       caseId: currentCase.id,
       sessionId: sessionIdRef.current,
       userEmail: userEmail || "anonymous",
-      answerText,
+      answerText: storedAnswer,
       timeSpentSec,
     });
 
@@ -135,6 +141,11 @@ const FrameworksDrill: React.FC = () => {
           difficulty,
           context_info: currentCase.context_info,
           reference_solution: currentCase.reference_solution,
+          framework_guidance: currentCase.reference_tree?.length
+            ? serializeFramework({ nodes: currentCase.reference_tree })
+            : null,
+          interviewer_notes: currentCase.interviewer_notes ?? null,
+          asked_qa: askedQA,
         },
       });
 

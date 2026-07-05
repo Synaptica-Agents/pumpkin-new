@@ -1,5 +1,11 @@
 import { FrameworkNode } from "@/types/frameworkBuilder";
 
+/** Eine Rückfrage des Kandidaten samt Interviewer-Antwort. */
+export interface ClarifyingQA {
+  q: string;
+  a: string;
+}
+
 export interface TextDrillCase {
   id: string;
   difficulty: "easy" | "medium" | "hard";
@@ -8,6 +14,8 @@ export interface TextDrillCase {
   context_info?: string | null;
   reference_solution?: string | null;
   reference_tree?: FrameworkNode[] | null; // only for frameworks drill: graphical sample solution
+  clarifying_qa?: ClarifyingQA[] | null; // frameworks: Fakten, die nur auf Rückfrage preisgegeben werden
+  interviewer_notes?: string | null; // frameworks: interner Bewertungs-/Interviewer-Maßstab
 }
 
 export interface TextDrillEvaluation {

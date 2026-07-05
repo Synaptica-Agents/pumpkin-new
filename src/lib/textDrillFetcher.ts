@@ -59,6 +59,8 @@ export const fetchTextDrillCases = async (
     context_info: d.context_info || d.interpretation_hints || null,
     reference_solution: d.reference_solution || d.reference_answer || d.reference_ideas || null,
     reference_tree: d.reference_tree || null,
+    clarifying_qa: d.clarifying_qa || null,
+    interviewer_notes: d.interviewer_notes || null,
   }));
 };
 
