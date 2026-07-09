@@ -153,6 +153,7 @@ def main():
             jobs.append((c, tier, answer))
     total = len(jobs)
     rows = []
+    out_path = os.path.join(BASE, "results.json")
     with ThreadPoolExecutor(max_workers=5) as ex:
         futs = {ex.submit(evaluate, c, tier, answer, total): (c, tier, answer)
                 for c, tier, answer in jobs}
@@ -175,6 +176,8 @@ def main():
                 "s_prio": sc.get("prioritization"),
                 "flagged": bool(d.get("flagged")),
             })
+            # Fortlaufend sichern, damit ein Abbruch keine Daten kostet.
+            json.dump(rows, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     order = {"perfekt": 0, "normal": 1, "schlecht": 2}
     rows.sort(key=lambda r: (r["difficulty"], r["category"], r["prompt"], order[r["tier"]]))
     json.dump(rows, open(os.path.join(BASE, "results.json"), "w", encoding="utf-8"),

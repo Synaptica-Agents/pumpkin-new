@@ -59,7 +59,9 @@ Der Kandidat konnte vor dem Strukturieren Rückfragen an den Interviewer stellen
 
 GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
 Du bewertest eine spontane Interview-Struktur WOHLWOLLEND, wie ein freundlicher Interviewer. Casebook-Prinzip: "There are many possible alternatives to this framework" — es gibt viele gleichwertige Sichtweisen auf denselben Case; jede in sich logische, zum Case passende Alternative verdient die volle Punktzahl.
-- WICHTIGSTES KRITERIUM IST MECE: Die Äste sollen sich nicht stark überschneiden und den Case sinnvoll aufteilen. Substanzielle Abzüge gibt es NUR für starke Überschneidungen, unlogische Aufteilung oder fehlenden Case-Bezug.
+- GESAMTSCORE-BODEN (WICHTIGSTE REGEL): Wenn die Antwort die zentralen Hebel des Cases abdeckt UND die Äste grundsätzlich unterscheidbar sind, MUSS der Gesamtscore mindestens 88 sein — auch wenn dir eine einzelne Dimension schwächer erscheint. Bilde ZUERST dieses Gesamturteil und verteile die Einzelscores konsistent dazu. Eine einzelne kritische Beobachtung (MECE-Unschärfe, Ast-Reihenfolge, fehlende explizite Priorisierung, etwas dünne Äste) rechtfertigt nur wenige Punkte Abzug, NIEMALS einen Absturz unter 88.
+- DIE REIHENFOLGE DER ÄSTE WIRD NICHT BEWERTET: Der Kandidat baut nebeneinanderliegende Boxen, KEINE Rangliste. Ob ein wichtiger Ast links, rechts, vorne oder hinten steht, ist völlig irrelevant und NIEMALS ein Abzugsgrund — auch nicht bei der Priorisierung. Priorität wird ausschließlich über die ⭐-Markierung und/oder die Analyse-Tiefe ausgedrückt, nicht über die Position.
+- WICHTIGSTES INHALTLICHES KRITERIUM IST MECE: Die Äste sollen sich nicht stark überschneiden und den Case sinnvoll aufteilen. Substanzielle Abzüge gibt es NUR für starke Überschneidungen, unlogische Aufteilung oder fehlenden Case-Bezug.
 - KÜRZE IST KEIN MANGEL: Wenige, kurze Stichpunkte, die das Relevante treffen, sind vollwertig — ein simples, sauberes Framework ist ein gutes Framework. Es gibt KEINE Mindestanzahl an Unterpunkten oder Ebenen, und "mehr Tiefe/Ausführlichkeit" ist NIEMALS ein Grund für substanziellen Abzug.
 - Der Kandidat hat die Beispiel-Lösung NIE gesehen. Übereinstimmung mit ihr (auch wörtlich) belegt Kompetenz — es gibt keinen "Kopier"-Tatbestand, Ähnlichkeit ist nie ein Mangel und gehört nicht ins Feedback. Gleiches gilt für Begriffe aus Case-Text/Briefing: Übernahme ist korrektes Arbeiten am Case.
 
@@ -92,11 +94,11 @@ Vollständigkeit (max 25) — großzügig; Kürze ist KEINE Unvollständigkeit, 
 - 12-16: Etwa die Hälfte der Kern-Hebel — typisch für eine knappe mittlere Antwort.
 - 0-11: Überwiegend Randthemen, Kern klar verfehlt.
 
-Priorisierung (max 20) — großzügig:
-- 17-20: Top-Priorität markiert (⭐) ODER erkennbarer Fokus — und er passt zum Case.
-- 13-16: Leichte Gewichtung erkennbar, nicht ganz stimmig.
-- 10-12: Keine Priorisierung, gleichmäßige Analyse (Standard — nicht bestrafen).
-- 0-9: Fokus klar auf Nebensächlichem oder wirr.` :
+Priorisierung (max 20) — großzügig; die REIHENFOLGE/Position der Äste zählt NICHT (siehe oben), maßgeblich sind allein ⭐-Markierung und/oder Tiefen-Fokus:
+- 17-20: Mindestens ein ⭐ auf einem case-relevanten Ast ODER klarer Fokus über Tiefe — egal an welcher Position dieser Ast steht.
+- 13-16: ⭐/Fokus vorhanden, aber die betonten Äste sind nicht die wichtigsten des Cases.
+- 10-12: Keine ⭐ und kein erkennbarer Fokus — gleichmäßige Analyse (neutral, NICHT bestrafen).
+- 0-9: Nur bei wirrer oder widersprüchlicher Gewichtung.` :
     drillType === "charts" ? `
 SCORING-ANKER (für Konsistenz – wende diese IMMER gleich an):
 - Daten-Ablesung: Zahlen korrekt gelesen und benannt = 20-25. Größtenteils korrekt = 12-19. Falsche/fehlende Werte = 0-11.
