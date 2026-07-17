@@ -63,9 +63,9 @@ const modules: Omit<ModuleCardProps, "emailParam">[] = [
   },
   {
     title: "Creativity",
-    description: "Entwickle kreative Lösungen und schärfe deinen Geschäftssinn.",
+    description: "Brainstorme simple Business-Fragen strukturiert und zeig deinen Geschäftssinn.",
     icon: <IconCreativity size={80} />,
-    status: "coming_soon",
+    status: "active",
     href: "/creativity-drill",
     drillType: "creativity",
   },

@@ -21,28 +21,36 @@ import { toast } from "sonner";
 const drillConfig: DrillConfig = {
   drillType: "creativity",
   title: "Creativity",
-  subtitle: "Strukturiere kreative Antworten auf typische Consulting-Fragen.",
+  subtitle: "Simple Business-Fragen, strukturiert gebrainstormt — Kreativität und Business Sense zeigen.",
   icon: "Lightbulb",
   tableName: "creativity_cases",
   categoryField: "category",
   categoryLabel: "Kategorie",
   categories: [
-    { value: "market_entry", label: "Market Entry" },
-    { value: "risks_opportunities", label: "Risiken & Opportunities" },
-    { value: "financial", label: "Financial" },
+    { value: "market_entry", label: "Expansion & Markteintritt" },
+    { value: "risks_opportunities", label: "Risiken & Chancen" },
+    { value: "financial", label: "Umsatz & Profitabilität" },
   ],
   difficultyOptions: [
-    { value: "medium", label: "Normal", desc: "Kurze Frage, knappe Antwort" },
-    { value: "hard", label: "Schwer", desc: "Mehr Kontext, mehr Substanz" },
+    { value: "medium", label: "Mittel", desc: "Eine kurze, sehr simple Frage" },
+    { value: "hard", label: "Schwer", desc: "Etwas breiter — mehr Ideen & Struktur gefragt" },
   ],
-  hintText: "Teile deine Antwort in MECE-Kategorien auf und liste Stichpunkte je Kategorie. Korrektheit > Vollständigkeit, eine kreative Idee zählt mehr als Generisches.",
-  startButtonText: "Start Creativity \u2192",
+  hintText: "Gruppiere deine Ideen in 2–4 Kategorien mit Stichpunkten. Breite schlägt Tiefe, eine überraschende Idee schlägt fünf generische — und rechnen musst du hier nichts.",
+  startButtonText: "Start Creativity →",
   rubricLabels: [
     { key: "structure", label: "Struktur", max: 40 },
     { key: "content", label: "Inhalt", max: 50 },
     { key: "creativity", label: "Kreativität", max: 10 },
   ],
-  placeholder: "Kategorie A:\n- Punkt 1\n- Punkt 2\n\nKategorie B:\n- Punkt 1\n- Punkt 2",
+  placeholder: "Kategorie A:\n- Idee 1\n- Idee 2\n\nKategorie B:\n- Idee 1\n- Idee 2",
+  structureGuide: [
+    "Kurz sortieren: Was wird wirklich gefragt?",
+    "2–4 Kategorien bilden (z.B. kurzfristig/langfristig, intern/extern, Umsatz/Kosten)",
+    "Je Kategorie 2–3 Ideen als Stichpunkte — mindestens eine unkonventionelle",
+    "Optional: kurz sagen, welche Idee du zuerst testen würdest",
+  ],
+  sprintMode: false,
+  timeReferenceMinutes: 3,
 };
 
 const CreativityDrill: React.FC = () => {
@@ -52,60 +60,38 @@ const CreativityDrill: React.FC = () => {
   const [categories, setCategories] = useState<string[]>(["all"]);
   const [phase, setPhase] = useState<TextDrillPhase>("config");
   const [currentCase, setCurrentCase] = useState<TextDrillCase | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState(0);
   const [results, setResults] = useState<TextDrillResult[]>([]);
   const [currentResult, setCurrentResult] = useState<TextDrillResult | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   const taskStartTime = useRef<number>(0);
   const sessionIdRef = useRef<string>(crypto.randomUUID());
-  const sprintStartTime = useRef<number>(0);
+  const sessionStartTime = useRef<number>(0);
 
   const buildLink = (path: string) =>
     userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
 
-  const loadNextCase = useCallback(async () => {
-    setIsGenerating(true);
+  const loadNextCase = useCallback(() => {
     const next = getNextTextDrillCase(drillConfig.tableName);
     setCurrentCase(next);
     taskStartTime.current = Date.now();
-    setIsGenerating(false);
     setPhase("answering");
   }, []);
 
   const handleStart = useCallback(async () => {
     await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories);
-    // NOTE: seenIds are NOT reset between sprints — sessionStorage carries
+    // NOTE: seenIds are NOT reset between sessions — sessionStorage carries
     // dedup across the whole tab session.
     sessionIdRef.current = crypto.randomUUID();
     setResults([]);
     setCurrentResult(null);
-    setTimeRemaining(duration);
-    sprintStartTime.current = Date.now();
+    sessionStartTime.current = Date.now();
     loadNextCase();
-
-    timerRef.current = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [duration, difficulty, categories, loadNextCase]);
+  }, [difficulty, categories, loadNextCase]);
 
   const handleEnd = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
     setPhase("debrief");
   }, []);
-
-  useEffect(() => {
-    if (timeRemaining === 0 && phase === "answering" && results.length > 0) {
-      setPhase("debrief");
-    }
-  }, [timeRemaining, phase]);
 
   const handleSubmit = useCallback(async (answerText: string) => {
     if (!currentCase) return;
@@ -132,6 +118,7 @@ const CreativityDrill: React.FC = () => {
           answer_text: answerText,
           difficulty,
           context_info: currentCase.context_info,
+          reference_solution: currentCase.reference_solution,
         },
       });
 
@@ -176,15 +163,10 @@ const CreativityDrill: React.FC = () => {
   }, [currentCase, userEmail, difficulty]);
 
   const handleNext = useCallback(() => {
-    if (timeRemaining <= 0) {
-      setPhase("debrief");
-    } else {
-      loadNextCase();
-    }
-  }, [timeRemaining, loadNextCase]);
+    loadNextCase();
+  }, [loadNextCase]);
 
   const handleFinish = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
     setPhase("debrief");
   }, []);
 
@@ -192,7 +174,7 @@ const CreativityDrill: React.FC = () => {
   const prevPhaseRef = useRef<TextDrillPhase>("config");
   useEffect(() => {
     if (phase === "debrief" && prevPhaseRef.current !== "debrief" && userEmail && results.length > 0) {
-      const actualSeconds = Math.round((Date.now() - sprintStartTime.current) / 1000);
+      const actualSeconds = Math.round((Date.now() - sessionStartTime.current) / 1000);
       const avgScore = results.filter(r => r.evaluation).length > 0
         ? Math.round(results.filter(r => r.evaluation).reduce((s, r) => s + (r.evaluation?.total_score ?? 0), 0) / results.filter(r => r.evaluation).length)
         : 0;
@@ -221,19 +203,17 @@ const CreativityDrill: React.FC = () => {
     prevPhaseRef.current = phase;
   }, [phase]);
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
   const handleRestart = useCallback(() => {
     setPhase("config");
     setCurrentCase(null);
     setResults([]);
     setCurrentResult(null);
-    setTimeRemaining(0);
   }, []);
+
+  const debriefSeconds =
+    results.length > 0 && sessionStartTime.current > 0
+      ? Math.round((Date.now() - sessionStartTime.current) / 1000)
+      : 0;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -245,71 +225,79 @@ const CreativityDrill: React.FC = () => {
       )}
 
       {phase === "config" && (
-        <main className="mx-auto w-full max-w-[640px] px-4 pb-6">
-          {/* Slim drill label */}
-          <div className="flex items-center gap-2 pt-3 pb-3">
-            <IconCreativity size={22} />
-            <span className="text-sm font-semibold tracking-tight text-foreground">{drillConfig.title}</span>
-          </div>
-
-          <TextDrillConfig
-            config={drillConfig}
-            duration={duration} onDurationChange={setDuration}
-            difficulty={difficulty} onDifficultyChange={setDifficulty}
-            categories={categories} onCategoriesChange={setCategories}
-            onStart={handleStart}
-          />
-        </main>
+        <>
+          <section className="flex flex-col items-center px-4 pt-8 pb-4">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-white/[0.08] bg-[#16161a]">
+              <IconCreativity size={40} />
+            </div>
+            <h1 className="mb-2 text-center text-h2 text-foreground">Creativity Drill</h1>
+            <p className="max-w-md text-center text-body text-secondary-foreground">
+              {drillConfig.subtitle} KI-gestützte Bewertung.
+            </p>
+            <Link to={buildLink("/")} className="mt-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+              <ArrowLeft className="h-4 w-4" /> Zurück zum Dashboard
+            </Link>
+          </section>
+          <main className="mx-auto w-full max-w-[640px] px-4 pb-12">
+            <TextDrillConfig
+              config={drillConfig}
+              duration={duration} onDurationChange={setDuration}
+              difficulty={difficulty} onDifficultyChange={setDifficulty}
+              categories={categories} onCategoriesChange={setCategories}
+              onStart={handleStart}
+            />
+          </main>
+        </>
       )}
 
       {(phase === "answering" || phase === "evaluating") && (
-        <main className="flex flex-1 flex-col items-center px-4 py-4">
+        <main className="flex flex-1 flex-col items-center px-4 py-8">
           <div className="w-full max-w-[760px] rounded-2xl border border-border bg-card p-6">
-            {isGenerating ? (
-              <div className="flex flex-col items-center gap-4 py-16">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-                <p className="text-sm text-muted-foreground">KI generiert eine neue Aufgabe...</p>
-              </div>
-            ) : (
-              <TextDrillGame
-                config={drillConfig}
-                currentCase={currentCase}
-                timeRemaining={timeRemaining}
-                totalDuration={duration}
-                onSubmit={handleSubmit}
-                onEnd={handleEnd}
-                isEvaluating={isEvaluating}
-              />
-            )}
+            <TextDrillGame
+              config={drillConfig}
+              currentCase={currentCase}
+              timeRemaining={0}
+              totalDuration={0}
+              onSubmit={handleSubmit}
+              onEnd={handleEnd}
+              isEvaluating={isEvaluating}
+            />
           </div>
         </main>
       )}
 
       {phase === "result" && currentResult && (
-        <main className="flex flex-1 flex-col items-center px-4 py-4">
+        <main className="flex flex-1 flex-col items-center px-4 py-8">
           <div className="w-full max-w-[760px] rounded-2xl border border-border bg-card p-6">
             <TextDrillResultView
               config={drillConfig}
               result={currentResult}
               onNext={handleNext}
               onFinish={handleFinish}
-              hasTimeLeft={timeRemaining > 0}
+              hasTimeLeft={false}
             />
           </div>
         </main>
       )}
 
       {phase === "debrief" && (
-        <main className="flex flex-1 flex-col items-center px-4 py-4">
-          <div className="w-full max-w-[760px] rounded-2xl border border-border bg-card p-6">
-            <TextDrillDebrief
-              config={drillConfig}
-              results={results}
-              durationSeconds={duration}
-              onRestart={handleRestart}
-            />
-          </div>
-        </main>
+        <>
+          <section className="flex flex-col items-center px-4 pt-8 pb-4">
+            <Link to={buildLink("/")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+              <ArrowLeft className="h-4 w-4" /> Zurück zum Dashboard
+            </Link>
+          </section>
+          <main className="flex flex-1 flex-col items-center px-4 pb-12">
+            <div className="w-full max-w-[760px] rounded-2xl border border-border bg-card p-6">
+              <TextDrillDebrief
+                config={drillConfig}
+                results={results}
+                durationSeconds={debriefSeconds}
+                onRestart={handleRestart}
+              />
+            </div>
+          </main>
+        </>
       )}
     </div>
   );
