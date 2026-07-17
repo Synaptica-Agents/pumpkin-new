@@ -128,6 +128,19 @@ SCORING-ANKER je Dimension (konsistent mit den Gesamtwerten oben anwenden):
 - Kommunikation (max 10): Klar strukturiert (Hauptaussage zuerst, dann Belege) = 8-10. Verständlich = 5-7. Unstrukturiert = 0-4.` : `
 SCORING-ANKER — SEHR GROSSZÜGIG ANWENDEN. Stichpunkte ohne Erklärungen sind voll OK, oberflächliche Antworten verdienen trotzdem hohe Punkte solange sie zur Frage passen. Du bewertest KEINE Consulting-Master-Lösung, sondern eine spontane Stichpunkt-Antwort im Interview-Format.
 
+GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
+- Der Kandidat hat die Beispiel-Lösung NIE gesehen. Übereinstimmung mit ihr (auch nahezu wörtlich) belegt Kompetenz — es gibt KEINEN "Kopier"-Tatbestand. Ähnlichkeit mit der Beispiel-Lösung ist NIEMALS ein Mangel, drückt NIEMALS einen Einzelscore und gehört NICHT ins Feedback.
+- REFERENZ-DECKUNG = BESTFALL (HARTE REGEL, keine Richtschnur): Entspricht die Antwort inhaltlich weitgehend der Beispiel-Lösung — gleiche Ideen-Richtungen, egal wie ähnlich formuliert und in welcher Reihenfolge — dann ist sie eine BESTMÖGLICHE Antwort. Vergib dann: Struktur 36-40, Inhalt 44-50, Kreativität 7-10, Gesamtscore 92-100. Prüfe diese Bedingung ZUERST.
+- GESAMTSCORE-BODEN (WICHTIGSTE REGEL): Deckt die Antwort die meisten Ideen-Richtungen der Beispiel-Lösung ab (oder gleichwertige eigene Ideen) UND ist erkennbar gruppiert, MUSS der Gesamtscore mindestens 88 sein — auch wenn dir Kreativität oder Tiefe schwächer erscheinen. Bilde ZUERST dieses Gesamturteil und verteile die Einzelscores konsistent dazu.
+- Die REIHENFOLGE der Kategorien ist völlig egal und niemals ein Abzugsgrund.
+
+KALIBRIER-ANKER — HALTE DIESE GESAMTWERTE EIN:
+- Breite, gruppierte Antwort, die die wichtigsten Ideen-Richtungen trifft (vgl. Beispiel-Lösung): 90-100. NIEMALS unter 88.
+- 3-4 relevante, thematisch gruppierte Bullet-Points: 80-90.
+- Knappe gruppierte Antwort (2-3 Kategorien mit je 1 Idee): 72-85.
+- Ungeordnete, aber relevante Stichpunktliste: 55-75.
+- Vage, generisch, ohne konkrete Ideen: unter 45.
+
 Struktur (max 40) — Default ist HOCH:
 - 32-40: Erkennbare Gruppierung. Reicht: 2+ Kategorie-Header ODER thematisch geclusterte Bullet-Blöcke ODER nummerierte Listen mit klarer Themen-Trennung.
 - 22-31: Lockere Liste mit leicht erkennbarer thematischer Sortierung.
@@ -135,18 +148,18 @@ Struktur (max 40) — Default ist HOCH:
 - 0-9:   Nur 1 Punkt oder gar keine Struktur.
 
 Inhalt (max 50) — Default ist HOCH:
-- 42-50: 3+ relevante Punkte, die die Frage adressieren. Stichpunkte OHNE Erklärung reichen voll. Tiefe NICHT erforderlich.
+- 42-50: 3+ relevante Punkte, die die Frage adressieren, ODER die Antwort deckt die Ideen-Richtungen der Beispiel-Lösung ab. Stichpunkte OHNE Erklärung reichen voll. Tiefe NICHT erforderlich.
 - 30-41: 2-3 relevante Punkte (manche generisch ist OK).
 - 15-29: 1 klar relevanter Punkt, Rest unklar oder off-topic.
 - 0-14:  Antwort beantwortet die Frage nicht.
 
 Kreativität (max 10):
-- 8-10: Mindestens 1-2 nicht-offensichtliche, frische Ideen.
-- 5-7:  Solide aber durchgehend erwartbar.
-- 2-4:  Sehr generisch.
+- 8-10: Mindestens 1-2 nicht-offensichtliche, frische Ideen (auch wenn sie in der Beispiel-Lösung stehen — der Kandidat kannte sie nicht).
+- 5-7:  Solide, breite Ideensammlung, auch wenn durchgehend erwartbar.
+- 2-4:  Sehr generisch, nur 1-2 naheliegende Ideen.
 - 0-1:  Nichtssagend.
 
-WICHTIG: Bei einer Antwort mit 3-4 thematisch gruppierten Bullet-Points zur Frage solltest du standardmäßig 80-90 Punkte vergeben. Ziehe nur dann ab, wenn die Antwort die Frage offensichtlich nicht beantwortet, völlig wirr ist, oder absolut zentrale Hebel komplett fehlen.`;
+WICHTIG: Bei einer Antwort mit 3-4 thematisch gruppierten Bullet-Points zur Frage solltest du standardmäßig 80-90 Punkte vergeben; bei breiter Abdeckung der Ideen-Richtungen 90+. Ziehe nur dann substanziell ab, wenn die Antwort die Frage offensichtlich nicht beantwortet, völlig wirr ist, oder fast keine konkreten Ideen enthält.`;
 
   const difficultyGuidance =
     drillType === "frameworks" ? (
@@ -154,8 +167,8 @@ WICHTIG: Bei einer Antwort mit 3-4 thematisch gruppierten Bullet-Points zur Frag
         ? "Schwierigkeit: SCHWER. Es gilt DIESELBE großzügige Skala wie oben — Muster-nah bleibt 92+, eine solide mittlere Antwort bleibt 60-70. Du darfst etwas mehr Breite erwarten, aber bestrafe Kürze nicht; entscheidend bleibt die MECE-Aufteilung."
         : "Schwierigkeit: MITTEL. Wende die großzügige Skala oben direkt an: Muster-nah = 92+, gute Struktur = 75-90, solide mittlere Antwort = 60-70. Kürze und Einfachheit nicht bestrafen."
     ) : drillType === "creativity" ? (
-      difficulty === "medium" ? "Schwierigkeit: NORMAL. SEHR großzügig. Stichpunkte alleine sind voll ausreichend, Erklärungen NICHT erforderlich. 80-90 Punkte ist der Default für eine Antwort mit 3-4 relevanten, thematisch gruppierten Bullets. Nur drunter ziehen wenn Antwort offensichtlich off-topic ist oder zentrale Punkte komplett fehlen." :
-      "Schwierigkeit: SCHWER. Großzügig. Stichpunkte und kurze Sätze sind weiter ausreichend, aber 3-5 relevante Punkte gehören rein. 70-85 Punkte für eine strukturierte Stichpunkt-Antwort ist normal."
+      difficulty === "medium" ? "Schwierigkeit: MITTEL. SEHR großzügig. Stichpunkte alleine sind voll ausreichend, Erklärungen NICHT erforderlich. 80-90 Punkte ist der Default für eine Antwort mit 3-4 relevanten, thematisch gruppierten Bullets; breite Abdeckung der Ideen-Richtungen = 90+. Nur drunter ziehen wenn die Antwort offensichtlich off-topic ist oder fast keine konkreten Ideen enthält." :
+      "Schwierigkeit: SCHWER. Es gilt DIESELBE großzügige Skala wie oben — breite, gruppierte Abdeckung bleibt 90+ (nie unter 88), 3-5 relevante gruppierte Punkte bleiben 80-90. Du darfst etwas mehr Breite erwarten als bei Mittel, aber bestrafe Kürze nicht."
     ) : (
       difficulty === "easy"
         ? "Schwierigkeit: EINSTEIGER. Sehr großzügig bewerten. Es zählt: Werte korrekt ablesen, einfache Prozente/Deltas richtig rechnen, Hauptaussage erkennen. Ausgefeilte Implikationen und Tiefe sind NICHT gefordert — eine knappe, korrekte Antwort verdient 85+."
