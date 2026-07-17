@@ -17,6 +17,7 @@ import {
   IconCreativity,
   IconMarketSizing,
   IconFrameworks,
+  IconDiagramme,
 } from "@/components/drillIcons";
 
 const modules: Omit<ModuleCardProps, "emailParam">[] = [
@@ -51,6 +52,14 @@ const modules: Omit<ModuleCardProps, "emailParam">[] = [
     status: "active",
     href: "/frameworks-drill",
     drillType: "frameworks",
+  },
+  {
+    title: "Diagramme",
+    description: "Interpretiere Charts & Tabellen und beantworte Fragen wie im Case-Interview.",
+    icon: <IconDiagramme size={80} />,
+    status: "active",
+    href: "/diagramme-drill",
+    drillType: "charts",
   },
   {
     title: "Creativity",

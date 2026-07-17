@@ -1,4 +1,5 @@
 import { FrameworkNode } from "@/types/frameworkBuilder";
+import { ChartExhibit, ChartQuestion } from "@/types/charts";
 
 /** Eine Rückfrage des Kandidaten samt Interviewer-Antwort. */
 export interface ClarifyingQA {
@@ -16,6 +17,10 @@ export interface TextDrillCase {
   reference_tree?: FrameworkNode[] | null; // only for frameworks drill: graphical sample solution
   clarifying_qa?: ClarifyingQA[] | null; // frameworks: Fakten, die nur auf Rückfrage preisgegeben werden
   interviewer_notes?: string | null; // frameworks: interner Bewertungs-/Interviewer-Maßstab
+  title?: string | null; // charts: Exhibit-Titel (z.B. "Eurotech – Exhibit 2")
+  exhibits?: ChartExhibit[] | null; // charts: 1–2 Exhibits (Tabelle/Diagramm)
+  additional_info?: string[] | null; // charts: "Additional Info"-Bullets neben dem Exhibit
+  questions?: ChartQuestion[] | null; // charts: 1–2 Fragen mit Musterlösung
 }
 
 export interface TextDrillEvaluation {

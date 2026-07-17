@@ -100,12 +100,31 @@ Priorisierung (max 20) — großzügig; die REIHENFOLGE/Position der Äste zähl
 - 10-12: Keine ⭐ und kein erkennbarer Fokus — gleichmäßige Analyse (neutral, NICHT bestrafen).
 - 0-9: Nur bei wirrer oder widersprüchlicher Gewichtung.` :
     drillType === "charts" ? `
-SCORING-ANKER (für Konsistenz – wende diese IMMER gleich an):
-- Daten-Ablesung: Zahlen korrekt gelesen und benannt = 20-25. Größtenteils korrekt = 12-19. Falsche/fehlende Werte = 0-11.
-- Trend-Analyse: Trends erkannt und quantifiziert = 20-25. Trends erkannt ohne Quantifizierung = 12-19. Trends nicht erkannt = 0-11.
-- Business-Implikationen: Konkrete Handlungsempfehlungen = 20-25. Allgemeine Schlussfolgerungen = 12-19. Keine Implikationen = 0-11.
-- Analysetiefe: Vergleiche, Ursachen, Zusammenhänge = 12-15. Grundlegende Analyse = 6-11. Nur Beschreibung = 0-5.
-- Kommunikation: Klar und prägnant = 8-10. Verständlich = 4-7. Unstrukturiert = 0-3.` : `
+HINWEIS ZUM ANTWORT-FORMAT:
+Die Antwort besteht aus zwei Teilen:
+- "=== INTERPRETATION & KEY INSIGHTS ===" — der Kandidat fasst zusammen, was das Exhibit zeigt (Hauptaussage + wichtigste Insights). Er hat diesen Teil geschrieben, BEVOR er die Fragen gesehen hat.
+- "=== FRAGE N: ... ===" mit "ANTWORT: ..." — Antworten auf konkrete Fragen. Die korrekten Antworten inkl. Rechenweg stehen in der BEISPIEL-LÖSUNG unter "KORREKTE ANTWORTEN". Die vollständigen Exhibit-Daten stehen im KONTEXT — prüfe Zahlenangaben dagegen.
+
+GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
+Du bewertest eine spontane Interview-Leistung WOHLWOLLEND, wie ein freundlicher Interviewer.
+- GESAMTSCORE-BODEN (WICHTIGSTE REGEL): Wenn alle Fragen im Kern korrekt beantwortet sind UND die Interpretation die Hauptaussage des Exhibits trifft, MUSS der Gesamtscore mindestens 85 sein — auch wenn dir einzelne Dimensionen schwächer erscheinen. Bilde ZUERST dieses Gesamturteil und verteile die Einzelscores konsistent dazu.
+- RUNDUNG IST KORREKT: Gerundete Werte, äquivalente Schreibweisen (27 % vs. 0,27 vs. "rund ein Viertel") und andere, aber richtige Rechenwege zählen VOLL als korrekt. Nur echte Ablese- oder Rechenfehler kosten Punkte.
+- KÜRZE IST KEIN MANGEL: Stichpunkte reichen. Eine knappe Interpretation mit Hauptaussage + 2-3 Insights mit Zahlen ist vollwertig; Länge ist NIE ein Abzugsgrund.
+- Die Interpretation entstand VOR den Fragen: Es ist KEIN Mangel, wenn sie Aspekte nicht anspricht, die erst durch die Fragen relevant werden.
+
+KALIBRIER-ANKER — HALTE DIESE GESAMTWERTE EIN:
+- Alle Fragen korrekt + Interpretation trifft die Hauptaussage mit konkreten Zahlen: 90-100.
+- Alle Fragen korrekt, Interpretation eher beschreibend (wenig eigene Insights): 80-90.
+- Eine Frage daneben ODER Hauptaussage verfehlt, Rest solide: 65-80.
+- Mehrere Ablese-/Rechenfehler, aber erkennbar strukturiertes Vorgehen: 50-65.
+- Zahlen überwiegend falsch oder Antwort wirr/leer: unter 45.
+
+SCORING-ANKER je Dimension (konsistent mit den Gesamtwerten oben anwenden):
+- Daten-Ablesung (max 25): Fragen korrekt beantwortet + Zahlen in der Interpretation stimmen = 22-25. Kleinere Ungenauigkeiten bei korrektem Kern = 15-21. Echte Ablese-/Rechenfehler = 8-14. Überwiegend falsch = 0-7.
+- Trend-Analyse (max 25): Muster/Trend/Ausreißer erkannt und quantifiziert (Delta, %, Multiplikator) = 22-25. Erkannt ohne Quantifizierung = 14-21. Nicht erkannt = 0-13. (Ohne Zeitreihe zählt hier das Erkennen der zentralen Vergleiche/Unterschiede im Exhibit.)
+- Business-Implikationen (max 25): "So what" klar benannt (Bedeutung fürs Geschäft oder sinnvoller nächster Prüfschritt) = 22-25. Allgemeine Schlussfolgerung = 14-21. Reine Beschreibung ohne Implikation = 0-13.
+- Analysetiefe (max 15): Verknüpft mehrere Werte, Exhibit-Teile oder Zusatzinfos = 12-15. Grundlegende Analyse = 7-11. Nur Einzelwerte abgelesen = 0-6.
+- Kommunikation (max 10): Klar strukturiert (Hauptaussage zuerst, dann Belege) = 8-10. Verständlich = 5-7. Unstrukturiert = 0-4.` : `
 SCORING-ANKER — SEHR GROSSZÜGIG ANWENDEN. Stichpunkte ohne Erklärungen sind voll OK, oberflächliche Antworten verdienen trotzdem hohe Punkte solange sie zur Frage passen. Du bewertest KEINE Consulting-Master-Lösung, sondern eine spontane Stichpunkt-Antwort im Interview-Format.
 
 Struktur (max 40) — Default ist HOCH:
@@ -137,9 +156,9 @@ WICHTIG: Bei einer Antwort mit 3-4 thematisch gruppierten Bullet-Points zur Frag
       difficulty === "medium" ? "Schwierigkeit: NORMAL. SEHR großzügig. Stichpunkte alleine sind voll ausreichend, Erklärungen NICHT erforderlich. 80-90 Punkte ist der Default für eine Antwort mit 3-4 relevanten, thematisch gruppierten Bullets. Nur drunter ziehen wenn Antwort offensichtlich off-topic ist oder zentrale Punkte komplett fehlen." :
       "Schwierigkeit: SCHWER. Großzügig. Stichpunkte und kurze Sätze sind weiter ausreichend, aber 3-5 relevante Punkte gehören rein. 70-85 Punkte für eine strukturierte Stichpunkt-Antwort ist normal."
     ) : (
-      difficulty === "easy" ? "Schwierigkeit: EINFACH. Sei großzügig – ein grundlegend richtiger Ansatz verdient 60+ Punkte. Erwarte keine Tiefe." :
-      difficulty === "medium" ? "Schwierigkeit: MITTEL. Erwarte solide Struktur und mehrere Aspekte. 50+ Punkte bei erkennbar gutem Ansatz." :
-      "Schwierigkeit: SCHWER. Erwarte Tiefe, Nuancen und Priorisierung. Aber auch hier: 40+ Punkte bei erkennbarem, strukturiertem Ansatz."
+      difficulty === "easy"
+        ? "Schwierigkeit: EINSTEIGER. Sehr großzügig bewerten. Es zählt: Werte korrekt ablesen, einfache Prozente/Deltas richtig rechnen, Hauptaussage erkennen. Ausgefeilte Implikationen und Tiefe sind NICHT gefordert — eine knappe, korrekte Antwort verdient 85+."
+        : "Schwierigkeit: FORTGESCHRITTEN. Es gilt DIESELBE großzügige Skala — alle Fragen korrekt + Hauptaussage getroffen bleibt mindestens 85. Du darfst mehrstufige Rechnungen und das Einbeziehen der Zusatzinformationen erwarten, aber bestrafe Kürze nicht."
     );
 
   const realismNote =

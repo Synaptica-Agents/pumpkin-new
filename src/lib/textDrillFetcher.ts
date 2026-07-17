@@ -61,6 +61,10 @@ export const fetchTextDrillCases = async (
     reference_tree: d.reference_tree || null,
     clarifying_qa: d.clarifying_qa || null,
     interviewer_notes: d.interviewer_notes || null,
+    title: d.title || null,
+    exhibits: d.exhibits || null,
+    additional_info: d.additional_info || null,
+    questions: d.questions || null,
   }));
 };
 

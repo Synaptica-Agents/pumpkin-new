@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const saveDrillSession = async (params: {
   userEmail: string;
-  drillType: "mental_math" | "case_math" | "creativity" | "market_sizing" | "frameworks";
+  drillType: "mental_math" | "case_math" | "creativity" | "market_sizing" | "frameworks" | "charts";
   correctCount: number;
   totalCount: number;
   accuracyPercent: number;
@@ -38,7 +38,7 @@ export const saveDrillSession = async (params: {
  */
 export const saveDrillAttempts = async (params: {
   userEmail: string;
-  drillType: "mental_math" | "case_math" | "creativity" | "market_sizing" | "frameworks";
+  drillType: "mental_math" | "case_math" | "creativity" | "market_sizing" | "frameworks" | "charts";
   sessionId: string | null;
   attempts: Array<{
     taskType: string;

@@ -9,6 +9,7 @@ import CaseMathDrill from "./pages/CaseMathDrill";
 import CreativityDrill from "./pages/CreativityDrill";
 import MarketSizingDrill from "./pages/MarketSizingDrill";
 import FrameworksDrill from "./pages/FrameworksDrill";
+import DiagrammeDrill from "./pages/DiagrammeDrill";
 import FortschrittPage from "./pages/FortschrittPage";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/creativity-drill" element={<CreativityDrill />} />
           <Route path="/market-sizing-drill" element={<MarketSizingDrill />} />
           <Route path="/frameworks-drill" element={<FrameworksDrill />} />
+          <Route path="/diagramme-drill" element={<DiagrammeDrill />} />
           <Route path="/fortschritt" element={<FortschrittPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

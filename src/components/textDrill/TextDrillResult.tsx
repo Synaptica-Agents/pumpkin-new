@@ -10,6 +10,8 @@ interface TextDrillResultProps {
   onNext: () => void;
   onFinish: () => void;
   hasTimeLeft: boolean;
+  /** Optionaler drill-spezifischer Block (z.B. Fragen-Review beim Diagramme-Drill), vor den Buttons gerendert. */
+  children?: React.ReactNode;
 }
 
 const ScoreBar: React.FC<{ label: string; score: number; max: number }> = ({ label, score, max }) => {
@@ -27,7 +29,7 @@ const ScoreBar: React.FC<{ label: string; score: number; max: number }> = ({ lab
 };
 
 const TextDrillResultView: React.FC<TextDrillResultProps> = ({
-  config, result, onNext, onFinish, hasTimeLeft,
+  config, result, onNext, onFinish, hasTimeLeft, children,
 }) => {
   const eval_ = result.evaluation;
   if (!eval_) {
@@ -117,6 +119,9 @@ const TextDrillResultView: React.FC<TextDrillResultProps> = ({
           </ul>
         </div>
       )}
+
+      {/* Drill-spezifischer Zusatzblock (z.B. Fragen-Review) */}
+      {children}
 
       {/* Reference Solution */}
       {(result.case.reference_tree?.length || result.case.reference_solution) && (

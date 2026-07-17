@@ -98,39 +98,51 @@ export type Database = {
       chart_cases: {
         Row: {
           active: boolean
-          chart_data: Json
+          additional_info: Json | null
+          chart_data: Json | null
           chart_title: string | null
           chart_type: string
           created_at: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
+          exhibits: Json | null
           id: string
           interpretation_hints: string | null
           prompt: string
+          questions: Json | null
           reference_answer: string | null
+          title: string | null
         }
         Insert: {
           active?: boolean
-          chart_data: Json
+          additional_info?: Json | null
+          chart_data?: Json | null
           chart_title?: string | null
           chart_type: string
           created_at?: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
+          exhibits?: Json | null
           id?: string
           interpretation_hints?: string | null
           prompt: string
+          questions?: Json | null
           reference_answer?: string | null
+          title?: string | null
         }
         Update: {
           active?: boolean
-          chart_data?: Json
+          additional_info?: Json | null
+          chart_data?: Json | null
           chart_title?: string | null
           chart_type?: string
           created_at?: string
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          exhibits?: Json | null
           id?: string
           interpretation_hints?: string | null
           prompt?: string
+          questions?: Json | null
           reference_answer?: string | null
+          title?: string | null
         }
         Relationships: []
       }
