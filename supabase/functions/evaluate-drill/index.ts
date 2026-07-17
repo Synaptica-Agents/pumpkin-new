@@ -108,6 +108,7 @@ Die Antwort besteht aus zwei Teilen:
 GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
 Du bewertest eine spontane Interview-Leistung WOHLWOLLEND, wie ein freundlicher Interviewer.
 - GESAMTSCORE-BODEN (WICHTIGSTE REGEL): Wenn alle Fragen im Kern korrekt beantwortet sind UND die Interpretation die Hauptaussage des Exhibits trifft, MUSS der Gesamtscore mindestens 85 sein — auch wenn dir einzelne Dimensionen schwächer erscheinen. Bilde ZUERST dieses Gesamturteil und verteile die Einzelscores konsistent dazu.
+- FRAGEN-BODEN: Sind ALLE Fragen im Kern korrekt beantwortet, liegt der Gesamtscore NIE unter 78 — auch wenn die Interpretation rein beschreibend bleibt. Ein fehlendes "So what" kostet dann höchstens den Bereich 78-85, niemals einen Absturz darunter; verteile die Einzelscores (v.a. Business-Implikationen) konsistent zu diesem Boden.
 - RUNDUNG IST KORREKT: Gerundete Werte, äquivalente Schreibweisen (27 % vs. 0,27 vs. "rund ein Viertel") und andere, aber richtige Rechenwege zählen VOLL als korrekt. Nur echte Ablese- oder Rechenfehler kosten Punkte.
 - KÜRZE IST KEIN MANGEL: Stichpunkte reichen. Eine knappe Interpretation mit Hauptaussage + 2-3 Insights mit Zahlen ist vollwertig; Länge ist NIE ein Abzugsgrund.
 - Die Interpretation entstand VOR den Fragen: Es ist KEIN Mangel, wenn sie Aspekte nicht anspricht, die erst durch die Fragen relevant werden.
