@@ -8,8 +8,8 @@
 #   .\scripts\deploy-functions.ps1 -Token "sbp_..." -Functions evaluate-drill,frameworks-interviewer
 #
 # Token: https://supabase.com/dashboard/account/tokens (Personal Access Token,
-# danach am besten widerrufen). verify_jwt bleibt false — der Client ruft die
-# Functions mit dem Publishable Key auf, nicht mit einem JWT.
+# danach am besten widerrufen). verify_jwt bleibt true — so sind die Functions
+# aktuell deployed (verifizierter Stand 2026-07-16), der Anon-Key ist ein JWT.
 
 param(
     [Parameter(Mandatory = $true)][string]$Token,
@@ -28,7 +28,7 @@ foreach ($fn in $Functions) {
 
     $boundary = "----pumpkin" + [Guid]::NewGuid().ToString("N")
     $nl = "`r`n"
-    $metadata = '{"entrypoint_path":"index.ts","name":"' + $fn + '","verify_jwt":false}'
+    $metadata = '{"entrypoint_path":"index.ts","name":"' + $fn + '","verify_jwt":true}'
     $fileBytes = [IO.File]::ReadAllBytes($indexPath)
 
     $pre = "--$boundary$nl" +
