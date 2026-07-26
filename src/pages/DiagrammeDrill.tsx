@@ -43,7 +43,7 @@ const drillConfig: DrillConfig = {
     { value: "easy", label: "Einsteiger", desc: "Werte ablesen, einfache Prozente & Deltas, 1 Frage" },
     { value: "hard", label: "Fortgeschritten", desc: "Mehrstufige Rechnungen, Zusatzinfos kombinieren, 2 Fragen" },
   ],
-  hintText: "Wie im echten Interview: Erst sagst du, was das Exhibit zeigt (Hauptaussage + Key Insights mit Zahlen), erst danach kommen die konkreten Fragen. Runden ist erlaubt — der Rechenweg zählt.",
+  hintText: "Wie im echten Interview: Erst sagst du, was das Exhibit zeigt — Hauptaussage, Key Insights mit Zahlen, mögliche Ursachen auffälliger Trends und dein 'So what' fürs Business. Erst danach kommen die konkreten Fragen. Runden ist erlaubt — der Rechenweg zählt.",
   startButtonText: "Exhibit starten →",
   rubricLabels: [
     { key: "data_reading", label: "Daten-Ablesung", max: 25 },
@@ -52,7 +52,7 @@ const drillConfig: DrillConfig = {
     { key: "depth_of_analysis", label: "Analysetiefe", max: 15 },
     { key: "communication", label: "Kommunikation", max: 10 },
   ],
-  placeholder: "Hauptaussage: ...\n\nKey Insights:\n- ...\n- ...",
+  placeholder: "Hauptaussage: ...\n\nKey Insights (mit Zahlen):\n- ...\n- ...\n\nMögliche Ursachen: ...\n\nSo what fürs Business: ...",
   sprintMode: false,
   timeReferenceMinutes: 5,
 };

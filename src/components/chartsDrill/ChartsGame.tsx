@@ -134,6 +134,23 @@ const ChartsGame: React.FC<ChartsGameProps> = ({
       {step === "interpret" ? (
         <>
           {/* Schritt 1: Interpretation */}
+          <div className="rounded-xl border border-border bg-muted/30 px-4 py-3">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">
+              Das gehört in deine Interpretation — alle vier Punkte fließen in die Bewertung ein:
+            </p>
+            <ol className="space-y-1">
+              {[
+                "Hauptaussage: Was zeigt das Exhibit in einem Satz?",
+                "2–3 Key Insights mit konkreten Zahlen (Deltas, %, Vergleiche)",
+                "Mögliche Ursachen: Was könnte hinter auffälligen Trends stecken? (Hypothesen reichen)",
+                "So what: Was bedeutet das fürs Geschäft des Klienten — oder was würdest du als Nächstes prüfen?",
+              ].map((step_, i) => (
+                <li key={i} className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground/70">{i + 1}.</span> {step_}
+                </li>
+              ))}
+            </ol>
+          </div>
           <div>
             <div className="mb-2 flex items-center justify-between">
               <label className="text-sm font-medium text-foreground">
@@ -155,7 +172,7 @@ const ChartsGame: React.FC<ChartsGameProps> = ({
               disabled={isEvaluating}
             />
             <p className="mt-1.5 text-xs text-muted-foreground">
-              Wie im Interview: Erst die Hauptaussage, dann 2–3 Key Insights mit Zahlen. Danach kommen die Fragen — die Interpretation lässt sich nicht mehr ändern.
+              Stichpunkte reichen völlig. Danach kommen die Fragen — die Interpretation lässt sich nicht mehr ändern.
             </p>
           </div>
 

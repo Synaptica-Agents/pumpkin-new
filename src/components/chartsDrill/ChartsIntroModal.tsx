@@ -22,7 +22,7 @@ interface ChartsIntroModalProps {
 
 const STEPS = [
   "Exhibit ansehen — Tabelle oder Diagramm wie im echten Case-Interview, inklusive Zusatzinfos.",
-  "Interpretation schreiben: Was zeigt das Exhibit? Hauptaussage + 2–3 Key Insights mit Zahlen.",
+  "Interpretation schreiben: Hauptaussage + 2–3 Key Insights mit Zahlen — und dazu mögliche Ursachen auffälliger Trends sowie dein 'So what' fürs Business. Alle vier Punkte fließen in die Bewertung ein.",
   "Danach erscheinen 1–2 konkrete Fragen — rechnen, kurz antworten, abgeben.",
   "Die KI bewertet beides zusammen und zeigt dir die Lösung mit Rechenweg.",
 ];

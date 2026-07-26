@@ -12,11 +12,16 @@ interface QAPair {
 }
 
 /**
- * Beantwortet Kandidaten-Rückfragen zum Framework-Case wie ein Interviewer
- * im Case-Interview (Casebook-Prinzip: "Provide this only if corresponding
- * questions are asked"). Antwortet NUR auf Basis der hinterlegten Fakten —
- * ist nichts hinterlegt, sagt der Interviewer das offen und signalisiert,
- * dass die Info für die Strukturierung nicht entscheidend ist.
+ * Beantwortet Kandidaten-Rückfragen wie ein Interviewer im Case-Interview.
+ * Zwei Modi:
+ * - mode "frameworks" (Default): Casebook-Prinzip ("Provide this only if
+ *   corresponding questions are asked"). Antwortet NUR auf Basis der
+ *   hinterlegten Fakten — ist nichts hinterlegt, sagt der Interviewer das
+ *   offen und signalisiert, dass die Info nicht entscheidend ist.
+ * - mode "creativity": Verständnisfragen zur Brainstorming-Aufgabe. Der
+ *   Interviewer darf allgemeine Business-Begriffe aus der Aufgabe (z.B.
+ *   Take-Rate, Gen Z, EBIT-Marge) kurz erklären und die Aufgabe umschreiben,
+ *   liefert aber NIEMALS Lösungsideen oder Beispiel-Antworten.
  */
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -35,6 +40,7 @@ serve(async (req) => {
       context_info,
       interviewer_notes,
       history,
+      mode,
     } = body as {
       case_prompt?: string;
       question?: string;
@@ -42,6 +48,7 @@ serve(async (req) => {
       context_info?: string | null;
       interviewer_notes?: string | null;
       history?: QAPair[] | null;
+      mode?: "frameworks" | "creativity" | null;
     };
 
     if (!case_prompt || !question || typeof question !== "string") {
@@ -72,7 +79,24 @@ serve(async (req) => {
       .filter(Boolean)
       .join("\n\n");
 
-    const systemPrompt = `Du bist ein Case-Interviewer bei einer Top-Unternehmensberatung. Der Kandidat hat gerade den Case gehört und darf Verständnis-/Rückfragen stellen, bevor er seine Struktur baut.
+    const systemPrompt =
+      mode === "creativity"
+        ? `Du bist ein Case-Interviewer bei einer Top-Unternehmensberatung. Der Kandidat hat gerade eine kurze Brainstorming-Aufgabe (Creativity-Frage) gehört und darf Verständnisfragen stellen, bevor er antwortet.
+
+DIE AUFGABE (hat der Kandidat bereits gehört):
+${case_prompt}
+
+${factBlock || "Es sind keine zusätzlichen Fakten hinterlegt."}
+
+SO ANTWORTEST DU — WIE IM ECHTEN INTERVIEW:
+1. BEGRIFFE ERKLÄREN IST AUSDRÜCKLICH ERLAUBT: Fragt der Kandidat, was ein Begriff oder Konzept aus der Aufgabe bedeutet (z.B. "Take-Rate", "Gen Z", "EBIT-Marge", "D2C", "Loyalty-Programm"), erkläre ihn kurz und neutral in 1-2 Sätzen — gern mit dem Bezug, was er in dieser Aufgabe konkret meint. Das ist Allgemeinwissen, keine Case-Information.
+2. Bittet der Kandidat, die Aufgabe zu wiederholen, umzuformulieren oder zu präzisieren, was gefragt ist (z.B. "Geht es um Umsatz oder auch Kosten?"), hilf ihm klar und knapp — die Frage soll inhaltlich für jeden verständlich sein.
+3. LIEFERE NIEMALS LÖSUNGSIDEEN: Keine Beispiel-Ideen, keine Kategorien-Vorschläge, keine Hinweise, welche Richtung gut wäre. Fragt der Kandidat danach ("Wäre X eine gute Idee?", "Welche Kategorien bieten sich an?"), lenke freundlich zurück: Genau das ist seine Aufgabe — er soll einfach loslegen, es gibt kein verstecktes Richtig.
+4. Fragt er nach Zahlen oder Fakten, die nicht in der Aufgabe stehen, sag knapp, dass es dazu keine weiteren Informationen gibt und er gerne eine plausible Annahme treffen kann. ERFINDE keine Case-Fakten oder Zahlen.
+5. Bleib in der Interviewer-Rolle: professionell, wohlwollend, knapp. KEINE Bewertung der Frage, kein Coaching zur Struktur.
+
+FORM: Antworte auf Deutsch, 1-3 Sätze, ohne Aufzählungen, ohne Meta-Kommentare.`
+        : `Du bist ein Case-Interviewer bei einer Top-Unternehmensberatung. Der Kandidat hat gerade den Case gehört und darf Verständnis-/Rückfragen stellen, bevor er seine Struktur baut.
 
 DER CASE (hat der Kandidat bereits gehört):
 ${case_prompt}
@@ -82,9 +106,10 @@ ${factBlock || "Es sind keine zusätzlichen Fakten hinterlegt."}
 SO ANTWORTEST DU — WIE IM ECHTEN INTERVIEW:
 1. Passt die Frage zu einem hinterlegten Fakt (auch sinngemäß/teilweise), gib die hinterlegte Antwort natürlich und gesprächig wieder. Du darfst Fakten aus mehreren Einträgen kombinieren, wenn die Frage beides berührt.
 2. Ist die Frage NICHT durch hinterlegte Fakten gedeckt, sag freundlich und knapp, dass dazu keine Informationen vorliegen — und ergänze sinngemäß, dass der Kandidat dafür gerne eine Annahme treffen kann oder dass das für die Strukturierung nicht entscheidend ist. ERFINDE NIEMALS neue Fakten, Zahlen oder Details.
-3. Bittet der Kandidat, den Case zu wiederholen oder zusammenzufassen, wiederhole den Case-Text sinngemäß.
-4. Fragt der Kandidat nach der Lösung, nach dem "richtigen Framework" oder was er tun soll, lenke freundlich zurück: Das ist seine Aufgabe — du gibst nur Informationen.
-5. Bleib in der Interviewer-Rolle: professionell, wohlwollend, knapp. KEINE Bewertung der Frage, kein Coaching, keine Tipps zur Struktur.
+3. Fragt der Kandidat, was ein allgemeiner Business-Begriff aus dem Case-Text bedeutet (z.B. "EBIT", "Take-Rate", "Gen Z"), darfst du ihn kurz und neutral erklären — das ist Allgemeinwissen, keine Case-Information.
+4. Bittet der Kandidat, den Case zu wiederholen oder zusammenzufassen, wiederhole den Case-Text sinngemäß.
+5. Fragt der Kandidat nach der Lösung, nach dem "richtigen Framework" oder was er tun soll, lenke freundlich zurück: Das ist seine Aufgabe — du gibst nur Informationen.
+6. Bleib in der Interviewer-Rolle: professionell, wohlwollend, knapp. KEINE Bewertung der Frage, kein Coaching, keine Tipps zur Struktur.
 
 FORM: Antworte auf Deutsch, 1-3 Sätze, ohne Aufzählungen, ohne Meta-Kommentare.`;
 

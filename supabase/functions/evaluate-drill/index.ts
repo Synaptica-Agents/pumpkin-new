@@ -102,14 +102,16 @@ Priorisierung (max 20) — großzügig; die REIHENFOLGE/Position der Äste zähl
     drillType === "charts" ? `
 HINWEIS ZUM ANTWORT-FORMAT:
 Die Antwort besteht aus zwei Teilen:
-- "=== INTERPRETATION & KEY INSIGHTS ===" — der Kandidat fasst zusammen, was das Exhibit zeigt (Hauptaussage + wichtigste Insights). Er hat diesen Teil geschrieben, BEVOR er die Fragen gesehen hat.
+- "=== INTERPRETATION & KEY INSIGHTS ===" — der Kandidat fasst zusammen, was das Exhibit zeigt. Die Aufgabe fordert dafür explizit vier Elemente: Hauptaussage, 2-3 Key Insights mit Zahlen, mögliche Ursachen/Hypothesen für auffällige Entwicklungen und ein kurzes "So what" (Business-Implikation). Er hat diesen Teil geschrieben, BEVOR er die Fragen gesehen hat.
 - "=== FRAGE N: ... ===" mit "ANTWORT: ..." — Antworten auf konkrete Fragen. Die korrekten Antworten inkl. Rechenweg stehen in der BEISPIEL-LÖSUNG unter "KORREKTE ANTWORTEN". Die vollständigen Exhibit-Daten stehen im KONTEXT — prüfe Zahlenangaben dagegen.
+- Bei Ursachen zählen plausible HYPOTHESEN ("könnte an ... liegen") voll — der Kandidat kann die wahren Ursachen aus dem Exhibit nicht kennen und muss sie nicht belegen.
 
 GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
 Du bewertest eine spontane Interview-Leistung WOHLWOLLEND, wie ein freundlicher Interviewer.
 - GESAMTSCORE-BODEN (WICHTIGSTE REGEL): Wenn alle Fragen im Kern korrekt beantwortet sind UND die Interpretation die Hauptaussage des Exhibits trifft, MUSS der Gesamtscore mindestens 85 sein — auch wenn dir einzelne Dimensionen schwächer erscheinen. Bilde ZUERST dieses Gesamturteil und verteile die Einzelscores konsistent dazu.
 - FRAGEN-BODEN: Sind ALLE Fragen im Kern korrekt beantwortet, liegt der Gesamtscore NIE unter 78 — auch wenn die Interpretation rein beschreibend bleibt. Ein fehlendes "So what" kostet dann höchstens den Bereich 78-85, niemals einen Absturz darunter; verteile die Einzelscores (v.a. Business-Implikationen) konsistent zu diesem Boden.
 - RUNDUNG IST KORREKT: Gerundete Werte, äquivalente Schreibweisen (27 % vs. 0,27 vs. "rund ein Viertel") und andere, aber richtige Rechenwege zählen VOLL als korrekt. Nur echte Ablese- oder Rechenfehler kosten Punkte.
+- EINDEUTIGE ENTSCHEIDUNG JE WERT (gegen widersprüchliches Feedback): Prüfe jeden genannten Wert gegen die korrekte Lösung und entscheide binär. Entweder (a) er ist im Rahmen von Rundung/Äquivalenz korrekt — dann zählt er voll UND darf nirgends im Feedback (auch nicht in den Improvements) als Ungenauigkeit oder "präziser rechnen" auftauchen. Oder (b) er ist ein echter Ablese-/Rechenfehler — dann kostet er Punkte, gehört in die Improvements und wird NICHT zugleich als Stärke gelobt. Im Zweifel gilt (a). Niemals beides zum selben Wert.
 - KÜRZE IST KEIN MANGEL: Stichpunkte reichen. Eine knappe Interpretation mit Hauptaussage + 2-3 Insights mit Zahlen ist vollwertig; Länge ist NIE ein Abzugsgrund.
 - Die Interpretation entstand VOR den Fragen: Es ist KEIN Mangel, wenn sie Aspekte nicht anspricht, die erst durch die Fragen relevant werden.
 
@@ -133,6 +135,7 @@ GRUNDKALIBRIERUNG — ZUERST LESEN, GILT ÜBER ALLEM:
 - REFERENZ-DECKUNG = BESTFALL (HARTE REGEL, keine Richtschnur): Entspricht die Antwort inhaltlich weitgehend der Beispiel-Lösung — gleiche Ideen-Richtungen, egal wie ähnlich formuliert und in welcher Reihenfolge — dann ist sie eine BESTMÖGLICHE Antwort. Vergib dann: Struktur 36-40, Inhalt 44-50, Kreativität 7-10, Gesamtscore 92-100. Prüfe diese Bedingung ZUERST.
 - GESAMTSCORE-BODEN (WICHTIGSTE REGEL): Deckt die Antwort die meisten Ideen-Richtungen der Beispiel-Lösung ab (oder gleichwertige eigene Ideen) UND ist erkennbar gruppiert, MUSS der Gesamtscore mindestens 88 sein — auch wenn dir Kreativität oder Tiefe schwächer erscheinen. Bilde ZUERST dieses Gesamturteil und verteile die Einzelscores konsistent dazu.
 - Die REIHENFOLGE der Kategorien ist völlig egal und niemals ein Abzugsgrund.
+- VERSTÄNDNISFRAGEN: Der Kandidat konnte vor dem Antworten Verständnisfragen an den Interviewer stellen (z.B. was ein Begriff wie "Take-Rate" oder "Gen Z" bedeutet). Falls unten RÜCKFRAGEN mitgegeben sind, sind sie gutes Interview-Verhalten und NIEMALS ein Abzugsgrund — ebenso wenig wie fehlende Rückfragen. Die Interviewer-Antworten sind reines Kontextwissen; bewerte ausschließlich die eigentliche Antwort des Kandidaten.
 
 KALIBRIER-ANKER — HALTE DIESE GESAMTWERTE EIN:
 - Breite, gruppierte Antwort, die die wichtigsten Ideen-Richtungen trifft (vgl. Beispiel-Lösung): 90-100. NIEMALS unter 88.
@@ -171,7 +174,7 @@ WICHTIG: Bei einer Antwort mit 3-4 thematisch gruppierten Bullet-Points zur Frag
       "Schwierigkeit: SCHWER. Es gilt DIESELBE großzügige Skala wie oben — breite, gruppierte Abdeckung bleibt 90+ (nie unter 88), 3-5 relevante gruppierte Punkte bleiben 80-90. Du darfst etwas mehr Breite erwarten als bei Mittel, aber bestrafe Kürze nicht."
     ) : (
       difficulty === "easy"
-        ? "Schwierigkeit: EINSTEIGER. Sehr großzügig bewerten. Es zählt: Werte korrekt ablesen, einfache Prozente/Deltas richtig rechnen, Hauptaussage erkennen. Ausgefeilte Implikationen und Tiefe sind NICHT gefordert — eine knappe, korrekte Antwort verdient 85+."
+        ? "Schwierigkeit: EINSTEIGER. Sehr großzügig bewerten. Es zählt: Werte korrekt ablesen, einfache Prozente/Deltas richtig rechnen, Hauptaussage erkennen. Ein einfaches 'So what' und eine simple Ursachen-Hypothese (je 1 Satz/Stichpunkt) genügen voll — ausgefeilte Implikationen und Tiefe sind NICHT gefordert. Eine knappe, korrekte Antwort mit einfachem 'So what' verdient 85+; fehlen Ursachen/'So what' komplett, greift der Fragen-Boden (78-85)."
         : "Schwierigkeit: FORTGESCHRITTEN. Es gilt DIESELBE großzügige Skala — alle Fragen korrekt + Hauptaussage getroffen bleibt mindestens 85. Du darfst mehrstufige Rechnungen und das Einbeziehen der Zusatzinformationen erwarten, aber bestrafe Kürze nicht."
     );
 
@@ -205,6 +208,8 @@ FEEDBACK-REGELN:
 - Jede Stärke muss konkret benennen, WAS gut war (z.B. "Gute MECE-Struktur mit 4 klar abgegrenzten Ästen").
 - Jedes Improvement muss konkret und UMSETZBAR sein. NICHT: "Struktur verbessern". SONDERN: "Füge einen Ast für externe Faktoren (Markt, Wettbewerb) hinzu."
 - Gib maximal 2-3 Improvements – fokussiere auf die wichtigsten.
+- WIDERSPRUCHSVERBOT (PFLICHT-CHECK VOR DER ABGABE): Stärken und Improvements dürfen sich NIEMALS widersprechen. Derselbe Aspekt darf nur in EINER der beiden Listen auftauchen. Entscheide je Aspekt eindeutig: Gilt er nach den Regeln oben als korrekt oder vollwertig (z.B. gerundete Werte, äquivalente Rechenwege, knappe Stichpunkte, Deckung mit der Beispiel-Lösung), erscheint er NIRGENDS als Kritik oder Improvement. Nur echte Fehler oder Lücken sind Improvements — und die lobst du nicht zugleich als Stärke. Lies vor der Abgabe beide Listen gegen und streiche jeden Widerspruch.
+- Erzwinge keine Kritik: Gibt es nichts Substanzielles zu verbessern, gib genau EIN weiterführendes Improvement als Profi-Tipp fürs nächste Level, das der Antwort nichts vorwirft (z.B. "Als Kür: nenne zusätzlich ...").
 - one_line_summary: Ein Satz der dem User hilft, den nächsten Versuch besser zu machen.`;
 }
 
@@ -331,7 +336,7 @@ serve(async (req) => {
 
     const askedQaBlock =
       Array.isArray(asked_qa) && asked_qa.length > 0
-        ? `\nRÜCKFRAGEN DES KANDIDATEN AN DEN INTERVIEWER (vor dem Strukturieren gestellt):\n${asked_qa
+        ? `\nRÜCKFRAGEN DES KANDIDATEN AN DEN INTERVIEWER (vor der Antwort gestellt — niemals negativ werten):\n${asked_qa
             .map((p: { q?: string; a?: string }) => `- Frage: ${p?.q ?? ""}\n  Antwort: ${p?.a ?? ""}`)
             .join("\n")}`
         : "";

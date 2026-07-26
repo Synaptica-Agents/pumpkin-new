@@ -72,7 +72,7 @@ export const buildChartsCasePrompt = (c: TextDrillCase): string => {
   const qs = c.questions ?? [];
   if (qs.length > 0) {
     parts.push(
-      "Der Kandidat sollte zuerst das Exhibit interpretieren (Zusammenfassung + Key Insights) und danach folgende Fragen beantworten:\n" +
+      "Der Kandidat sollte zuerst das Exhibit interpretieren — explizit gefordert waren: Hauptaussage, 2-3 Key Insights mit Zahlen, mögliche Ursachen/Hypothesen für auffällige Entwicklungen und ein kurzes \"So what\" (Business-Implikation) — und danach folgende Fragen beantworten:\n" +
         qs.map((q, i) => `Frage ${i + 1}: ${q.text}`).join("\n")
     );
   }

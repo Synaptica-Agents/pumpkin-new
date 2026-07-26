@@ -10,7 +10,7 @@ import TextDrillGame from "@/components/textDrill/TextDrillGame";
 import TextDrillResultView from "@/components/textDrill/TextDrillResult";
 import TextDrillDebrief from "@/components/textDrill/TextDrillDebrief";
 import { SprintDuration } from "@/types/drill";
-import { TextDrillCase, TextDrillResult, TextDrillPhase, TextDrillEvaluation, DrillConfig } from "@/types/textDrill";
+import { TextDrillCase, TextDrillResult, TextDrillPhase, TextDrillEvaluation, DrillConfig, ClarifyingQA } from "@/types/textDrill";
 import {
   fetchTextDrillCases, getNextTextDrillCase,
   submitTextDrillAnswer, saveTextDrillEvaluation,
@@ -35,8 +35,17 @@ const drillConfig: DrillConfig = {
     { value: "medium", label: "Mittel", desc: "Eine kurze, sehr simple Frage" },
     { value: "hard", label: "Schwer", desc: "Etwas breiter — mehr Ideen & Struktur gefragt" },
   ],
-  hintText: "Gruppiere deine Ideen in 2–4 Kategorien mit Stichpunkten. Breite schlägt Tiefe, eine überraschende Idee schlägt fünf generische — und rechnen musst du hier nichts.",
+  hintText: "Gruppiere deine Ideen in 2–4 Kategorien mit Stichpunkten. Breite schlägt Tiefe, eine überraschende Idee schlägt fünf generische — und rechnen musst du hier nichts. Unklare Begriffe? Frag den Interviewer einfach kurz, bevor du antwortest.",
   startButtonText: "Start Creativity →",
+  clarifyQuestions: {
+    mode: "creativity",
+    max: 3,
+    title: "Verständnisfragen an den Interviewer",
+    hint: "Begriff unklar (z.B. Take-Rate, Gen Z) oder Frage mehrdeutig? Frag kurz nach — wie im echten Interview. Lösungsideen gibt es hier keine, und Fragen kosten dich keine Punkte.",
+    placeholder: "z.B. Was genau ist mit Take-Rate gemeint?",
+    interviewerContext:
+      "BEGRIFFSERKLÄRUNGEN SIND ERLAUBT: Du darfst allgemeine Business-Begriffe aus der Aufgabe (z.B. Take-Rate, Gen Z, EBIT-Marge, D2C) auf Nachfrage kurz und neutral erklären und die Aufgabe umformulieren oder wiederholen. Liefere aber niemals Lösungsideen, Beispiel-Antworten oder Kategorien-Vorschläge — das ist Aufgabe des Kandidaten.",
+  },
   rubricLabels: [
     { key: "structure", label: "Struktur", max: 40 },
     { key: "content", label: "Inhalt", max: 50 },
@@ -93,7 +102,7 @@ const CreativityDrill: React.FC = () => {
     setPhase("debrief");
   }, []);
 
-  const handleSubmit = useCallback(async (answerText: string) => {
+  const handleSubmit = useCallback(async (answerText: string, askedQA: ClarifyingQA[]) => {
     if (!currentCase) return;
     setIsEvaluating(true);
     setPhase("evaluating");
@@ -119,6 +128,7 @@ const CreativityDrill: React.FC = () => {
           difficulty,
           context_info: currentCase.context_info,
           reference_solution: currentCase.reference_solution,
+          asked_qa: askedQA.length > 0 ? askedQA : undefined,
         },
       });
 

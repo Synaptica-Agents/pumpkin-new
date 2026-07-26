@@ -83,7 +83,9 @@ def build_case_prompt(case):
     qs = case.get("questions") or []
     if qs:
         parts.append(
-            "Der Kandidat sollte zuerst das Exhibit interpretieren (Zusammenfassung + Key Insights) "
+            "Der Kandidat sollte zuerst das Exhibit interpretieren — explizit gefordert waren: "
+            "Hauptaussage, 2-3 Key Insights mit Zahlen, mögliche Ursachen/Hypothesen für auffällige "
+            "Entwicklungen und ein kurzes \"So what\" (Business-Implikation) — "
             "und danach folgende Fragen beantworten:\n"
             + "\n".join(f"Frage {i + 1}: {q['text']}" for i, q in enumerate(qs)))
     return "\n\n".join(parts)
