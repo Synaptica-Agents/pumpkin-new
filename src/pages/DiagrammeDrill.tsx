@@ -23,6 +23,7 @@ import {
 } from "@/lib/textDrillFetcher";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTestMode, withTestPrefix } from "@/lib/testMode";
 
 const drillConfig: DrillConfig = {
   drillType: "charts",
@@ -61,6 +62,7 @@ const INTRO_STORAGE_KEY = "diagrammeDrill.intro.seen";
 
 const DiagrammeDrill: React.FC = () => {
   const userEmail = useUserEmail();
+  const testMode = useTestMode();
   const [duration, setDuration] = useState<SprintDuration>(300);
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
   const [categories, setCategories] = useState<string[]>(["all"]);
@@ -76,8 +78,10 @@ const DiagrammeDrill: React.FC = () => {
   const sessionIdRef = useRef<string>(crypto.randomUUID());
   const sessionStartTime = useRef<number>(0);
 
-  const buildLink = (path: string) =>
-    userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  const buildLink = (rawPath: string) => {
+    const path = withTestPrefix(testMode, rawPath);
+    return userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  };
 
   const loadNextCase = useCallback(() => {
     const next = getNextTextDrillCase(drillConfig.tableName);

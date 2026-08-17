@@ -11,6 +11,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useUserEmail } from "@/hooks/useUserEmail";
+import { useTestMode, withTestPrefix } from "@/lib/testMode";
 import {
   IconMentalMath,
   IconCaseMath,
@@ -73,6 +74,7 @@ const modules: Omit<ModuleCardProps, "emailParam">[] = [
 
 const ClientDrillsCarousel: React.FC = () => {
   const userEmail = useUserEmail();
+  const testMode = useTestMode();
   const [api, setApi] = useState<CarouselApi>();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -118,7 +120,11 @@ const ClientDrillsCarousel: React.FC = () => {
             <CarouselContent>
               {modules.map((module, i) => (
                 <CarouselItem key={i} className="basis-full">
-                  <ModuleCard {...module} emailParam={userEmail} />
+                  <ModuleCard
+                    {...module}
+                    href={module.href ? withTestPrefix(testMode, module.href) : undefined}
+                    emailParam={userEmail}
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>

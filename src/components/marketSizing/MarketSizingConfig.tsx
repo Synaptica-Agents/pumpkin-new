@@ -5,6 +5,8 @@ import { Boxes, TrendingUp, Ruler, Shuffle } from "lucide-react";
 
 interface MarketSizingConfigProps {
   onStart: (category: MarketSizingCategory) => void;
+  /** Test-Modus: Kategorie fest vorgewählt — andere Optionen sichtbar, aber nicht wählbar. */
+  lockedCategory?: MarketSizingCategory;
 }
 
 const CATEGORIES: Array<{
@@ -39,8 +41,8 @@ const CATEGORIES: Array<{
   },
 ];
 
-const MarketSizingConfig: React.FC<MarketSizingConfigProps> = ({ onStart }) => {
-  const [category, setCategory] = useState<MarketSizingCategory>("all");
+const MarketSizingConfig: React.FC<MarketSizingConfigProps> = ({ onStart, lockedCategory }) => {
+  const [category, setCategory] = useState<MarketSizingCategory>(lockedCategory ?? "all");
 
   return (
     <div className="flex flex-col gap-8 py-4">
@@ -56,7 +58,7 @@ const MarketSizingConfig: React.FC<MarketSizingConfigProps> = ({ onStart }) => {
               <button
                 key={cat.value}
                 type="button"
-                onClick={() => setCategory(cat.value)}
+                onClick={() => { if (!lockedCategory) setCategory(cat.value); }}
                 className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all ${
                   selected
                     ? "border-primary bg-primary/10 ring-1 ring-primary"

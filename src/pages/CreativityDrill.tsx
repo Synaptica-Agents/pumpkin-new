@@ -17,6 +17,7 @@ import {
 } from "@/lib/textDrillFetcher";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { TEST_LOCKS, useTestMode, withTestPrefix } from "@/lib/testMode";
 
 const drillConfig: DrillConfig = {
   drillType: "creativity",
@@ -64,9 +65,12 @@ const drillConfig: DrillConfig = {
 
 const CreativityDrill: React.FC = () => {
   const userEmail = useUserEmail();
+  const testMode = useTestMode();
+  // /test: fester Demo-Case — Schwierigkeit & Kategorie gesperrt (src/lib/testMode.ts)
+  const lock = testMode ? TEST_LOCKS.creativity : null;
   const [duration, setDuration] = useState<SprintDuration>(300);
-  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
-  const [categories, setCategories] = useState<string[]>(["all"]);
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(lock?.difficulty ?? "medium");
+  const [categories, setCategories] = useState<string[]>(lock ? [...lock.categories] : ["all"]);
   const [phase, setPhase] = useState<TextDrillPhase>("config");
   const [currentCase, setCurrentCase] = useState<TextDrillCase | null>(null);
   const [results, setResults] = useState<TextDrillResult[]>([]);
@@ -77,8 +81,10 @@ const CreativityDrill: React.FC = () => {
   const sessionIdRef = useRef<string>(crypto.randomUUID());
   const sessionStartTime = useRef<number>(0);
 
-  const buildLink = (path: string) =>
-    userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  const buildLink = (rawPath: string) => {
+    const path = withTestPrefix(testMode, rawPath);
+    return userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  };
 
   const loadNextCase = useCallback(() => {
     const next = getNextTextDrillCase(drillConfig.tableName);
@@ -88,7 +94,7 @@ const CreativityDrill: React.FC = () => {
   }, []);
 
   const handleStart = useCallback(async () => {
-    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories);
+    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories, lock ?? undefined);
     // NOTE: seenIds are NOT reset between sessions — sessionStorage carries
     // dedup across the whole tab session.
     sessionIdRef.current = crypto.randomUUID();
@@ -96,7 +102,7 @@ const CreativityDrill: React.FC = () => {
     setCurrentResult(null);
     sessionStartTime.current = Date.now();
     loadNextCase();
-  }, [difficulty, categories, loadNextCase]);
+  }, [difficulty, categories, loadNextCase, lock]);
 
   const handleEnd = useCallback(() => {
     setPhase("debrief");
@@ -252,8 +258,8 @@ const CreativityDrill: React.FC = () => {
             <TextDrillConfig
               config={drillConfig}
               duration={duration} onDurationChange={setDuration}
-              difficulty={difficulty} onDifficultyChange={setDifficulty}
-              categories={categories} onCategoriesChange={setCategories}
+              difficulty={difficulty} onDifficultyChange={lock ? () => {} : setDifficulty}
+              categories={categories} onCategoriesChange={lock ? () => {} : setCategories}
               onStart={handleStart}
             />
           </main>

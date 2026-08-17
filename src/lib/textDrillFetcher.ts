@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { TextDrillCase } from "@/types/textDrill";
+import type { FixedCaseRef } from "@/lib/testMode";
 
 // Pools live in memory per module instance.
 const pools: Record<string, TextDrillCase[]> = {};
@@ -33,7 +34,8 @@ export const fetchTextDrillCases = async (
   tableName: string,
   difficulty: "easy" | "medium" | "hard",
   categoryField?: string,
-  categoryValues?: string[]
+  categoryValues?: string[],
+  fixedCase?: FixedCaseRef
 ): Promise<void> => {
   let query = supabase
     .from(tableName as any)
@@ -51,7 +53,7 @@ export const fetchTextDrillCases = async (
     pools[tableName] = [];
     return;
   }
-  pools[tableName] = (data ?? []).map((d: any) => ({
+  let mapped: TextDrillCase[] = (data ?? []).map((d: any) => ({
     id: d.id,
     difficulty: d.difficulty,
     prompt: d.prompt,
@@ -66,6 +68,20 @@ export const fetchTextDrillCases = async (
     additional_info: d.additional_info || null,
     questions: d.questions || null,
   }));
+
+  // Test-Modus (/test): Pool auf den fest verdrahteten Demo-Case reduzieren.
+  if (fixedCase) {
+    const only = mapped.filter(
+      (c) => c.id === fixedCase.caseId || c.prompt.includes(fixedCase.promptContains)
+    );
+    if (only.length > 0) {
+      mapped = only;
+    } else {
+      console.warn(`[testMode] Fixer Case nicht im ${tableName}-Pool gefunden — voller Pool bleibt aktiv.`);
+    }
+  }
+
+  pools[tableName] = mapped;
 };
 
 /**

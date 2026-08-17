@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, BarChart3 } from "lucide-react";
 import { useUserEmail } from "@/hooks/useUserEmail";
+import { isTestPath, withTestPrefix } from "@/lib/testMode";
 
 interface NavHeaderProps {
   showStats?: boolean;
@@ -11,9 +12,12 @@ const NavHeader: React.FC<NavHeaderProps> = () => {
   const userEmail = useUserEmail();
   const location = useLocation();
   const onProgressPage = location.pathname === "/fortschritt";
+  const testMode = isTestPath(location.pathname);
 
-  const withEmail = (path: string) =>
-    userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  const withEmail = (rawPath: string) => {
+    const path = withTestPrefix(testMode, rawPath);
+    return userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  };
 
   return (
     <header className="flex h-[52px] w-full items-center justify-between border-b border-border px-4">

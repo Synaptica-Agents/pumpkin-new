@@ -11,6 +11,7 @@ import { useUserEmail } from "@/hooks/useUserEmail";
 import { saveDrillSession, saveDrillAttempts } from "@/lib/sessionTracker";
 import { ArrowLeft } from "lucide-react";
 import { IconMentalMath } from "@/components/drillIcons";
+import { useTestMode, withTestPrefix } from "@/lib/testMode";
 
 const DIFFICULTY_MAP: Record<DifficultyLevel, "easy" | "medium" | "hard"> = {
   1: "easy",
@@ -20,6 +21,7 @@ const DIFFICULTY_MAP: Record<DifficultyLevel, "easy" | "medium" | "hard"> = {
 
 const Index = () => {
   const userEmail = useUserEmail();
+  const testMode = useTestMode();
   const [duration, setDuration] = useState<SprintDuration>(300);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(1);
   const [selectedTypes, setSelectedTypes] = useState<TaskType[]>(["multiplication", "percentage", "division", "zeros"]);
@@ -33,8 +35,10 @@ const Index = () => {
   const taskStartTime = useRef<number>(0);
   const flashTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const buildLink = (path: string) =>
-    userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  const buildLink = (rawPath: string) => {
+    const path = withTestPrefix(testMode, rawPath);
+    return userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  };
 
   const generateNewTask = useCallback(() => {
     // Pick a random type from selected types (filter out "all")

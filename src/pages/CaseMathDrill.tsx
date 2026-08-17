@@ -12,9 +12,11 @@ import { DifficultyLevel } from "@/components/DifficultySelector";
 import { SprintDuration } from "@/types/drill";
 import { CaseMathTask, CaseMathCategory, CaseMathResult, CaseMathStats, CaseMathPhase } from "@/types/caseMath";
 import { generateCaseMathTask, resetCaseMathGenerator, checkCaseMathAnswer } from "@/lib/caseMathGenerator";
+import { useTestMode, withTestPrefix } from "@/lib/testMode";
 
 const CaseMathDrill = () => {
   const userEmail = useUserEmail();
+  const testMode = useTestMode();
   const [duration, setDuration] = useState<SprintDuration>(300);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(1);
   const [selectedCategories, setSelectedCategories] = useState<CaseMathCategory[]>(["profitability", "investment", "breakeven"]);
@@ -28,8 +30,10 @@ const CaseMathDrill = () => {
   const taskStartTime = useRef<number>(0);
   const flashTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const buildLink = (path: string) =>
-    userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  const buildLink = (rawPath: string) => {
+    const path = withTestPrefix(testMode, rawPath);
+    return userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  };
 
   const generateNewTask = useCallback(() => {
     const task = generateCaseMathTask(selectedCategories, difficulty);

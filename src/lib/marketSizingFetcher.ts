@@ -1,12 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 import { MarketSizingCase, MarketSizingCategory } from "@/types/marketSizing";
+import type { FixedCaseRef } from "@/lib/testMode";
 
 let casesPool: MarketSizingCase[] = [];
 let seenIds: string[] = [];
 let seenIndustries: string[] = [];
 
 export const fetchMarketSizingCases = async (
-  category: MarketSizingCategory = "all"
+  category: MarketSizingCategory = "all",
+  fixedCase?: FixedCaseRef
 ): Promise<void> => {
   const query = supabase
     .from("market_sizing_cases" as any)
@@ -25,6 +27,19 @@ export const fetchMarketSizingCases = async (
     // Fallback: never leave the pool empty if a category is unexpectedly unset.
     if (filtered.length > 0) cases = filtered;
   }
+
+  // Test-Modus (/test): Pool auf den fest verdrahteten Demo-Case reduzieren.
+  if (fixedCase) {
+    const only = cases.filter(
+      (c) => c.id === fixedCase.caseId || c.prompt.includes(fixedCase.promptContains)
+    );
+    if (only.length > 0) {
+      cases = only;
+    } else {
+      console.warn("[testMode] Fixer Market-Sizing-Case nicht gefunden — voller Pool bleibt aktiv.");
+    }
+  }
+
   casesPool = cases;
 };
 

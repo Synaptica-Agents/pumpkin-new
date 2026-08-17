@@ -29,6 +29,14 @@ const App = () => (
           <Route path="/frameworks-drill" element={<FrameworksDrill />} />
           <Route path="/diagramme-drill" element={<DiagrammeDrill />} />
           <Route path="/fortschritt" element={<FortschrittPage />} />
+          {/* /test: identisches UI, aber fixe Demo-Cases in Frameworks/Market Sizing/Creativity (src/lib/testMode.ts) */}
+          <Route path="/test" element={<ClientDrillsCarousel key="test" />} />
+          <Route path="/test/mental-math-drill" element={<MentalMathDrill key="test" />} />
+          <Route path="/test/case-math-drill" element={<CaseMathDrill key="test" />} />
+          <Route path="/test/creativity-drill" element={<CreativityDrill key="test" />} />
+          <Route path="/test/market-sizing-drill" element={<MarketSizingDrill key="test" />} />
+          <Route path="/test/frameworks-drill" element={<FrameworksDrill key="test" />} />
+          <Route path="/test/diagramme-drill" element={<DiagrammeDrill key="test" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

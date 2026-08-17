@@ -17,9 +17,13 @@ import {
 } from "@/lib/marketSizingFetcher";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { TEST_LOCKS, useTestMode, withTestPrefix } from "@/lib/testMode";
 
 const MarketSizingDrill: React.FC = () => {
   const userEmail = useUserEmail();
+  const testMode = useTestMode();
+  // /test: fester Demo-Case — Kategorie gesperrt (src/lib/testMode.ts)
+  const lock = testMode ? TEST_LOCKS.marketSizing : null;
   const [phase, setPhase] = useState<MarketSizingPhase>("config");
   const [currentCase, setCurrentCase] = useState<MarketSizingCase | null>(null);
   const [results, setResults] = useState<MarketSizingResult[]>([]);
@@ -32,8 +36,10 @@ const MarketSizingDrill: React.FC = () => {
   const sessionIdRef = useRef<string>(crypto.randomUUID());
   const sessionStartTime = useRef<number>(0);
 
-  const buildLink = (path: string) =>
-    userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  const buildLink = (rawPath: string) => {
+    const path = withTestPrefix(testMode, rawPath);
+    return userEmail ? `${path}?email=${encodeURIComponent(userEmail)}` : path;
+  };
 
   const loadNextCase = useCallback(() => {
     const next = getNextMarketSizingCase();
@@ -43,7 +49,7 @@ const MarketSizingDrill: React.FC = () => {
   }, []);
 
   const handleStart = useCallback(async (category: MarketSizingCategory) => {
-    await fetchMarketSizingCases(category);
+    await fetchMarketSizingCases(category, lock ?? undefined);
     resetMarketSizingSession();
     sessionIdRef.current = crypto.randomUUID();
     setResults([]);
@@ -60,7 +66,7 @@ const MarketSizingDrill: React.FC = () => {
     }
 
     loadNextCase();
-  }, [loadNextCase]);
+  }, [loadNextCase, lock]);
 
   const handleEnd = useCallback(() => {
     setPhase("debrief");
@@ -224,7 +230,7 @@ const MarketSizingDrill: React.FC = () => {
           </section>
           <main className="flex flex-1 flex-col items-center px-4 pb-12">
             <div className="w-full max-w-drill rounded-2xl border border-border bg-card p-card-padding">
-              <MarketSizingConfig onStart={handleStart} />
+              <MarketSizingConfig onStart={handleStart} lockedCategory={lock?.category} />
             </div>
           </main>
         </>
