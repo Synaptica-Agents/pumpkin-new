@@ -40,6 +40,9 @@ const DRILL_LABEL: Record<DrillKey, string> = {
   charts: "Diagramme",
 };
 
+/** Diagramm-Zeitraum: ab August 2026 — ältere Sessions zählen nur in die Gesamtwerte. */
+const CHART_START = new Date(2026, 7, 1);
+
 interface SessionRow {
   user_email: string;
   drill_type: string;
@@ -137,6 +140,12 @@ const ReportingPage: React.FC = () => {
     };
   }, []);
 
+  // Nur für die beiden Diagramme; die Kacheln oben rechnen weiter über alles.
+  const chartRows = useMemo(
+    () => rows.filter((r) => new Date(r.created_at).getTime() >= CHART_START.getTime()),
+    [rows]
+  );
+
   const stats = useMemo(() => {
     const users = new Set(rows.map((r) => r.user_email.toLowerCase()));
     const weekAgo = Date.now() - 7 * 86400000;
@@ -158,9 +167,9 @@ const ReportingPage: React.FC = () => {
   }, [rows]);
 
   const daily = useMemo<DailyPoint[]>(() => {
-    if (rows.length === 0) return [];
+    if (chartRows.length === 0) return [];
     const byDay = new Map<string, { users: Set<string>; sessions: number }>();
-    rows.forEach((r) => {
+    chartRows.forEach((r) => {
       const k = dayKey(new Date(r.created_at));
       const e = byDay.get(k) ?? { users: new Set<string>(), sessions: 0 };
       e.users.add(r.user_email.toLowerCase());
@@ -169,7 +178,7 @@ const ReportingPage: React.FC = () => {
     });
     // Lückenlose Tagesachse vom ersten Eintrag bis heute (Tage ohne Nutzung = 0)
     const out: DailyPoint[] = [];
-    const cursor = new Date(rows[0].created_at);
+    const cursor = new Date(CHART_START);
     cursor.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -179,10 +188,10 @@ const ReportingPage: React.FC = () => {
       cursor.setDate(cursor.getDate() + 1);
     }
     return out;
-  }, [rows]);
+  }, [chartRows]);
 
   const weekly = useMemo<WeeklyPoint[]>(() => {
-    if (rows.length === 0) return [];
+    if (chartRows.length === 0) return [];
     const byWeek = new Map<string, WeeklyPoint>();
     const weekOf = (d: Date): WeeklyPoint => {
       const mon = mondayOf(d);
@@ -202,13 +211,13 @@ const ReportingPage: React.FC = () => {
       return e;
     };
     // Lückenlose Wochenachse
-    const cursor = mondayOf(new Date(rows[0].created_at));
+    const cursor = mondayOf(CHART_START);
     const lastMonday = mondayOf(new Date());
     while (cursor.getTime() <= lastMonday.getTime()) {
       weekOf(cursor);
       cursor.setDate(cursor.getDate() + 7);
     }
-    rows.forEach((r) => {
+    chartRows.forEach((r) => {
       const e = weekOf(new Date(r.created_at));
       if (r.drill_type in DRILL_LABEL) {
         e[r.drill_type as DrillKey] += 1;
@@ -218,7 +227,7 @@ const ReportingPage: React.FC = () => {
     return Array.from(byWeek.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([, v]) => v);
-  }, [rows]);
+  }, [chartRows]);
 
   const fmtHours = (h: number): string =>
     h >= 10 ? `${Math.round(h)} h` : `${Math.round(h * 10) / 10} h`;
@@ -261,7 +270,7 @@ const ReportingPage: React.FC = () => {
             </section>
 
             {/* Nutzung über Zeit (täglich) */}
-            <ChartCard title="Aktive Nutzer pro Tag" subtitle="Verschiedene Nutzer mit mindestens einer Session an dem Tag">
+            <ChartCard title="Aktive Nutzer pro Tag" subtitle="Verschiedene Nutzer mit mindestens einer Session an dem Tag · ab August 2026">
               <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={daily} margin={{ top: 4, right: 4, bottom: 0, left: -26 }}>
@@ -286,7 +295,7 @@ const ReportingPage: React.FC = () => {
             </ChartCard>
 
             {/* Drills pro Woche */}
-            <ChartCard title="Sessions pro Woche nach Drill" subtitle="Gestapelt · Kalenderwochen von Montag bis Sonntag">
+            <ChartCard title="Sessions pro Woche nach Drill" subtitle="Gestapelt · Kalenderwochen von Montag bis Sonntag · ab August 2026">
               <div className="h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weekly} margin={{ top: 4, right: 4, bottom: 0, left: -26 }}>
