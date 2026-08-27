@@ -93,7 +93,7 @@ const FrameworksDrill: React.FC = () => {
   }, []);
 
   const handleStart = useCallback(async () => {
-    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories, lock ?? undefined);
+    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories, lock ?? undefined, { userEmail, drillType: drillConfig.drillType });
     sessionIdRef.current = crypto.randomUUID();
     setResults([]);
     setCurrentResult(null);
@@ -109,7 +109,7 @@ const FrameworksDrill: React.FC = () => {
     }
 
     loadNextCase();
-  }, [difficulty, categories, loadNextCase, lock]);
+  }, [difficulty, categories, loadNextCase, lock, userEmail]);
 
   const handleEnd = useCallback(() => {
     setPhase("debrief");

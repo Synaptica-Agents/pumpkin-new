@@ -91,7 +91,7 @@ const DiagrammeDrill: React.FC = () => {
   }, []);
 
   const handleStart = useCallback(async () => {
-    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories);
+    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories, undefined, { userEmail, drillType: drillConfig.drillType });
     sessionIdRef.current = crypto.randomUUID();
     setResults([]);
     setCurrentResult(null);
@@ -107,7 +107,7 @@ const DiagrammeDrill: React.FC = () => {
     }
 
     loadNextCase();
-  }, [difficulty, categories, loadNextCase]);
+  }, [difficulty, categories, loadNextCase, userEmail]);
 
   const handleEnd = useCallback(() => {
     setPhase("debrief");

@@ -1,32 +1,54 @@
 import { supabase } from "@/integrations/supabase/client";
 import { TextDrillCase } from "@/types/textDrill";
 import type { FixedCaseRef } from "@/lib/testMode";
+import {
+  SolvedCounts,
+  appendLocalSolved,
+  countsFromIds,
+  pickLeastSolved,
+  readLocalSolved,
+} from "@/lib/solvedCases";
 
 // Pools live in memory per module instance.
 const pools: Record<string, TextDrillCase[]> = {};
 
-// seenIds persist across sprints in the SAME browser session (sessionStorage).
-// Goal: a user playing multiple Creativity sprints in one sitting never sees the
-// same case twice — until they have actually seen every case in the active pool,
-// at which point we drop only the pool-specific ids and let them cycle.
-const SEEN_KEY = (tableName: string) => `pumpkin_seenIds_${tableName}`;
+// Löse-Zähler je Tabelle: DB-Historie des Nutzers (user_email) plus die
+// Abgaben dieser Session. Eine gelöste Aufgabe kommt erst wieder, wenn alle
+// anderen des aktiven Pools gleich oft gelöst wurden.
+const solvedCounts: Record<string, SolvedCounts> = {};
+// Kontext hinter dem Zähler (für Inkremente nach Abgabe + anonymen Fallback).
+const historyScope: Record<string, { userEmail: string | null; drillType: string }> = {};
 
-const getSeenIds = (tableName: string): string[] => {
-  if (typeof window === "undefined" || !window.sessionStorage) return [];
-  try {
-    const raw = sessionStorage.getItem(SEEN_KEY(tableName));
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch {
-    return [];
+export interface CaseHistoryRef {
+  userEmail: string | null;
+  drillType: string;
+}
+
+const loadSolvedCounts = async (
+  tableName: string,
+  scope: { userEmail: string | null; drillType: string }
+): Promise<SolvedCounts> => {
+  if (!scope.userEmail) return countsFromIds(readLocalSolved(tableName));
+  const { data, error } = await supabase
+    .from("text_drill_submissions" as any)
+    .select("case_id")
+    .eq("user_email", scope.userEmail)
+    .eq("drill_type", scope.drillType)
+    .limit(10000);
+  if (error) {
+    console.error("Error loading solved history:", error.message);
+    return countsFromIds(readLocalSolved(tableName));
   }
+  return countsFromIds((data ?? []).map((d: any) => d.case_id as string));
 };
 
-const setSeenIds = (tableName: string, ids: string[]): void => {
-  if (typeof window === "undefined" || !window.sessionStorage) return;
-  try {
-    sessionStorage.setItem(SEEN_KEY(tableName), JSON.stringify(ids));
-  } catch {
-    /* sessionStorage full or unavailable — silently ignore */
+/** Abgabe lokal mitzählen, damit der nächste Zug den Case sofort meidet. */
+const noteSolved = (drillType: string, caseId: string): void => {
+  for (const [table, scope] of Object.entries(historyScope)) {
+    if (scope.drillType !== drillType) continue;
+    const m = solvedCounts[table] ?? (solvedCounts[table] = new Map());
+    m.set(caseId, (m.get(caseId) ?? 0) + 1);
+    if (!scope.userEmail) appendLocalSolved(table, caseId);
   }
 };
 
@@ -35,7 +57,8 @@ export const fetchTextDrillCases = async (
   difficulty: "easy" | "medium" | "hard",
   categoryField?: string,
   categoryValues?: string[],
-  fixedCase?: FixedCaseRef
+  fixedCase?: FixedCaseRef,
+  history?: CaseHistoryRef
 ): Promise<void> => {
   let query = supabase
     .from(tableName as any)
@@ -82,35 +105,16 @@ export const fetchTextDrillCases = async (
   }
 
   pools[tableName] = mapped;
-};
 
-/**
- * Optional explicit reset (e.g. for a "starte komplett neu" button).
- * Not called between sprints anymore — sessionStorage carries dedup across sprints.
- */
-export const resetTextDrillSession = (tableName: string) => {
-  setSeenIds(tableName, []);
+  // Löse-Historie des Nutzers laden — steuert, welche Cases zuerst drankommen.
+  historyScope[tableName] = history ?? { userEmail: null, drillType: "" };
+  solvedCounts[tableName] = await loadSolvedCounts(tableName, historyScope[tableName]);
 };
 
 export const getNextTextDrillCase = (tableName: string): TextDrillCase | null => {
-  const pool = pools[tableName] || [];
-  if (pool.length === 0) return null;
-
-  let seen = getSeenIds(tableName);
-  let available = pool.filter((c) => !seen.includes(c.id));
-
-  if (available.length === 0) {
-    // Active pool fully seen this session — drop only the pool-specific ids
-    // so other category combos keep their dedup memory.
-    const poolIds = new Set(pool.map((c) => c.id));
-    seen = seen.filter((id) => !poolIds.has(id));
-    setSeenIds(tableName, seen);
-    available = pool;
-  }
-
-  const picked = available[Math.floor(Math.random() * available.length)];
-  setSeenIds(tableName, [...seen, picked.id]);
-  return picked;
+  // "Am seltensten gelöst zuerst": bereits gelöste Cases kommen erst wieder,
+  // wenn alle anderen des aktiven Pools gleich oft gelöst wurden.
+  return pickLeastSolved(pools[tableName] || [], solvedCounts[tableName] ?? new Map());
 };
 
 export const submitTextDrillAnswer = async (params: {
@@ -133,6 +137,9 @@ export const submitTextDrillAnswer = async (params: {
     } as any)
     .select("id")
     .single();
+
+  // Unabhängig vom Insert-Erfolg lokal zählen: bearbeitet ist bearbeitet.
+  noteSolved(params.drillType, params.caseId);
 
   if (error) {
     console.error("Error submitting answer:", error.message);

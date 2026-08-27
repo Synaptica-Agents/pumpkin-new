@@ -1,14 +1,40 @@
 import { supabase } from "@/integrations/supabase/client";
 import { MarketSizingCase, MarketSizingCategory } from "@/types/marketSizing";
 import type { FixedCaseRef } from "@/lib/testMode";
+import {
+  SolvedCounts,
+  appendLocalSolved,
+  countsFromIds,
+  leastSolvedCandidates,
+  readLocalSolved,
+} from "@/lib/solvedCases";
+
+const LOCAL_SCOPE = "market_sizing_cases";
 
 let casesPool: MarketSizingCase[] = [];
-let seenIds: string[] = [];
 let seenIndustries: string[] = [];
+// Löse-Zähler: DB-Historie des Nutzers plus Abgaben dieser Session.
+let solvedCounts: SolvedCounts = new Map();
+let scopeEmail: string | null = null;
+
+const loadSolvedCounts = async (userEmail: string | null): Promise<SolvedCounts> => {
+  if (!userEmail) return countsFromIds(readLocalSolved(LOCAL_SCOPE));
+  const { data, error } = await supabase
+    .from("market_sizing_submissions" as any)
+    .select("case_id")
+    .eq("user_email", userEmail)
+    .limit(10000);
+  if (error) {
+    console.error("Error loading solved history:", error.message);
+    return countsFromIds(readLocalSolved(LOCAL_SCOPE));
+  }
+  return countsFromIds((data ?? []).map((d: any) => d.case_id as string));
+};
 
 export const fetchMarketSizingCases = async (
   category: MarketSizingCategory = "all",
-  fixedCase?: FixedCaseRef
+  fixedCase?: FixedCaseRef,
+  history?: { userEmail: string | null }
 ): Promise<void> => {
   const query = supabase
     .from("market_sizing_cases" as any)
@@ -41,42 +67,31 @@ export const fetchMarketSizingCases = async (
   }
 
   casesPool = cases;
+
+  // Löse-Historie des Nutzers laden — steuert, welche Cases zuerst drankommen.
+  scopeEmail = history?.userEmail ?? null;
+  solvedCounts = await loadSolvedCounts(scopeEmail);
 };
 
 export const resetMarketSizingSession = () => {
-  seenIds = [];
   seenIndustries = [];
 };
 
 export const getNextMarketSizingCase = (): MarketSizingCase | null => {
-  if (casesPool.length === 0) return null;
+  // "Am seltensten gelöst zuerst": bereits gelöste Cases kommen erst wieder,
+  // wenn alle anderen des aktiven Pools gleich oft gelöst wurden.
+  const candidates = leastSolvedCandidates(casesPool, solvedCounts);
+  if (candidates.length === 0) return null;
 
-  // Exclude seen IDs with fallback
-  let excludeCount = Math.min(20, casesPool.length - 1);
-  let lastSeenIds = seenIds.slice(-excludeCount);
-  let available = casesPool.filter((c) => !lastSeenIds.includes(c.id));
-
-  if (available.length === 0) {
-    excludeCount = Math.min(10, casesPool.length - 1);
-    lastSeenIds = seenIds.slice(-excludeCount);
-    available = casesPool.filter((c) => !lastSeenIds.includes(c.id));
-  }
-  if (available.length === 0) {
-    excludeCount = Math.min(5, casesPool.length - 1);
-    lastSeenIds = seenIds.slice(-excludeCount);
-    available = casesPool.filter((c) => !lastSeenIds.includes(c.id));
-  }
-  if (available.length === 0) available = casesPool;
-
-  // Prioritize unseen industries
+  // Innerhalb der Kandidaten: bevorzugt eine Branche, die in dieser Session
+  // noch nicht dran war (Abwechslung).
   const recentIndustries = seenIndustries.slice(-10);
-  const freshIndustry = available.filter(
+  const freshIndustry = candidates.filter(
     (c) => !recentIndustries.includes(c.industry_tag)
   );
-  const pool = freshIndustry.length > 0 ? freshIndustry : available;
+  const pool = freshIndustry.length > 0 ? freshIndustry : candidates;
 
   const picked = pool[Math.floor(Math.random() * pool.length)];
-  seenIds.push(picked.id);
   seenIndustries.push(picked.industry_tag);
   return picked;
 };
@@ -103,6 +118,10 @@ export const submitMarketSizingAnswer = async (params: {
     } as any)
     .select("id")
     .single();
+
+  // Unabhängig vom Insert-Erfolg lokal zählen: bearbeitet ist bearbeitet.
+  solvedCounts.set(params.caseId, (solvedCounts.get(params.caseId) ?? 0) + 1);
+  if (!scopeEmail) appendLocalSolved(LOCAL_SCOPE, params.caseId);
 
   if (error) {
     console.error("Error submitting market sizing answer:", error.message);

@@ -49,7 +49,7 @@ const MarketSizingDrill: React.FC = () => {
   }, []);
 
   const handleStart = useCallback(async (category: MarketSizingCategory) => {
-    await fetchMarketSizingCases(category, lock ?? undefined);
+    await fetchMarketSizingCases(category, lock ?? undefined, { userEmail });
     resetMarketSizingSession();
     sessionIdRef.current = crypto.randomUUID();
     setResults([]);
@@ -66,7 +66,7 @@ const MarketSizingDrill: React.FC = () => {
     }
 
     loadNextCase();
-  }, [loadNextCase, lock]);
+  }, [loadNextCase, lock, userEmail]);
 
   const handleEnd = useCallback(() => {
     setPhase("debrief");

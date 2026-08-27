@@ -94,7 +94,7 @@ const CreativityDrill: React.FC = () => {
   }, []);
 
   const handleStart = useCallback(async () => {
-    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories, lock ?? undefined);
+    await fetchTextDrillCases(drillConfig.tableName, difficulty, drillConfig.categoryField, categories, lock ?? undefined, { userEmail, drillType: drillConfig.drillType });
     // NOTE: seenIds are NOT reset between sessions — sessionStorage carries
     // dedup across the whole tab session.
     sessionIdRef.current = crypto.randomUUID();
@@ -102,7 +102,7 @@ const CreativityDrill: React.FC = () => {
     setCurrentResult(null);
     sessionStartTime.current = Date.now();
     loadNextCase();
-  }, [difficulty, categories, loadNextCase, lock]);
+  }, [difficulty, categories, loadNextCase, lock, userEmail]);
 
   const handleEnd = useCallback(() => {
     setPhase("debrief");
