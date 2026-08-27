@@ -11,6 +11,7 @@ import MarketSizingDrill from "./pages/MarketSizingDrill";
 import FrameworksDrill from "./pages/FrameworksDrill";
 import DiagrammeDrill from "./pages/DiagrammeDrill";
 import FortschrittPage from "./pages/FortschrittPage";
+import ReportingPage from "./pages/ReportingPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/frameworks-drill" element={<FrameworksDrill />} />
           <Route path="/diagramme-drill" element={<DiagrammeDrill />} />
           <Route path="/fortschritt" element={<FortschrittPage />} />
+          <Route path="/reporting" element={<ReportingPage />} />
           {/* /test: identisches UI, aber fixe Demo-Cases in Frameworks/Market Sizing/Creativity (src/lib/testMode.ts) */}
           <Route path="/test" element={<ClientDrillsCarousel key="test" />} />
           <Route path="/test/mental-math-drill" element={<MentalMathDrill key="test" />} />
