@@ -3,6 +3,11 @@ import { useSearchParams } from "react-router-dom";
 
 const STORAGE_KEY = "pumpkin_user_email";
 
+/** Verwirft nicht aufgelöste Template-Platzhalter (z.B. "{{email}}") und
+ *  offensichtlich kaputte Werte, damit kein Datenmüll getrackt wird. */
+const isRealEmail = (v: string | null): v is string =>
+  !!v && v.includes("@") && !v.includes("{") && !v.includes("}");
+
 /**
  * Returns the user email. Priority:
  *   1. ?email=... query param (refreshed on every render)
@@ -17,12 +22,16 @@ const STORAGE_KEY = "pumpkin_user_email";
 export const useUserEmail = (): string | null => {
   const [searchParams] = useSearchParams();
 
-  const fromUrl = useMemo(() => searchParams.get("email"), [searchParams]);
+  const fromUrl = useMemo(() => {
+    const raw = searchParams.get("email");
+    return isRealEmail(raw) ? raw : null;
+  }, [searchParams]);
 
   const [stored, setStored] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     try {
-      return window.sessionStorage.getItem(STORAGE_KEY);
+      const s = window.sessionStorage.getItem(STORAGE_KEY);
+      return isRealEmail(s) ? s : null;
     } catch {
       return null;
     }

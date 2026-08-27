@@ -14,6 +14,7 @@ import {
   IconDiagramme,
 } from "@/components/drillIcons";
 import { TrendingUp, Hash, Award } from "lucide-react";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 
 type DrillKey = "mental_math" | "case_math" | "creativity" | "market_sizing" | "frameworks" | "charts";
 
@@ -73,10 +74,22 @@ const aggregate = (sessions: DrillSessionRow[], drill: DrillKey): StatsAgg => {
   };
 };
 
-const StatsCard: React.FC<{ drill: DrillKey; agg: StatsAgg }> = ({ drill, agg }) => {
+/** Ein Punkt pro Session, chronologisch — die Sparkline zeigt den Score-Verlauf. */
+const toHistory = (sessions: DrillSessionRow[]) =>
+  sessions.map((s) => ({
+    score: Math.round(s.accuracy_percent ?? 0),
+    date: new Date(s.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }),
+  }));
+
+const StatsCard: React.FC<{ drill: DrillKey; agg: StatsAgg; history: DrillSessionRow[] }> = ({
+  drill,
+  agg,
+  history,
+}) => {
   const meta = DRILL_META[drill];
   const Icon = meta.icon;
   const hasData = agg.count > 0;
+  const points = toHistory(history);
   return (
     <div className="flex flex-col rounded-2xl border border-white/[0.06] bg-[#0d0d10] p-4">
       <div className="mb-3 flex items-center gap-2">
@@ -84,20 +97,58 @@ const StatsCard: React.FC<{ drill: DrillKey; agg: StatsAgg }> = ({ drill, agg })
         <span className="text-sm font-semibold text-foreground">{meta.label}</span>
       </div>
       {hasData ? (
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-primary">{fmtScore(drill, agg.avg)}</span>
-            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Ø Score</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Hash className="h-3 w-3" /> {agg.count} {agg.count === 1 ? "Sprint" : "Sprints"}
-          </div>
-          {agg.last !== null && (
+        <>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold text-primary">{fmtScore(drill, agg.avg)}</span>
+              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Ø Score</span>
+            </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3" /> Letzter: {fmtScore(drill, agg.last)}
+              <Hash className="h-3 w-3" /> {agg.count} {agg.count === 1 ? "Sprint" : "Sprints"}
+            </div>
+            {agg.last !== null && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <TrendingUp className="h-3 w-3" /> Letzter: {fmtScore(drill, agg.last)}
+              </div>
+            )}
+          </div>
+          {points.length >= 2 && (
+            <div className="mt-3 h-16" aria-label={`Score-Verlauf ${meta.label}`}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={points} margin={{ top: 4, right: 2, bottom: 0, left: 2 }}>
+                  <defs>
+                    <linearGradient id={`spark-${drill}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  {/* Fester 0–100-Bereich: Verläufe sind zwischen den Drills vergleichbar */}
+                  <YAxis hide domain={[0, 100]} />
+                  <Tooltip
+                    cursor={{ stroke: "hsl(var(--primary))", strokeOpacity: 0.35 }}
+                    content={({ active, payload }) =>
+                      active && payload && payload.length ? (
+                        <div className="rounded-md border border-border bg-[#16161a] px-2 py-1 text-[11px] text-foreground shadow-md">
+                          {payload[0].payload.date} · {fmtScore(drill, payload[0].payload.score)}
+                        </div>
+                      ) : null
+                    }
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="score"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fill={`url(#spark-${drill})`}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                    isAnimationActive={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           )}
-        </div>
+        </>
       ) : (
         <p className="text-xs text-muted-foreground/70">Noch keine Sprints.</p>
       )}
@@ -153,7 +204,12 @@ const FortschrittPage: React.FC = () => {
         {/* Stats cards */}
         <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {DRILL_ORDER.map((drill) => (
-            <StatsCard key={drill} drill={drill} agg={aggregate(sessions, drill)} />
+            <StatsCard
+              key={drill}
+              drill={drill}
+              agg={aggregate(sessions, drill)}
+              history={sessions.filter((s) => s.drill_type === drill)}
+            />
           ))}
         </section>
 
