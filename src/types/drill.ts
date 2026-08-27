@@ -20,6 +20,8 @@ export interface Task {
   shortcut: ShortcutInfo;
   difficulty: number;
   tolerance?: number;
+  /** Weitere voll gültige Antworten (z.B. exakter Wert neben der ⅓-Approximation). */
+  altAnswers?: number[];
 }
 
 export interface FeedbackState {

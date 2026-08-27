@@ -81,7 +81,7 @@ const Index = () => {
     if (!currentTask || phase !== "sprint") return;
     const timeSpent = Date.now() - taskStartTime.current;
     const isPercentageResult = currentTask.type === "percentage" || currentTask.type === "growth";
-    const isCorrect = checkAnswer(userAnswer, currentTask.answer, isPercentageResult, currentTask.tolerance);
+    const isCorrect = checkAnswer(userAnswer, currentTask.answer, isPercentageResult, currentTask.tolerance, currentTask.altAnswers);
     const result: SprintResult = { task: currentTask, userAnswer, isCorrect, timeSpent };
     setResults(prev => [...prev, result]);
     if (isCorrect) setCorrectCount(prev => prev + 1);

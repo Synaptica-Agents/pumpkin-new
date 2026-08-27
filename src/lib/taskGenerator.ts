@@ -48,7 +48,7 @@ const fmtRand = (num: number): string => {
   return formatNumber(num);
 };
 
-type GenResult = { question: string; answer: number; shortcut: ShortcutInfo; tolerance?: number };
+type GenResult = { question: string; answer: number; shortcut: ShortcutInfo; tolerance?: number; altAnswers?: number[] };
 
 const makeTask = (type: TaskType, difficulty: number, r: GenResult): Task => ({
   id: ++taskCounter,
@@ -58,6 +58,7 @@ const makeTask = (type: TaskType, difficulty: number, r: GenResult): Task => ({
   shortcut: r.shortcut,
   difficulty,
   ...(r.tolerance !== undefined ? { tolerance: r.tolerance } : {}),
+  ...(r.altAnswers !== undefined ? { altAnswers: r.altAnswers } : {}),
 });
 
 const tryGenerate = (type: TaskType, difficulty: number, gen: () => GenResult, maxAttempts = 30): Task => {
@@ -290,9 +291,12 @@ const generatePercentageL2 = (): GenResult => {
     const mult = unit === "k" ? 1000 : 1_000_000;
     const third = (base * mult) / 3;
     const answer = pct === 33 ? third : third * 2;
+    // Die exakte Rechnung (33% bzw. 66%) zählt genauso wie die ⅓/⅔-Approximation.
+    const exact = (pct / 100) * base * mult;
     return {
       question: `${pct}% von ${fmtRand(base * mult)}`,
       answer,
+      altAnswers: [exact],
       shortcut: {
         name: "Bruch-Trick",
         description: pct === 33 ? "33% ≈ ⅓" : "66% ≈ ⅔",
@@ -947,7 +951,7 @@ const normalizeInput = (input: string): number | null => {
 // ANSWER CHECKING
 // ============================================
 
-export const checkAnswer = (userAnswer: number | string, correctAnswer: number, isPercentageResult: boolean = false, tolerance?: number): boolean => {
+export const checkAnswer = (userAnswer: number | string, correctAnswer: number, isPercentageResult: boolean = false, tolerance?: number, altAnswers?: number[]): boolean => {
   let normalizedUserAnswer: number;
 
   if (typeof userAnswer === "string") {
@@ -958,19 +962,22 @@ export const checkAnswer = (userAnswer: number | string, correctAnswer: number, 
     normalizedUserAnswer = userAnswer;
   }
 
-  // For percentage results, also accept decimal form (0.035 for 3.5%)
-  if (isPercentageResult && normalizedUserAnswer < 1 && correctAnswer >= 1) {
-    normalizedUserAnswer *= 100;
-  }
+  const matchesTarget = (target: number): boolean => {
+    let u = normalizedUserAnswer;
+    // For percentage results, also accept decimal form (0.035 for 3.5%)
+    if (isPercentageResult && u < 1 && target >= 1) {
+      u *= 100;
+    }
+    // Use custom tolerance if provided, otherwise default (0.01%)
+    if (tolerance !== undefined && tolerance > 0) {
+      return Math.abs(u - target) <= tolerance;
+    }
+    const epsilon = Math.abs(target) * 0.0001;
+    const tol = Math.max(epsilon, 0.01);
+    return Math.abs(u - target) <= tol;
+  };
 
-  // Use custom tolerance if provided, otherwise default (0.01%)
-  if (tolerance !== undefined && tolerance > 0) {
-    return Math.abs(normalizedUserAnswer - correctAnswer) <= tolerance;
-  }
-
-  const epsilon = Math.abs(correctAnswer) * 0.0001;
-  const tol = Math.max(epsilon, 0.01);
-  return Math.abs(normalizedUserAnswer - correctAnswer) <= tol;
+  return [correctAnswer, ...(altAnswers ?? [])].some(matchesTarget);
 };
 
 export { normalizeInput };
